@@ -9,7 +9,23 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "locales")
 
 public class Locales {
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String nombre;
+
+    @Column(unique = true)
+    private String locales;
+
+    private String contrasena;
+
+    private Boolean activo;
+
+    private LocalDateTime fechaCreacion;
 
 }
