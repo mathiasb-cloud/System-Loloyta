@@ -27,8 +27,8 @@ public class Almacenes {
     public Almacenes() {
     }
 
-    public Almacenes(int id, String nombre, String ubicacion, boolean activo, LocalDateTime fechaCreacion) {
-        this.id = id;
+    public Almacenes( String nombre, String ubicacion, boolean activo, LocalDateTime fechaCreacion) {
+
         this.nombre = nombre;
         this.ubicacion = ubicacion;
         this.activo = activo;
