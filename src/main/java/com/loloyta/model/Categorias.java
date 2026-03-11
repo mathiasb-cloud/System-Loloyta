@@ -8,7 +8,7 @@ public class Categorias {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     private String nombre;
     private String descripcion ;
     private boolean activo;
@@ -23,12 +23,12 @@ public class Categorias {
         this.activo = activo;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public Long getId() {
+        return id;
     }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getNombre() {
@@ -39,12 +39,12 @@ public class Categorias {
         this.nombre = nombre;
     }
 
-    public int getId() {
-        return id;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     public boolean isActivo() {
