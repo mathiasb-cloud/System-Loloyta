@@ -7,72 +7,62 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "almacenes")
 public class Almacenes {
-
-
-
-
-    @Id
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     private String nombre;
 
     private String ubicacion;
 
-    private boolean activo;
+    private Boolean activo;
 
-    @Column(name = "fecha_creacion")
-    private LocalDateTime fechaCreacion;
+	public Almacenes() {
+		
+	}
 
-    public Almacenes() {
-    }
+	public Almacenes(String nombre, String ubicacion, Boolean activo) {
+		this.nombre = nombre;
+		this.ubicacion = ubicacion;
+		this.activo = activo;
+	}
 
-    public Almacenes( String nombre, String ubicacion, boolean activo, LocalDateTime fechaCreacion) {
+	public Long getId() {
+		return id;
+	}
 
-        this.nombre = nombre;
-        this.ubicacion = ubicacion;
-        this.activo = activo;
-        this.fechaCreacion = fechaCreacion;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public int getId() {
-        return id;
-    }
+	public String getNombre() {
+		return nombre;
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
 
-    public String getNombre() {
-        return nombre;
-    }
+	public String getUbicacion() {
+		return ubicacion;
+	}
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+	public void setUbicacion(String ubicacion) {
+		this.ubicacion = ubicacion;
+	}
 
-    public String getUbicacion() {
-        return ubicacion;
-    }
+	public Boolean getActivo() {
+		return activo;
+	}
 
-    public void setUbicacion(String ubicacion) {
-        this.ubicacion = ubicacion;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
+	public void setActivo(Boolean activo) {
+		this.activo = activo;
+	}
+	
+	
+	
+    
+    
+    
 }
 
