@@ -13,7 +13,6 @@ public class Categorias {
     private String descripcion ;
     private boolean activo;
 
-
     public Categorias() {
     }
 

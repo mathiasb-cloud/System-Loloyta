@@ -1,17 +1,7 @@
 package com.loloyta.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "ordenes_compra")
@@ -23,9 +13,11 @@ public class OrdenCompra {
 
     private LocalDateTime fecha;
 
+    @Column(name = "metodo_pago")
     private String metodoPago;
 
-    private BigDecimal montoTotal;
+    @Column(name = "monto_total")
+    private Double montoTotal;
 
     private String estado;
 
@@ -37,7 +29,71 @@ public class OrdenCompra {
     @JoinColumn(name = "almacen_id")
     private Almacenes almacenes;
 
-    @OneToMany(mappedBy = "ordenCompra")
-    private List<DetalleOrdenCompra> detalles;
+    public OrdenCompra() {
+    }
 
+    public OrdenCompra(LocalDateTime fecha, String metodoPago, Double montoTotal, String estado, Usuario usuario, Almacenes almacenes) {
+        this.fecha = fecha;
+        this.metodoPago = metodoPago;
+        this.montoTotal = montoTotal;
+        this.estado = estado;
+        this.usuario = usuario;
+        this.almacenes = almacenes;
+    }
+
+    public LocalDateTime getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(LocalDateTime fecha) {
+        this.fecha = fecha;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(String metodoPago) {
+        this.metodoPago = metodoPago;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public Double getMontoTotal() {
+        return montoTotal;
+    }
+
+    public void setMontoTotal(Double montoTotal) {
+        this.montoTotal = montoTotal;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public Almacenes getAlmacenes() {
+        return almacenes;
+    }
+
+    public void setAlmacenes(Almacenes almacenes) {
+        this.almacenes = almacenes;
+    }
 }

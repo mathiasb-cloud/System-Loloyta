@@ -2,6 +2,7 @@ package com.loloyta.model;
 
 import jakarta.persistence.*;
 
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,58 +12,65 @@ public class Almacenes {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     private String nombre;
 
     private String ubicacion;
 
     private Boolean activo;
 
-	public Almacenes() {
+    @Column(name = "fecha_creacion")
+    private LocalDateTime fechaCreacion;
+
+    public Almacenes() {
 		
 	}
 
-	public Almacenes(String nombre, String ubicacion, Boolean activo) {
-		this.nombre = nombre;
-		this.ubicacion = ubicacion;
-		this.activo = activo;
-	}
+    public Almacenes(String nombre, LocalDateTime fechaCreacion, Boolean activo, String ubicacion) {
+        this.nombre = nombre;
+        this.fechaCreacion = fechaCreacion;
+        this.activo = activo;
+        this.ubicacion = ubicacion;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public String getNombre() {
+        return nombre;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-	public String getNombre() {
-		return nombre;
-	}
+    public Boolean getActivo() {
+        return activo;
+    }
 
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
+    }
 
-	public String getUbicacion() {
-		return ubicacion;
-	}
+    public String getUbicacion() {
+        return ubicacion;
+    }
 
-	public void setUbicacion(String ubicacion) {
-		this.ubicacion = ubicacion;
-	}
+    public void setUbicacion(String ubicacion) {
+        this.ubicacion = ubicacion;
+    }
 
-	public Boolean getActivo() {
-		return activo;
-	}
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
 
-	public void setActivo(Boolean activo) {
-		this.activo = activo;
-	}
-	
-	
-	
-    
-    
-    
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }
 
