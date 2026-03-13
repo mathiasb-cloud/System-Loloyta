@@ -26,7 +26,7 @@ public class CategoriaController {
         return categoriaService.buscarPorId(id);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public Categorias guardar(@RequestBody Categorias categoria){
         return categoriaService.guardar(categoria);
     }
