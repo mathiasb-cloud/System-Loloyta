@@ -1,6 +1,5 @@
 package com.loloyta.controller;
 
-import com.loloyta.model.Categorias;
 import com.loloyta.model.Producto;
 import com.loloyta.service.ProductoService;
 import org.springframework.web.bind.annotation.*;
