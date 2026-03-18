@@ -1,7 +1,12 @@
 package com.loloyta.repository;
 
-import com.loloyta.model.DetalleOrdenCompra;
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 
-public interface DetalleOrdenCompraRepository extends JpaRepository<DetalleOrdenCompra,Long> {
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.loloyta.model.DetalleOrdenCompra;
+
+public interface DetalleOrdenCompraRepository extends JpaRepository<DetalleOrdenCompra, Long> {
+
+    List<DetalleOrdenCompra> findByOrdenCompraId(Long ordenId);
+
 }
