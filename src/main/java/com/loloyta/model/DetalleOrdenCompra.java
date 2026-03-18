@@ -20,70 +20,78 @@ public class DetalleOrdenCompra {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
-    private Double cantidad;
+    private BigDecimal cantidad;
 
     @Column(name = "precio_unitario")
-    private Double precioUnitario;
+    private BigDecimal precioUnitario;
 
     @Column(name = "importe_total")
-    private Double importeTotal;
+    private BigDecimal importeTotal;
 
     public DetalleOrdenCompra() {
     }
 
-    public DetalleOrdenCompra(OrdenCompra ordenCompra, Producto producto, Double cantidad, Double precioUnitario, Double importeTotal) {
-        this.ordenCompra = ordenCompra;
-        this.producto = producto;
-        this.cantidad = cantidad;
-        this.precioUnitario = precioUnitario;
-        this.importeTotal = importeTotal;
-    }
+	public DetalleOrdenCompra(OrdenCompra ordenCompra, Producto producto, BigDecimal cantidad,
+			BigDecimal precioUnitario, BigDecimal importeTotal) {
+		this.ordenCompra = ordenCompra;
+		this.producto = producto;
+		this.cantidad = cantidad;
+		this.precioUnitario = precioUnitario;
+		this.importeTotal = importeTotal;
+	}
 
-    public OrdenCompra getOrdenCompra() {
-        return ordenCompra;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setOrdenCompra(OrdenCompra ordenCompra) {
-        this.ordenCompra = ordenCompra;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public OrdenCompra getOrdenCompra() {
+		return ordenCompra;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setOrdenCompra(OrdenCompra ordenCompra) {
+		this.ordenCompra = ordenCompra;
+	}
 
-    public Producto getProducto() {
-        return producto;
-    }
+	public Producto getProducto() {
+		return producto;
+	}
 
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
+	public void setProducto(Producto producto) {
+		this.producto = producto;
+	}
 
-    public Double getCantidad() {
-        return cantidad;
-    }
+	public BigDecimal getCantidad() {
+		return cantidad;
+	}
 
-    public void setCantidad(Double cantidad) {
-        this.cantidad = cantidad;
-    }
+	public void setCantidad(BigDecimal cantidad) {
+		this.cantidad = cantidad;
+	}
 
-    public Double getPrecioUnitario() {
-        return precioUnitario;
-    }
+	public BigDecimal getPrecioUnitario() {
+		return precioUnitario;
+	}
 
-    public void setPrecioUnitario(Double precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
+	public void setPrecioUnitario(BigDecimal precioUnitario) {
+		this.precioUnitario = precioUnitario;
+	}
 
-    public Double getImporteTotal() {
-        return importeTotal;
-    }
+	public BigDecimal getImporteTotal() {
+		return importeTotal;
+	}
 
-    public void setImporteTotal(Double importeTotal) {
-        this.importeTotal = importeTotal;
-    }
+	public void setImporteTotal(BigDecimal importeTotal) {
+		this.importeTotal = importeTotal;
+	}
+    
+    
+    
+
+
 }
+
+    
