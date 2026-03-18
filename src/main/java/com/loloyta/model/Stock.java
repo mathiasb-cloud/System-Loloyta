@@ -2,6 +2,7 @@ package com.loloyta.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,7 +21,7 @@ public class Stock {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
-    private Double cantidad;
+    private BigDecimal cantidad;
 
     @Column(name = "ultima_actualizacion")
     private LocalDateTime ultimaActualizacion;
@@ -28,7 +29,7 @@ public class Stock {
     public Stock() {
     }
 
-    public Stock(Almacenes almacenes, Producto producto, Double cantidad, LocalDateTime ultimaActualizacion) {
+    public Stock(Almacenes almacenes, Producto producto, BigDecimal cantidad, LocalDateTime ultimaActualizacion) {
         this.almacenes = almacenes;
         this.producto = producto;
         this.cantidad = cantidad;
@@ -59,11 +60,11 @@ public class Stock {
         this.producto = producto;
     }
 
-    public Double getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(Double cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
 
