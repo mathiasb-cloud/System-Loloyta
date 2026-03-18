@@ -39,4 +39,73 @@ public class Movimiento {
     private Usuario usuario;
 
     public Movimiento() {}
+
+	public String getTipo() {
+		return tipo;
+	}
+
+	public void setTipo(String tipo) {
+		this.tipo = tipo;
+	}
+
+	public Almacenes getAlmacen() {
+		return almacen;
+	}
+
+	public void setAlmacen(Almacenes almacen) {
+		this.almacen = almacen;
+	}
+
+	public Producto getProducto() {
+		return producto;
+	}
+
+	public void setProducto(Producto producto) {
+		this.producto = producto;
+	}
+
+	public BigDecimal getCantidad() {
+		return cantidad;
+	}
+
+	public void setCantidad(BigDecimal cantidad) {
+		this.cantidad = cantidad;
+	}
+
+	public OrdenCompra getOrdenCompra() {
+		return ordenCompra;
+	}
+
+	public void setOrdenCompra(OrdenCompra ordenCompra) {
+		this.ordenCompra = ordenCompra;
+	}
+
+	public Salida getSalida() {
+		return salida;
+	}
+
+	public void setSalida(Salida salida) {
+		this.salida = salida;
+	}
+
+	public LocalDateTime getFecha() {
+		return fecha;
+	}
+
+	public void setFecha(LocalDateTime fecha) {
+		this.fecha = fecha;
+	}
+
+	public Usuario getUsuario() {
+		return usuario;
+	}
+
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
+	}
+    
+    
+    
+    
+    
 }
