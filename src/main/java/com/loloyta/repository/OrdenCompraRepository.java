@@ -1,7 +1,8 @@
 package com.loloyta.repository;
 
-import com.loloyta.model.OrdenCompra;
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.loloyta.model.OrdenCompra;
 
-public interface OrdenCompraRepository extends JpaRepository<OrdenCompra,Long> {
+public interface OrdenCompraRepository extends JpaRepository<OrdenCompra, Long> {
+
 }
