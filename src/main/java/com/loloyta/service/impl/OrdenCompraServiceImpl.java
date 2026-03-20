@@ -1,6 +1,7 @@
 package com.loloyta.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.loloyta.model.DetalleOrdenCompra;
+import com.loloyta.model.Movimiento;
 import com.loloyta.model.OrdenCompra;
 import com.loloyta.model.Stock;
 import com.loloyta.repository.DetalleOrdenCompraRepository;
+import com.loloyta.repository.MovimientoRepository;
 import com.loloyta.repository.OrdenCompraRepository;
 import com.loloyta.repository.StockRepository;
 import com.loloyta.service.OrdenCompraService;
@@ -31,6 +34,8 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
     public List<OrdenCompra> listar() {
         return ordenCompraRepository.findAll();
     }
+    @Autowired
+    private MovimientoRepository movimientoRepository;
 
     @Override
     public Optional<OrdenCompra> obtenerPorId(Long id) {
@@ -96,6 +101,17 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
                 stock.setUltimaActualizacion(java.time.LocalDateTime.now());
 
                 stockRepository.save(stock);
+                
+                Movimiento mov = new Movimiento();
+
+                mov.setTipo("INGRESO");
+                mov.setOrdenCompra(orden);
+                mov.setCantidad(d.getCantidad());
+                mov.setFecha(LocalDateTime.now());
+                mov.setUsuario(orden.getUsuario());
+                mov.setAlmacen(orden.getAlmacenes());
+
+                movimientoRepository.save(mov);
             }
         }
 
