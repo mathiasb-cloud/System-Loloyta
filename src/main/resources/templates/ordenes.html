@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Orden de Compra</title>
+</head>
+<body>
+
+<h1>Crear Orden de Compra</h1>
+
+<label>Almacén:</label>
+<select id="almacenSelect"></select><br><br>
+
+<label>Método de Pago:</label>
+<select id="metodoPago">
+    <option value="YAPE">YAPE</option>
+    <option value="EFECTIVO">EFECTIVO</option>
+</select>
+
+<h3>Buscar Producto</h3>
+
+<input type="text" id="buscador" placeholder="Escribe producto...">
+<div id="resultados" style="border:1px solid #000; max-width:300px;"></div>
+
+<h3>Lista de Compra</h3>
+
+<table border="1" id="tablaProductos">
+    <tr>
+        <th>Producto</th>
+        <th>Cantidad</th>
+        <th>Precio</th>
+        <th>Acción</th>
+    </tr>
+</table>
+
+<br><br>
+
+<button onclick="crearOrden()">Guardar Orden</button>
+<button onclick="confirmarOrden()">Confirmar Orden</button>
+
+<hr>
+
+<h2>Stock</h2>
+<button onclick="cargarStock()">Ver Stock</button>
+
+<table border="1" id="tablaStock"></table>
+
+<hr>
+
+<h2>Movimientos</h2>
+<button onclick="cargarMovimientos()">Ver Movimientos</button>
+
+<table border="1" id="tablaMovimientos"></table>
+
+<script>
+
+let ordenId = null;
+let productosGlobal = [];
+
+window.onload = async function() {
+    await cargarAlmacenes();
+    await cargarProductos();
+};
+
+async function cargarAlmacenes() {
+    let res = await fetch('/api/almacenes');
+    let data = await res.json();
+
+    let select = document.getElementById("almacenSelect");
+    select.innerHTML = "";
+
+    data.forEach(a => {
+        select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`;
+    });
+}
+
+async function cargarProductos() {
+
+    let res = await fetch('/api/productos');
+    let json = await res.json();
+
+    console.log("Respuesta API:", json);
+
+    if (Array.isArray(json)) {
+        productosGlobal = json;
+    } else if (json.content) {
+        productosGlobal = json.content;
+    } else {
+        productosGlobal = [];
+    }
+
+    console.log("Productos procesados:", productosGlobal);
+}
+
+document.getElementById("buscador").addEventListener("keyup", function() {
+
+    let texto = this.value.toLowerCase();
+    let resultadosDiv = document.getElementById("resultados");
+
+    resultadosDiv.innerHTML = "";
+
+    if (texto.length === 0) return;
+
+    let filtrados = productosGlobal.filter(p =>
+        p.nombre.toLowerCase().includes(texto)
+    );
+
+    filtrados.forEach(p => {
+        let item = document.createElement("div");
+        item.innerText = p.nombre;
+        item.style.cursor = "pointer";
+        item.style.padding = "5px";
+
+        item.onclick = () => agregarProductoTabla(p);
+
+        resultadosDiv.appendChild(item);
+    });
+});
+
+function agregarProductoTabla(producto) {
+
+    let tabla = document.getElementById("tablaProductos");
+
+    let filas = tabla.querySelectorAll("tr");
+
+    for (let i = 1; i < filas.length; i++) {
+        let nombre = filas[i].children[0].innerText;
+        if (nombre === producto.nombre) return;
+    }
+
+    let fila = tabla.insertRow();
+
+    fila.innerHTML = `
+        <td data-id="${producto.id}">${producto.nombre}</td>
+        <td><input type="number" class="cantidad" value="1"></td>
+        <td><input type="number" class="precio" value="0"></td>
+        <td><button onclick="eliminarFila(this)">X</button></td>
+    `;
+}
+
+function eliminarFila(btn) {
+    btn.parentElement.parentElement.remove();
+}
+
+async function crearOrden() {
+
+    let almacenId = document.getElementById("almacenSelect").value;
+
+    let res = await fetch('/api/ordenes-compra', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            metodoPago: document.getElementById("metodoPago").value,
+            estado: "PENDIENTE",
+            almacenes: { id: almacenId }
+        })
+    });
+
+    let data = await res.json();
+    ordenId = data.id;
+
+    alert("Orden creada correctamente");
+
+    await guardarDetalles();
+}
+
+async function guardarDetalles() {
+
+    let filas = document.querySelectorAll("#tablaProductos tr");
+
+    for (let i = 1; i < filas.length; i++) {
+
+        let celdas = filas[i].querySelectorAll("td");
+        let inputs = filas[i].querySelectorAll("input");
+
+        let productoId = celdas[0].dataset.id;
+        let cantidad = inputs[0].value;
+        let precio = inputs[1].value;
+
+        await fetch('/api/detalle-orden-compra', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ordenCompra: { id: ordenId },
+                producto: { id: productoId },
+                cantidad: cantidad,
+                precioUnitario: precio
+            })
+        });
+    }
+
+    alert("Productos agregados a la orden");
+}
+
+async function confirmarOrden() {
+
+    await fetch(`/api/ordenes-compra/${ordenId}/estado?estado=CONFIRMADA`, {
+        method: 'PATCH'
+    });
+
+    alert("Orden confirmada (Stock actualizado)");
+}
+
+async function cargarStock() {
+
+    let res = await fetch('/api/stock');
+    let data = await res.json();
+
+    let tabla = document.getElementById("tablaStock");
+
+    tabla.innerHTML = `
+        <tr>
+            <th>Producto</th>
+            <th>Almacén</th>
+            <th>Cantidad</th>
+        </tr>
+    `;
+
+    data.forEach(s => {
+        tabla.innerHTML += `
+            <tr>
+                <td>${s.producto.nombre}</td>
+                <td>${s.almacenes.nombre}</td>
+                <td>${s.cantidad}</td>
+            </tr>
+        `;
+    });
+}
+
+async function cargarMovimientos() {
+
+    let res = await fetch('/api/movimientos/resumen');
+    let data = await res.json();
+
+    let tabla = document.getElementById("tablaMovimientos");
+
+    tabla.innerHTML = `
+        <tr>
+            <th>Tipo</th>
+            <th>Fecha</th>
+            <th>Items</th>
+        </tr>
+    `;
+
+    data.forEach(m => {
+        tabla.innerHTML += `
+            <tr>
+                <td>${m.tipo}</td>
+                <td>${m.fecha}</td>
+                <td>${m.totalItems} productos</td>
+            </tr>
+        `;
+    });
+}
+
+</script>
+
+</body>
+</html>
