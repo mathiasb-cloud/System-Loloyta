@@ -8,5 +8,4 @@ import com.loloyta.model.DetalleOrdenCompra;
 public interface DetalleOrdenCompraRepository extends JpaRepository<DetalleOrdenCompra, Long> {
 
     List<DetalleOrdenCompra> findByOrdenCompraId(Long ordenId);
-
 }

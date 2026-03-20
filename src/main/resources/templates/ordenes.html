@@ -143,20 +143,29 @@ function eliminarFila(btn) {
 
 async function crearOrden() {
 
-    let almacenId = document.getElementById("almacenSelect").value;
-
     let res = await fetch('/api/ordenes-compra', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             metodoPago: document.getElementById("metodoPago").value,
             estado: "PENDIENTE",
-            almacenes: { id: almacenId }
+            almacenes: { id: document.getElementById("almacenSelect").value },
+            usuario: { id: 1 }
         })
     });
 
     let data = await res.json();
+
+    console.log("Orden creada:", data);
+
     ordenId = data.id;
+
+    console.log("ordenId:", ordenId);
+
+    if (!ordenId) {
+        alert("Error al crear la orden");
+        return;
+    }
 
     alert("Orden creada correctamente");
 
@@ -193,11 +202,16 @@ async function guardarDetalles() {
 
 async function confirmarOrden() {
 
+    if (!ordenId) {
+        alert("Primero debes guardar la orden");
+        return;
+    }
+
     await fetch(`/api/ordenes-compra/${ordenId}/estado?estado=CONFIRMADA`, {
         method: 'PATCH'
     });
 
-    alert("Orden confirmada (Stock actualizado)");
+    alert("Orden confirmada");
 }
 
 async function cargarStock() {

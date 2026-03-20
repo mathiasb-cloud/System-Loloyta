@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.loloyta.model.Almacenes;
+import com.loloyta.model.Producto;
 import com.loloyta.model.Stock;
 import com.loloyta.repository.StockRepository;
 import com.loloyta.service.StockService;
@@ -38,6 +40,17 @@ public class StockServiceImpl implements StockService {
 
         if (stock == null) {
             stock = new Stock();
+
+            stock.setCantidad(BigDecimal.ZERO);
+
+            stock.setProducto(new Producto());
+            stock.getProducto().setId(productoId);
+
+            stock.setAlmacenes(new Almacenes());
+            stock.getAlmacenes().setId(almacenId);
+        }
+
+        if (stock.getCantidad() == null) {
             stock.setCantidad(BigDecimal.ZERO);
         }
 
