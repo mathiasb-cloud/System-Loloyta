@@ -10,4 +10,15 @@ public class VistaController {
     public String verOrdenes() {
         return "ordenes";
     }
+
+    @GetMapping("/stock")
+    public String verStock(){return "stock";}
+
+    @GetMapping("/index")
+    public String verIndex(){return "index";}
+
+    @GetMapping("/movimientos")
+    public String verMovimientos(){return "movimientos";}
+
+
 }
