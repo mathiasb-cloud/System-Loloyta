@@ -19,6 +19,11 @@ public class VistaController {
 
     @GetMapping("/movimientos")
     public String verMovimientos(){return "movimientos";}
+    
+    @GetMapping("/salidas")
+    public String salidas() {
+        return "salidas"; 
+    }
 
 
 }

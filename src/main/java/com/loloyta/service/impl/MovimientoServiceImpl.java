@@ -30,22 +30,28 @@ public class MovimientoServiceImpl implements MovimientoService {
 
         List<Movimiento> movimientos = repository.findAll();
 
-        Map<Long, List<Movimiento>> agrupados = movimientos.stream()
-                .filter(m -> m.getOrdenCompra() != null)
-                .collect(Collectors.groupingBy(m -> m.getOrdenCompra().getId()));
+        Map<String, List<Movimiento>> agrupados = movimientos.stream()
+                .collect(Collectors.groupingBy(m -> {
+                    if (m.getOrdenCompra() != null) {
+                        return "OC-" + m.getOrdenCompra().getId();
+                    } else if (m.getSalida() != null) {
+                        return "SAL-" + m.getSalida().getId();
+                    } else {
+                        return "OTRO-" + m.getId();
+                    }
+                }));
 
         List<MovimientoResumenDTO> resumen = new ArrayList<>();
 
-        for (Map.Entry<Long, List<Movimiento>> entry : agrupados.entrySet()) {
+        for (Map.Entry<String, List<Movimiento>> entry : agrupados.entrySet()) {
 
             List<Movimiento> lista = entry.getValue();
-
             Movimiento primero = lista.get(0);
 
             resumen.add(new MovimientoResumenDTO(
                     primero.getTipo(),
                     primero.getFecha(),
-                    entry.getKey(),
+                    entry.getKey(), 
                     lista.size()
             ));
         }

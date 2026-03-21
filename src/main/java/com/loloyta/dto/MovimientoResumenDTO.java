@@ -6,10 +6,10 @@ public class MovimientoResumenDTO {
 
     private String tipo;
     private LocalDateTime fecha;
-    private Long referenciaId;
+    private String referenciaId;
     private int totalItems;
 
-    public MovimientoResumenDTO(String tipo, LocalDateTime fecha, Long referenciaId, int totalItems) {
+    public MovimientoResumenDTO(String tipo, LocalDateTime fecha, String referenciaId, int totalItems) {
         this.tipo = tipo;
         this.fecha = fecha;
         this.referenciaId = referenciaId;
@@ -32,11 +32,11 @@ public class MovimientoResumenDTO {
 		this.fecha = fecha;
 	}
 
-	public Long getReferenciaId() {
+	public String getReferenciaId() {
 		return referenciaId;
 	}
 
-	public void setReferenciaId(Long referenciaId) {
+	public void setReferenciaId(String referenciaId) {
 		this.referenciaId = referenciaId;
 	}
 

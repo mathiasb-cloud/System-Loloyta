@@ -25,6 +25,9 @@
                 <li class="nav-item">
                     <a class="nav-link text-white" href="#" onclick="cargar(event, '/ordenes')"> Ordenes</a>
                 </li>
+				<li class="nav-item">
+				    <a class="nav-link text-white" href="#" onclick="cargar(event, '/salidas')"> Salidas</a>
+				</li>
                 <li class="nav-item">
                     <a class="nav-link text-white" href="#" onclick="cargar(event, '/stock')"> Stock</a>
                 </li>
@@ -65,6 +68,7 @@
                 setTimeout(() => {
                     if (url.includes("stock")) initStock();
                     if (url.includes("ordenes")) initOrdenes();
+					if (url.includes("salidas")) initSalidas();
                     if (url.includes("movimientos")) initMovimientos();
                 }, 100);
             });
@@ -287,6 +291,121 @@
             `;
         });
     }
+	
+	
+	//salidas xd
+	let salidaId = null;
+
+	async function initSalidas() {
+	    await cargarAlmacenesSalida();
+	    await cargarProductos();
+
+	    document.getElementById("buscadorSalida")
+	        ?.addEventListener("keyup", function() {
+
+	            let texto = this.value.toLowerCase();
+	            let resultados = document.getElementById("resultadosSalida");
+
+	            resultados.innerHTML = "";
+
+	            if (texto.length === 0) return;
+
+	            let filtrados = productosGlobal.filter(p =>
+	                p.nombre.toLowerCase().includes(texto)
+	            );
+
+	            filtrados.forEach(p => {
+	                let item = document.createElement("div");
+	                item.classList.add("list-group-item");
+	                item.innerText = p.nombre;
+
+	                item.onclick = () => agregarProductoSalida(p);
+
+	                resultados.appendChild(item);
+	            });
+	        });
+	}
+
+	async function cargarAlmacenesSalida() {
+	    let res = await fetch('/api/almacenes');
+	    let data = await res.json();
+
+	    let select = document.getElementById("almacenSalida");
+	    if (!select) return;
+
+	    select.innerHTML = "";
+
+	    data.forEach(a => {
+	        select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`;
+	    });
+	}
+
+	function agregarProductoSalida(producto) {
+	    let tabla = document.getElementById("tablaSalida");
+	    if (!tabla) return;
+
+	    let filas = tabla.querySelectorAll("tr");
+
+	    for (let i = 1; i < filas.length; i++) {
+	        if (filas[i].children[0].innerText === producto.nombre) return;
+	    }
+
+	    let fila = tabla.insertRow();
+
+	    fila.innerHTML = `
+	        <td data-id="${producto.id}">${producto.nombre}</td>
+	        <td><input type="number" value="1"></td>
+	        <td><button onclick="this.parentElement.parentElement.remove()">X</button></td>
+	    `;
+	}
+
+	async function crearSalida() {
+	    let res = await fetch('/api/salidas', {
+	        method: 'POST',
+	        headers: { 'Content-Type': 'application/json' },
+	        body: JSON.stringify({
+	            almacenes: { id: document.getElementById("almacenSalida").value },
+	            usuario: { id: 1 }
+	        })
+	    });
+
+	    let data = await res.json();
+	    salidaId = data.id;
+
+	    alert("Salida creada");
+
+	    await guardarDetalleSalida();
+	}
+
+	async function guardarDetalleSalida() {
+	    let filas = document.querySelectorAll("#tablaSalida tr");
+
+	    for (let i = 1; i < filas.length; i++) {
+
+	        let celdas = filas[i].querySelectorAll("td");
+	        let cantidad = filas[i].querySelector("input").value;
+
+	        await fetch('/api/detalle-salida', {
+	            method: 'POST',
+	            headers: { 'Content-Type': 'application/json' },
+	            body: JSON.stringify({
+	                salida: { id: salidaId },
+	                producto: { id: celdas[0].dataset.id },
+	                cantidad: cantidad
+	            })
+	        });
+	    }
+
+	    alert("Productos agregados");
+	}
+
+	async function confirmarSalida() {
+	    await fetch(`/api/salidas/${salidaId}/confirmar`, {
+	        method: 'PATCH'
+	    });
+
+	    alert("Salida confirmada");
+	}
 </script>
 </body>
 </html>

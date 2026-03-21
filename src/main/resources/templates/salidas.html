@@ -1,0 +1,50 @@
+<h2 class="mb-4">Salidas</h2>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <label class="form-label">Almacén</label>
+        <select id="almacenSalida" class="form-select"></select>
+    </div>
+
+</div>
+
+<div class="mb-4">
+    <h5>Buscar Producto</h5>
+
+    <input
+        type="text"
+        id="buscadorSalida"
+        class="form-control mb-2"
+        placeholder="Escribe producto..."
+    >
+
+    <div id="resultadosSalida" class="list-group shadow-sm" style="max-width:400px;"></div>
+</div>
+
+<div class="mb-4">
+    <h5>Lista de Salida</h5>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle" id="tablaSalida">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>Producto</th>
+                    <th style="width:120px;">Cantidad</th>
+                    <th style="width:80px;">Acción</th>
+                </tr>
+            </thead>
+            <tbody class="text-center"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="d-flex gap-2">
+    <button onclick="crearSalida()" class="btn btn-success">
+        Guardar Salida
+    </button>
+
+    <button onclick="confirmarSalida()" class="btn btn-danger">
+        Confirmar Salida
+    </button>
+</div>
