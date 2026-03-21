@@ -17,7 +17,7 @@ public class DetalleSalidaController {
     private DetalleSalidaRepository repository;
 
     @PostMapping
-    public DetalleSalida guardar(@RequestBody DetalleSalida d) {
-        return repository.save(d);
+    public DetalleSalida guardar(@RequestBody DetalleSalida detalle) {
+        return repository.save(detalle);
     }
 }

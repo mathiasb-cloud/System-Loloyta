@@ -10,7 +10,12 @@ import org.springframework.stereotype.Service;
 
 import com.loloyta.dto.MovimientoResumenDTO;
 import com.loloyta.model.*;
+import com.loloyta.repository.AlmacenesRepository;
 import com.loloyta.repository.MovimientoRepository;
+import com.loloyta.repository.OrdenCompraRepository;
+import com.loloyta.repository.ProductoRepository;
+import com.loloyta.repository.SalidaRepository;
+import com.loloyta.repository.UsuarioRepository;
 import com.loloyta.service.MovimientoService;
 
 @Service
@@ -19,12 +24,26 @@ public class MovimientoServiceImpl implements MovimientoService {
     @Autowired
     private MovimientoRepository repository;
 
+    @Autowired
+    private ProductoRepository productoRepository;
+
+    @Autowired
+    private AlmacenesRepository almacenesRepository;
+
+    @Autowired
+    private OrdenCompraRepository ordenCompraRepository;
+
+    @Autowired
+    private SalidaRepository salidaRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     @Override
     public List<Movimiento> listar() {
         return repository.findAll();
     }
 
-    
     @Override
     public List<MovimientoResumenDTO> listarResumen() {
 
@@ -51,7 +70,7 @@ public class MovimientoServiceImpl implements MovimientoService {
             resumen.add(new MovimientoResumenDTO(
                     primero.getTipo(),
                     primero.getFecha(),
-                    entry.getKey(), 
+                    entry.getKey(),
                     lista.size()
             ));
         }
@@ -63,11 +82,15 @@ public class MovimientoServiceImpl implements MovimientoService {
     public Movimiento registrarIngreso(Long productoId, Long almacenId, BigDecimal cantidad, Long ordenId, Long usuarioId) {
 
         Movimiento m = new Movimiento();
+
         m.setTipo("INGRESO");
         m.setCantidad(cantidad);
         m.setFecha(LocalDateTime.now());
 
-        
+        m.setProducto(productoRepository.findById(productoId).orElse(null));
+        m.setAlmacen(almacenesRepository.findById(almacenId).orElse(null));
+        m.setOrdenCompra(ordenCompraRepository.findById(ordenId).orElse(null));
+        m.setUsuario(usuarioRepository.findById(usuarioId).orElse(null));
 
         return repository.save(m);
     }
@@ -76,9 +99,15 @@ public class MovimientoServiceImpl implements MovimientoService {
     public Movimiento registrarSalida(Long productoId, Long almacenId, BigDecimal cantidad, Long salidaId, Long usuarioId) {
 
         Movimiento m = new Movimiento();
+
         m.setTipo("SALIDA");
         m.setCantidad(cantidad);
         m.setFecha(LocalDateTime.now());
+
+        m.setProducto(productoRepository.findById(productoId).orElse(null));
+        m.setAlmacen(almacenesRepository.findById(almacenId).orElse(null));
+        m.setSalida(salidaRepository.findById(salidaId).orElse(null));
+        m.setUsuario(usuarioRepository.findById(usuarioId).orElse(null));
 
         return repository.save(m);
     }

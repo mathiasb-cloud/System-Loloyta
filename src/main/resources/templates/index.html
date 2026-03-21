@@ -293,35 +293,40 @@
     }
 	
 	
-	//salidas xd
+	
+	
+	// ========================
+	// SALIDAS
+	// ========================
 	let salidaId = null;
+	let productosSalidaGlobal = [];
 
 	async function initSalidas() {
 	    await cargarAlmacenesSalida();
-	    await cargarProductos();
+	    await cargarProductosSalida();
 
 	    document.getElementById("buscadorSalida")
 	        ?.addEventListener("keyup", function() {
 
 	            let texto = this.value.toLowerCase();
-	            let resultados = document.getElementById("resultadosSalida");
-
-	            resultados.innerHTML = "";
+	            let resultadosDiv = document.getElementById("resultadosSalida");
+	            resultadosDiv.innerHTML = "";
 
 	            if (texto.length === 0) return;
 
-	            let filtrados = productosGlobal.filter(p =>
+	            let filtrados = productosSalidaGlobal.filter(p =>
 	                p.nombre.toLowerCase().includes(texto)
 	            );
 
 	            filtrados.forEach(p => {
+
 	                let item = document.createElement("div");
-	                item.classList.add("list-group-item");
+	                item.className = "list-group-item list-group-item-action";
 	                item.innerText = p.nombre;
 
 	                item.onclick = () => agregarProductoSalida(p);
 
-	                resultados.appendChild(item);
+	                resultadosDiv.appendChild(item);
 	            });
 	        });
 	}
@@ -340,26 +345,43 @@
 	    });
 	}
 
+	async function cargarProductosSalida() {
+	    let res = await fetch('/api/productos');
+	    let json = await res.json();
+
+	    productosSalidaGlobal = json.content || json || [];
+	}
+
 	function agregarProductoSalida(producto) {
-	    let tabla = document.getElementById("tablaSalida");
-	    if (!tabla) return;
+
+	    let tabla = document.querySelector("#tablaSalida tbody");
 
 	    let filas = tabla.querySelectorAll("tr");
 
-	    for (let i = 1; i < filas.length; i++) {
-	        if (filas[i].children[0].innerText === producto.nombre) return;
+	    for (let i = 0; i < filas.length; i++) {
+	        if (filas[i].dataset.id == producto.id) return;
 	    }
 
-	    let fila = tabla.insertRow();
+	    let fila = document.createElement("tr");
+	    fila.dataset.id = producto.id;
 
 	    fila.innerHTML = `
-	        <td data-id="${producto.id}">${producto.nombre}</td>
-	        <td><input type="number" value="1"></td>
-	        <td><button onclick="this.parentElement.parentElement.remove()">X</button></td>
+	        <td>${producto.categoria?.nombre || "N/A"}</td>
+	        <td>${producto.nombre}</td>
+	        <td>${producto.unidadMedida || "N/A"}</td>
+	        <td><input type="number" class="form-control" value="1"></td>
+	        <td><button class="btn btn-sm btn-danger" onclick="eliminarFilaSalida(this)">X</button></td>
 	    `;
+
+	    tabla.appendChild(fila);
+	}
+
+	function eliminarFilaSalida(btn) {
+	    btn.parentElement.parentElement.remove();
 	}
 
 	async function crearSalida() {
+
 	    let res = await fetch('/api/salidas', {
 	        method: 'POST',
 	        headers: { 'Content-Type': 'application/json' },
@@ -370,39 +392,59 @@
 	    });
 
 	    let data = await res.json();
+
+	    console.log("SALIDA CREADA:", data);
+
 	    salidaId = data.id;
 
-	    alert("Salida creada");
+	    if (!salidaId) {
+	        alert("Error: no se creó la salida");
+	        return;
+	    }
 
 	    await guardarDetalleSalida();
 	}
 
 	async function guardarDetalleSalida() {
-	    let filas = document.querySelectorAll("#tablaSalida tr");
 
-	    for (let i = 1; i < filas.length; i++) {
+	    let filas = document.querySelectorAll("#tablaSalida tbody tr");
 
-	        let celdas = filas[i].querySelectorAll("td");
-	        let cantidad = filas[i].querySelector("input").value;
+	    for (let i = 0; i < filas.length; i++) {
 
-	        await fetch('/api/detalle-salida', {
+	        let input = filas[i].querySelector("input");
+
+	        let cantidad = input.value;
+
+	        let res = await fetch('/api/detalle-salida', {
 	            method: 'POST',
 	            headers: { 'Content-Type': 'application/json' },
 	            body: JSON.stringify({
 	                salida: { id: salidaId },
-	                producto: { id: celdas[0].dataset.id },
-	                cantidad: cantidad
+	                producto: { id: filas[i].dataset.id },
+	                cantidadDespacho: cantidad
 	            })
 	        });
+
+	        console.log("DETALLE:", await res.json());
 	    }
 
-	    alert("Productos agregados");
+	    alert("Detalle guardado");
 	}
 
 	async function confirmarSalida() {
-	    await fetch(`/api/salidas/${salidaId}/confirmar`, {
+
+	    if (!salidaId) {
+	        alert("Primero guarda la salida");
+	        return;
+	    }
+
+	    let res = await fetch(`/api/salidas/${salidaId}/confirmar`, {
 	        method: 'PATCH'
 	    });
+
+	    let data = await res.json();
+
+	    console.log("CONFIRMAR:", data);
 
 	    alert("Salida confirmada");
 	}
