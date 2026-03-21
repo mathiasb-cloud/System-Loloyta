@@ -24,6 +24,11 @@ public class VistaController {
     public String salidas() {
         return "salidas"; 
     }
+    
+    @GetMapping("/productos")
+    public String productos() {
+        return "productos";
+    }
 
 
 }

@@ -1,0 +1,89 @@
+<h2 class="mb-4">Productos</h2>
+
+<div class="d-flex gap-2 mb-3 flex-wrap">
+
+    <button onclick="abrirModal()" class="btn btn-success">
+        Nuevo Producto
+    </button>
+
+    <input
+        type="text"
+        id="buscadorProducto"
+        class="form-control"
+        placeholder="Buscar producto..."
+        style="max-width:300px;"
+    >
+
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover" id="tablaProductosCrud">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>ID</th>
+				<th>Categoría</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Unidad</th>
+                <th>Stock Mínimo</th>
+                <th>Activo</th>
+                <th style="width:120px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody class="text-center"></tbody>
+    </table>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="modalProducto">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Producto</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <input type="hidden" id="productoId">
+
+                <div class="mb-2">
+                    <label>Nombre</label>
+                    <input type="text" id="nombre" class="form-control">
+                </div>
+
+                <div class="mb-2">
+                    <label>Descripción</label>
+                    <input type="text" id="descripcion" class="form-control">
+                </div>
+
+                <div class="mb-2">
+                    <label>Unidad Medida</label>
+                    <input type="text" id="unidad" class="form-control">
+                </div>
+
+                <div class="mb-2">
+                    <label>Stock Mínimo</label>
+                    <input type="number" id="stockMinimo" class="form-control">
+                </div>
+
+                <div class="mb-2">
+                    <label>Activo</label>
+                    <select id="activo" class="form-select">
+                        <option value="true">Sí</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button onclick="guardarProducto()" class="btn btn-primary">
+                    Guardar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

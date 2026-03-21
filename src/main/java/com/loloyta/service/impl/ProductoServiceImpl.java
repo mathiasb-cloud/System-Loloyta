@@ -52,6 +52,11 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public void eliminar(Long id) {
-        productoRepository.deleteById(id);
+        Producto p = productoRepository.findById(id).orElse(null);
+
+        if (p != null) {
+            p.setActivo(false);
+            productoRepository.save(p);
+        }
     }
 }
