@@ -14,76 +14,79 @@ public class Salida {
 
     private LocalDateTime fecha;
 
-    @ManyToOne
-    @JoinColumn(name = "almacen_id")
-    private Almacenes almacen;
-
-    @ManyToOne
-    @JoinColumn(name = "local_id")
-    private Locales local;
-
     private String estado;
 
     @ManyToOne
-    @JoinColumn(name = "creado_por")
+    @JoinColumn(name = "almacen_id")
+    private Almacenes almacenes;
+
+    @ManyToOne
+    @JoinColumn(name = "local_id")
+    private Locales locales;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    public Salida() {
-    }
+    public Salida() {}
 
-    public Salida(LocalDateTime fecha, Almacenes almacen, Locales local, String estado, Usuario usuario) {
-        this.fecha = fecha;
-        this.almacen = almacen;
-        this.local = local;
-        this.estado = estado;
-        this.usuario = usuario;
-    }
+	public Salida(LocalDateTime fecha, String estado, Almacenes almacenes, Locales locales, Usuario usuario) {
+		this.fecha = fecha;
+		this.estado = estado;
+		this.almacenes = almacenes;
+		this.locales = locales;
+		this.usuario = usuario;
+	}
 
-    public Almacenes getAlmacen() {
-        return almacen;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setAlmacen(Almacenes almacen) {
-        this.almacen = almacen;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public LocalDateTime getFecha() {
+		return fecha;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setFecha(LocalDateTime fecha) {
+		this.fecha = fecha;
+	}
 
-    public LocalDateTime getFecha() {
-        return fecha;
-    }
+	public String getEstado() {
+		return estado;
+	}
 
-    public void setFecha(LocalDateTime fecha) {
-        this.fecha = fecha;
-    }
+	public void setEstado(String estado) {
+		this.estado = estado;
+	}
 
-    public Locales getLocal() {
-        return local;
-    }
+	public Almacenes getAlmacenes() {
+		return almacenes;
+	}
 
-    public void setLocal(Locales local) {
-        this.local = local;
-    }
+	public void setAlmacenes(Almacenes almacenes) {
+		this.almacenes = almacenes;
+	}
 
-    public String getEstado() {
-        return estado;
-    }
+	public Locales getLocales() {
+		return locales;
+	}
 
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+	public void setLocales(Locales locales) {
+		this.locales = locales;
+	}
 
-    public Usuario getUsuario() {
-        return usuario;
-    }
+	public Usuario getUsuario() {
+		return usuario;
+	}
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
+	}
+    
+    
 }
+
+   
