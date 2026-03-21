@@ -2,7 +2,7 @@ package com.loloyta.model;
 
 
 import jakarta.persistence.*;
-
+import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,20 +13,29 @@ public class Producto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(min = 2, max = 80, message = "El nombre debe tener entre 2 y 80 caracteres")
     private String nombre;
 
+    @Size(max = 180, message = "La descripción no debe superar 180 caracteres")
     private String descripcion;
 
+    @NotNull(message = "La categoría es obligatoria")
     @ManyToOne
     @JoinColumn(name = "categoria_id")
     private Categorias categoria;
 
+    @NotBlank(message = "La unidad de medida es obligatoria")
+    @Size(max = 20, message = "La unidad no debe superar 20 caracteres")
     @Column(name = "unidad_medida")
     private String unidadMedida;
 
+    @NotNull(message = "El stock mínimo es obligatorio")
+    @DecimalMin(value = "0.0", inclusive = true, message = "El stock mínimo no puede ser negativo")
     @Column(name = "stock_minimo")
     private Double stockMinimo;
 
+    @NotNull(message = "El estado activo es obligatorio")
     private Boolean activo;
 
     @Column(name = "fecha_creacion")

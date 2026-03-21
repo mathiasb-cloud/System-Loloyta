@@ -11,12 +11,12 @@ public class Categorias {
     private Long id;
     private String nombre;
     private String descripcion ;
-    private boolean activo;
+    private Boolean activo;
 
     public Categorias() {
     }
 
-    public Categorias(String descripcion, String nombre, boolean activo) {
+    public Categorias(String descripcion, String nombre, Boolean activo) {
         this.descripcion = descripcion;
         this.nombre = nombre;
         this.activo = activo;
@@ -46,11 +46,11 @@ public class Categorias {
         this.descripcion = descripcion;
     }
 
-    public boolean isActivo() {
+    public Boolean isActivo() {
         return activo;
     }
 
-    public void setActivo(boolean activo) {
+    public void setActivo(Boolean activo) {
         this.activo = activo;
     }
 }

@@ -1,85 +1,208 @@
-<h2 class="mb-4">Productos</h2>
-
-<div class="d-flex gap-2 mb-3 flex-wrap">
-
-    <button onclick="abrirModal()" class="btn btn-success">
-        Nuevo Producto
-    </button>
-
-    <input
-        type="text"
-        id="buscadorProducto"
-        class="form-control"
-        placeholder="Buscar producto..."
-        style="max-width:300px;"
-    >
-
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="section-title">Productos</h2>
+		<div id="productoSuccessBanner" class="success-banner d-none">
+		    <div class="success-banner-content">
+		        <i class="bi bi-check-circle-fill"></i>
+		        <div>
+		            <div class="success-banner-title">Producto guardado correctamente</div>
+		            <div class="success-banner-text">El registro se actualizó sin errores.</div>
+		        </div>
+		    </div>
+		</div>
+        <p class="section-subtitle">Administra catálogo, categoría, stock mínimo y estado del producto.</p>
+    </div>
 </div>
 
-<div class="table-responsive">
-    <table class="table table-bordered table-hover" id="tablaProductosCrud">
-        <thead class="table-dark text-center">
-            <tr>
-                <th>ID</th>
-				<th>Categoría</th>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Unidad</th>
-                <th>Stock Mínimo</th>
-                <th>Activo</th>
-                <th style="width:120px;">Acciones</th>
-            </tr>
-        </thead>
-        <tbody class="text-center"></tbody>
-    </table>
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+<div class="toolbar">
+    <div>
+        <button onclick="abrirModal()" class="btn btn-success btn-icon">
+            <span>＋</span>
+            <span>Nuevo Producto</span>
+        </button>
+    </div>
+
+	<div class="toolbar-group">
+	    <label class="form-label mb-1">Buscar producto</label>
+	    <div class="search-input-group">
+	        <span class="search-icon">
+	            <i class="bi bi-search"></i>
+	        </span>
+
+	        <input
+	            type="text"
+	            id="buscadorProducto"
+	            class="form-control search-input-pro"
+	            placeholder="Busca por nombre del producto..."
+	            maxlength="80"
+	            autocomplete="off"
+	        >
+
+	        <button
+	            type="button"
+	            class="search-clear-btn d-none"
+	            id="limpiarBuscadorProducto"
+	            onclick="limpiarBuscadorProducto()"
+	            aria-label="Limpiar búsqueda"
+	        >
+	            <i class="bi bi-x-lg"></i>
+	        </button>
+	    </div>
+	    <div class="form-text">Escribe parte del nombre para filtrar rápidamente.</div>
+	</div>
 </div>
 
-<!-- MODAL -->
-<div class="modal fade" id="modalProducto">
-    <div class="modal-dialog">
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table table-hover table-striped mb-0" id="tablaProductosCrud">
+            <thead class="text-center">
+                <tr>
+                    <th>ID</th>
+                    <th>Categoría</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Unidad</th>
+                    <th>Stock Mínimo</th>
+                    <th>Activo</th>
+                    <th style="width:160px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="text-center"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalProducto" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
 
             <div class="modal-header">
-                <h5 class="modal-title">Producto</h5>
+                <div>
+                    <h5 class="modal-title mb-0">Producto</h5>
+                    <small class="text-muted">Completa todos los datos correctamente.</small>
+                </div>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
-
                 <input type="hidden" id="productoId">
 
-                <div class="mb-2">
-                    <label>Nombre</label>
-                    <input type="text" id="nombre" class="form-control">
-                </div>
+                <div id="productoFormAlert" class="alert alert-warning d-none py-2 mb-3" role="alert"></div>
 
-                <div class="mb-2">
-                    <label>Descripción</label>
-                    <input type="text" id="descripcion" class="form-control">
-                </div>
+                <form id="formProducto" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre</label>
+                            <input
+                                type="text"
+                                id="nombre"
+                                class="form-control"
+                                maxlength="80"
+                                required
+                                autocomplete="off"
+                            >
+                            <div class="form-text">Entre 2 y 80 caracteres.</div>
+                            <div class="invalid-feedback"></div>
+                        </div>
 
-                <div class="mb-2">
-                    <label>Unidad Medida</label>
-                    <input type="text" id="unidad" class="form-control">
-                </div>
+						<div class="col-md-6">
+						    <label class="form-label">Categoría</label>
 
-                <div class="mb-2">
-                    <label>Stock Mínimo</label>
-                    <input type="number" id="stockMinimo" class="form-control">
-                </div>
+						    <input type="hidden" id="categoria">
 
-                <div class="mb-2">
-                    <label>Activo</label>
-                    <select id="activo" class="form-select">
-                        <option value="true">Sí</option>
-                        <option value="false">No</option>
-                    </select>
-                </div>
+						    <div class="category-search-wrapper">
+						        <div class="search-input-group">
+						            <span class="search-icon">
+						                <i class="bi bi-search"></i>
+						            </span>
 
+						            <input
+						                type="text"
+						                id="categoriaBusqueda"
+						                class="form-control search-input-pro"
+						                placeholder="Buscar categoría..."
+						                autocomplete="off"
+						            >
+
+						            <button
+						                type="button"
+						                class="search-clear-btn d-none"
+						                id="limpiarBusquedaCategoria"
+						                onclick="limpiarBusquedaCategoria()"
+						                aria-label="Limpiar búsqueda"
+						            >
+						                <i class="bi bi-x-lg"></i>
+						            </button>
+						        </div>
+
+						        <div id="categoriaDropdown" class="category-dropdown d-none"></div>
+								<div id="categoriaSeleccionadaVisual"></div>
+						    </div>
+
+						    <div class="form-text">Busca y selecciona una categoría.</div>
+						    <div class="invalid-feedback d-block" id="categoriaError"></div>
+						</div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Descripción</label>
+                            <input
+                                type="text"
+                                id="descripcion"
+                                class="form-control"
+                                maxlength="180"
+                                autocomplete="off"
+                            >
+                            <div class="form-text">
+                                Opcional, hasta 180 caracteres.
+                            </div>
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Unidad Medida</label>
+                            <input
+                                type="text"
+                                id="unidad"
+                                class="form-control"
+                                maxlength="20"
+                                required
+                                autocomplete="off"
+                            >
+                            <div class="form-text">Ej.: Kg, Unidad, Caja, Litro.</div>
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Stock Mínimo</label>
+                            <input
+                                type="number"
+                                id="stockMinimo"
+                                class="form-control"
+                                min="0"
+                                step="0.01"
+                                required
+                            >
+                            <div class="form-text">Debe ser 0 o mayor.</div>
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Activo</label>
+                            <select id="activo" class="form-select" required>
+                                <option value="true">Sí</option>
+                                <option value="false">No</option>
+                            </select>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                </form>
             </div>
 
             <div class="modal-footer">
-                <button onclick="guardarProducto()" class="btn btn-primary">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardarProducto" onclick="guardarProducto()" class="btn btn-primary">
                     Guardar
                 </button>
             </div>

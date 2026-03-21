@@ -3,6 +3,7 @@ package com.loloyta.controller;
 import com.loloyta.model.Producto;
 import com.loloyta.service.ProductoService;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -27,12 +28,12 @@ public class ProductoController {
     }
 
     @PostMapping("/create")
-    public Producto guardar(@RequestBody Producto producto){
+    public Producto guardar(@Valid @RequestBody Producto producto){
         return productoService.guardar(producto);
     }
 
     @PutMapping("/{id}")
-    public Producto actualizar(@PathVariable Long id, @RequestBody Producto producto){
+    public Producto actualizar(@PathVariable Long id, @Valid @RequestBody Producto producto){
         return productoService.actualizar(id, producto);
     }
 

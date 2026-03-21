@@ -16,7 +16,7 @@ public class CategoriaController {
         this.categoriaService = categoriaService;
     }
 
-    @GetMapping("/listar")
+    @GetMapping
     public List<Categorias> listar(){
         return categoriaService.listar();
     }

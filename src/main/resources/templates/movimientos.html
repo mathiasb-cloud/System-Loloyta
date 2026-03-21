@@ -1,16 +1,28 @@
-<h1>Movimientos</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="section-title">Movimientos</h2>
+        <p class="section-subtitle">Visualiza el resumen de movimientos registrados en el sistema.</p>
+    </div>
 
-<button onclick="cargarMovimientos()" class="btn btn-primary mb-3">
-    Ver Movimientos
-</button>
+    <div>
+        <button onclick="cargarMovimientos()" class="btn btn-primary btn-icon">
+            <span>📄</span>
+            <span>Ver Movimientos</span>
+        </button>
+    </div>
+</div>
 
-<table class="table table-bordered" id="tablaMovimientos">
-    <thead>
-    <tr>
-        <th>Tipo</th>
-        <th>Fecha</th>
-        <th>Items</th>
-    </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle mb-0" id="tablaMovimientos">
+            <thead class="text-center">
+                <tr>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                    <th>Items</th>
+                </tr>
+            </thead>
+            <tbody class="text-center"></tbody>
+        </table>
+    </div>
+</div>

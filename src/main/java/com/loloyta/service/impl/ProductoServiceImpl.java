@@ -23,6 +23,13 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public Producto guardar(Producto producto) {
+        String nombre = producto.getNombre().trim();
+
+        if (productoRepository.existsByNombreIgnoreCase(nombre)) {
+            throw new RuntimeException("Ya existe un producto con ese nombre.");
+        }
+
+        producto.setNombre(nombre);
         return productoRepository.save(producto);
     }
 
@@ -36,8 +43,14 @@ public class ProductoServiceImpl implements ProductoService {
     public Producto actualizar(Long id, Producto producto) {
         Producto p = productoRepository.findById(id).orElse(null);
 
-        if(p != null){
-            p.setNombre(producto.getNombre());
+        if (p != null) {
+            String nombre = producto.getNombre().trim();
+
+            if (productoRepository.existsByNombreIgnoreCaseAndIdNot(nombre, id)) {
+                throw new RuntimeException("Ya existe un producto con ese nombre.");
+            }
+
+            p.setNombre(nombre);
             p.setDescripcion(producto.getDescripcion());
             p.setCategoria(producto.getCategoria());
             p.setUnidadMedida(producto.getUnidadMedida());
