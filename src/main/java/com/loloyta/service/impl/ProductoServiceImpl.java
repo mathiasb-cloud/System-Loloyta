@@ -30,6 +30,15 @@ public class ProductoServiceImpl implements ProductoService {
         }
 
         producto.setNombre(nombre);
+
+        if (producto.getDescripcion() != null) {
+            producto.setDescripcion(producto.getDescripcion().trim());
+        }
+
+        if (producto.getUnidadMedida() != null) {
+            producto.setUnidadMedida(producto.getUnidadMedida().trim());
+        }
+
         return productoRepository.save(producto);
     }
 
@@ -51,9 +60,10 @@ public class ProductoServiceImpl implements ProductoService {
             }
 
             p.setNombre(nombre);
-            p.setDescripcion(producto.getDescripcion());
+            p.setDescripcion(producto.getDescripcion() != null ? producto.getDescripcion().trim() : null);
             p.setCategoria(producto.getCategoria());
-            p.setUnidadMedida(producto.getUnidadMedida());
+            p.setUnidadMedida(producto.getUnidadMedida() != null ? producto.getUnidadMedida().trim() : null);
+            p.setPrecioActual(producto.getPrecioActual());
             p.setStockMinimo(producto.getStockMinimo());
             p.setActivo(producto.getActivo());
 
@@ -71,5 +81,17 @@ public class ProductoServiceImpl implements ProductoService {
             p.setActivo(false);
             productoRepository.save(p);
         }
+    }
+    
+    @Override
+    public Producto toggleActivo(Long id) {
+        Producto p = productoRepository.findById(id).orElse(null);
+
+        if (p != null) {
+            p.setActivo(!Boolean.TRUE.equals(p.getActivo()));
+            return productoRepository.save(p);
+        }
+
+        return null;
     }
 }

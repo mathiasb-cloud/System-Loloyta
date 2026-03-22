@@ -116,6 +116,7 @@ function renderProductos(data) {
                 <td>${escapeHtml(p.nombre || "")}</td>
                 <td>${escapeHtml(p.descripcion || "")}</td>
                 <td>${escapeHtml(p.unidadMedida || "")}</td>
+                <td>${formatearMoneda(p.precioActual)}</td>
                 <td>${p.stockMinimo ?? 0}</td>
                 <td>
                     ${p.activo
@@ -165,6 +166,11 @@ function abrirModal() {
     modalProducto.show();
 }
 
+function formatearMoneda(valor) {
+    const numero = Number(valor || 0);
+    return `S/ ${numero.toFixed(2)}`;
+}
+
 function editarProducto(p) {
     limpiarErroresProducto();
     ocultarAlertaFormulario();
@@ -177,6 +183,7 @@ function editarProducto(p) {
     document.getElementById("unidad").value = p.unidadMedida || "";
     document.getElementById("stockMinimo").value = p.stockMinimo ?? "";
     document.getElementById("activo").value = String(p.activo);
+	document.getElementById("precioActual").value = p.precioActual ?? "";
 
     const visual = document.getElementById("categoriaSeleccionadaVisual");
     if (visual && p.categoria?.nombre) {
@@ -205,12 +212,13 @@ function limpiarFormularioProducto() {
     document.getElementById("unidad").value = "";
     document.getElementById("stockMinimo").value = "";
     document.getElementById("activo").value = "true";
+	document.getElementById("precioActual").value = "";
 
     actualizarBotonLimpiarBusquedaCategoria();
 }
 
 function limpiarErroresProducto() {
-    ["nombre", "descripcion", "categoria", "unidad", "stockMinimo", "activo"].forEach(id => {
+    ["nombre", "descripcion", "categoria", "unidad", "precioActual", "stockMinimo", "activo"].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
         el.classList.remove("is-invalid", "is-valid", "input-valid-soft", "input-invalid-soft");
@@ -313,6 +321,18 @@ function validarCampo(id) {
             mensaje = "Solo letras, números y espacios.";
         }
     }
+	
+	if (id === "precioActual") {
+	    if (valor === "" || valor === null || valor === undefined) {
+	        mensaje = "El precio es obligatorio.";
+	    } else if (isNaN(valor)) {
+	        mensaje = "Debe ser un número válido.";
+	    } else if (Number(valor) < 0) {
+	        mensaje = "No puede ser negativo.";
+	    } else if (Number(valor) > 999999.99) {
+	        mensaje = "El precio es demasiado alto.";
+	    }
+	}
 
     if (id === "stockMinimo") {
         if (valor === "" || valor === null || valor === undefined) {
@@ -435,6 +455,7 @@ function obtenerDatosFormularioProducto() {
         descripcion: sanitizarTexto(document.getElementById("descripcion")?.value),
         categoria: document.getElementById("categoria")?.value || "",
         unidad: sanitizarTexto(document.getElementById("unidad")?.value),
+        precioActual: document.getElementById("precioActual")?.value,
         stockMinimo: document.getElementById("stockMinimo")?.value,
         activo: document.getElementById("activo")?.value
     };
@@ -443,7 +464,7 @@ function obtenerDatosFormularioProducto() {
 function validarFormularioProducto() {
     ocultarAlertaFormulario();
 
-    const campos = ["nombre", "descripcion", "categoria", "unidad", "stockMinimo", "activo"];
+    const campos = ["nombre", "descripcion", "categoria", "unidad","precioActual", "stockMinimo", "activo"];
     let esValido = true;
 
     campos.forEach(id => {
@@ -493,14 +514,15 @@ async function guardarProducto() {
         let id = document.getElementById("productoId").value;
         let categoriaId = document.getElementById("categoria").value;
 
-        let body = {
-            nombre: sanitizarTexto(document.getElementById("nombre").value),
-            descripcion: sanitizarTexto(document.getElementById("descripcion").value),
-            categoria: categoriaId ? { id: parseInt(categoriaId) } : null,
-            unidadMedida: sanitizarTexto(document.getElementById("unidad").value),
-            stockMinimo: parseFloat(document.getElementById("stockMinimo").value),
-            activo: document.getElementById("activo").value === "true"
-        };
+		let body = {
+		    nombre: sanitizarTexto(document.getElementById("nombre").value),
+		    descripcion: sanitizarTexto(document.getElementById("descripcion").value),
+		    categoria: categoriaId ? { id: parseInt(categoriaId) } : null,
+		    unidadMedida: sanitizarTexto(document.getElementById("unidad").value),
+		    precioActual: parseFloat(document.getElementById("precioActual").value),
+		    stockMinimo: parseFloat(document.getElementById("stockMinimo").value),
+		    activo: document.getElementById("activo").value === "true"
+		};
 
         let res;
 

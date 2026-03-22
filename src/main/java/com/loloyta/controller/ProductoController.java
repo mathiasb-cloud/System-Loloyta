@@ -41,5 +41,10 @@ public class ProductoController {
     public void eliminar(@PathVariable Long id){
         productoService.eliminar(id);
     }
+    
+    @PatchMapping("/{id}/toggle-activo")
+    public Producto toggleActivo(@PathVariable Long id) {
+        return productoService.toggleActivo(id);
+    }
 
 }

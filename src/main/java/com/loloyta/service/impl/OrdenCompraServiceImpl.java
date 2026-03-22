@@ -11,18 +11,23 @@ import org.springframework.stereotype.Service;
 import com.loloyta.model.DetalleOrdenCompra;
 import com.loloyta.model.Movimiento;
 import com.loloyta.model.OrdenCompra;
+import com.loloyta.model.Producto;
 import com.loloyta.model.Stock;
 import com.loloyta.repository.DetalleOrdenCompraRepository;
 import com.loloyta.repository.MovimientoRepository;
 import com.loloyta.repository.OrdenCompraRepository;
 import com.loloyta.repository.StockRepository;
 import com.loloyta.service.OrdenCompraService;
+import com.loloyta.repository.ProductoRepository;
 
 @Service
 public class OrdenCompraServiceImpl implements OrdenCompraService {
 
     @Autowired
     private OrdenCompraRepository ordenCompraRepository;
+    
+    @Autowired
+    private ProductoRepository productoRepository;
     
     @Autowired
     private DetalleOrdenCompraRepository detalleRepository;
@@ -71,48 +76,54 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
 
         if (estado.equals("CONFIRMADA")) {
 
-            List<DetalleOrdenCompra> detalles =
-                    detalleRepository.findByOrdenCompraId(id);
+        	List<DetalleOrdenCompra> detalles = detalleRepository.findByOrdenCompraId(id);
 
-            for (DetalleOrdenCompra d : detalles) {
+        	for (DetalleOrdenCompra d : detalles) {
 
-                Stock stock = stockRepository
-                        .findByAlmacenesIdAndProductoId(
-                                orden.getAlmacenes().getId(),
-                                d.getProducto().getId()
-                        )
-                        .orElse(null);
+        	    Producto producto = d.getProducto();
 
-                if (stock == null) {
-                    stock = new Stock();
-                    stock.setAlmacenes(orden.getAlmacenes());
-                    stock.setProducto(d.getProducto());
-                    stock.setCantidad(BigDecimal.ZERO);
-                }
+        	    if (producto != null && d.getPrecioUnitario() != null) {
+        	        producto.setPrecioActual(d.getPrecioUnitario().doubleValue());
+        	        productoRepository.save(producto);
+        	    }
 
-                if (stock.getCantidad() == null) {
-                    stock.setCantidad(BigDecimal.ZERO);
-                }
+        	    Stock stock = stockRepository
+        	            .findByAlmacenesIdAndProductoId(
+        	                    orden.getAlmacenes().getId(),
+        	                    d.getProducto().getId()
+        	            )
+        	            .orElse(null);
 
-                stock.setCantidad(
-                        stock.getCantidad().add(d.getCantidad())
-                );
+        	    if (stock == null) {
+        	        stock = new Stock();
+        	        stock.setAlmacenes(orden.getAlmacenes());
+        	        stock.setProducto(d.getProducto());
+        	        stock.setCantidad(BigDecimal.ZERO);
+        	    }
 
-                stock.setUltimaActualizacion(java.time.LocalDateTime.now());
+        	    if (stock.getCantidad() == null) {
+        	        stock.setCantidad(BigDecimal.ZERO);
+        	    }
 
-                stockRepository.save(stock);
-                
-                Movimiento mov = new Movimiento();
+        	    stock.setCantidad(
+        	            stock.getCantidad().add(d.getCantidad())
+        	    );
 
-                mov.setTipo("INGRESO");
-                mov.setOrdenCompra(orden);
-                mov.setCantidad(d.getCantidad());
-                mov.setFecha(LocalDateTime.now());
-                mov.setUsuario(orden.getUsuario());
-                mov.setAlmacen(orden.getAlmacenes());
+        	    stock.setUltimaActualizacion(LocalDateTime.now());
 
-                movimientoRepository.save(mov);
-            }
+        	    stockRepository.save(stock);
+
+        	    Movimiento mov = new Movimiento();
+
+        	    mov.setTipo("INGRESO");
+        	    mov.setOrdenCompra(orden);
+        	    mov.setCantidad(d.getCantidad());
+        	    mov.setFecha(LocalDateTime.now());
+        	    mov.setUsuario(orden.getUsuario());
+        	    mov.setAlmacen(orden.getAlmacenes());
+
+        	    movimientoRepository.save(mov);
+        	}
         }
 
         return ordenCompraRepository.save(orden);

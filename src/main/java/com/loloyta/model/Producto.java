@@ -3,7 +3,11 @@ package com.loloyta.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "productos")
@@ -40,11 +44,16 @@ public class Producto {
 
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
+    
+    @NotNull(message = "El precio es obligatorio")
+    @DecimalMin(value = "0.0", inclusive = true, message = "El precio no puede ser negativo")
+    @Column(name = "precio_actual")
+    private Double precioActual;
 
     public Producto() {
     }
 
-    public Producto(String nombre, String descripcion, Categorias categoria, String unidadMedida, Double stockMinimo, Boolean activo, LocalDateTime fechaCreacion) {
+    public Producto(String nombre, String descripcion, Categorias categoria, String unidadMedida, Double stockMinimo, Boolean activo, LocalDateTime fechaCreacion, Double precioActual) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.categoria = categoria;
@@ -52,6 +61,7 @@ public class Producto {
         this.stockMinimo = stockMinimo;
         this.activo = activo;
         this.fechaCreacion = fechaCreacion;
+        this.precioActual = precioActual;
     }
 
     public Long getId() {
@@ -117,5 +127,15 @@ public class Producto {
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
+
+	public Double getPrecioActual() {
+		return precioActual;
+	}
+
+	public void setPrecioActual(Double precioActual) {
+		this.precioActual = precioActual;
+	}
+    
+    
 
 }
