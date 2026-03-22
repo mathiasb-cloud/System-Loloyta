@@ -430,4 +430,39 @@
 		        transform: translateY(0) scale(1);
 		    }
 		}
+		
+		
+		.table td {
+		    vertical-align: middle;
+		}
+
+		.badge {
+		    font-size: 0.75rem;
+		    border-radius: 8px;
+		}
+
+		.table small {
+		    display: block;
+		    font-size: 12px;
+		}
+
+		.btn-outline-primary {
+		    border-radius: 8px;
+		}
+		
+		
+		
+		
+		.fade-in-row {
+		    opacity: 0;
+		    transform: translateY(10px);
+		    animation: fadeInUp 0.4s ease forwards;
+		}
+
+		@keyframes fadeInUp {
+		    to {
+		        opacity: 1;
+		        transform: translateY(0);
+		    }
+		}
    
