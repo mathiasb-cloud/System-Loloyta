@@ -118,11 +118,11 @@ function renderProductos(data) {
                 <td>${escapeHtml(p.unidadMedida || "")}</td>
                 <td>${formatearMoneda(p.precioActual)}</td>
                 <td>${p.stockMinimo ?? 0}</td>
-                <td>
-                    ${p.activo
-                        ? '<span class="badge rounded-pill badge-soft-success">Activo</span>'
-                        : '<span class="badge rounded-pill badge-soft-danger">Inactivo</span>'}
-                </td>
+				<td>
+				    ${p.activo
+				        ? '<span class="badge badge-soft-success">Activo</span>'
+				        : '<span class="badge badge-soft-danger">Inactivo</span>'}
+				</td>
                 <td>
                     <div class="d-flex justify-content-center gap-2">
                         <button class="btn btn-sm btn-warning" onclick='editarProducto(${JSON.stringify(p)})'>✏️</button>
