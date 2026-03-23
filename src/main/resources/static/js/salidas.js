@@ -346,7 +346,7 @@ function limpiarFormularioSalida() {
         resultados.innerHTML = "";
     }
 
-    // Limpiar selects
+    
     const almacenSelect = document.getElementById("almacenSalida");
     if (almacenSelect) {
         almacenSelect.selectedIndex = 0;  // Opción vacía seleccionada
