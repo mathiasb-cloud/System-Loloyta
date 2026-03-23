@@ -44,8 +44,18 @@ public class SalidaServiceImpl implements SalidaService {
 
     @Override
     public Salida crear(Salida salida) {
+
+        if (salida.getAlmacenes() == null || salida.getAlmacenes().getId() == null) {
+            throw new RuntimeException("Debe seleccionar un almacén");
+        }
+
+        if (salida.getLocales() == null || salida.getLocales().getId() == null) {
+            throw new RuntimeException("Debe seleccionar un local destino");
+        }
+
         salida.setEstado("PENDIENTE");
         salida.setFecha(LocalDateTime.now());
+
         return salidaRepository.save(salida);
     }
 
@@ -56,6 +66,7 @@ public class SalidaServiceImpl implements SalidaService {
                 .orElseThrow(() -> new RuntimeException("Salida no encontrada"));
 
         salida.setAlmacenes(salidaActualizada.getAlmacenes());
+        salida.setLocales(salidaActualizada.getLocales());
         salida.setUsuario(salidaActualizada.getUsuario());
 
         return salidaRepository.save(salida);
@@ -63,6 +74,14 @@ public class SalidaServiceImpl implements SalidaService {
 
     @Override
     public void eliminar(Long id) {
+        Salida salida = salidaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Salida no encontrada"));
+
+        if (!"PENDIENTE".equals(salida.getEstado())) {
+            throw new RuntimeException("Solo se puede cancelar una salida en estado PENDIENTE");
+        }
+
+        detalleRepository.deleteBySalidaId(id);
         salidaRepository.deleteById(id);
     }
 

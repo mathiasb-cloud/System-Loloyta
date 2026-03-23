@@ -1,150 +1,361 @@
 let salidaId = null;
-	let productosSalidaGlobal = [];
+let productosSalidaGlobal = [];
 
-	async function initSalidas() {
-	    await cargarAlmacenesSalida();
-	    await cargarProductosSalida();
+async function initSalidas() {
+    await cargarAlmacenesSalida();
+    await cargarLocalesSalida();
+    await cargarProductosSalida();
 
-	    document.getElementById("buscadorSalida")
-	        ?.addEventListener("keyup", function() {
+    document.getElementById("buscadorSalida")
+        ?.addEventListener("keyup", function() {
 
-	            let texto = this.value.toLowerCase();
-	            let resultadosDiv = document.getElementById("resultadosSalida");
-	            resultadosDiv.innerHTML = "";
+            let texto = this.value.toLowerCase();
+            let resultadosDiv = document.getElementById("resultadosSalida");
+            resultadosDiv.innerHTML = "";
 
-	            if (texto.length === 0) return;
+            if (texto.length === 0) return;
 
-	            let filtrados = productosSalidaGlobal.filter(p =>
-	                p.nombre.toLowerCase().includes(texto)
-	            );
+            let filtrados = productosSalidaGlobal.filter(p =>
+                p.nombre.toLowerCase().includes(texto)
+            );
 
-	            filtrados.forEach(p => {
+            filtrados.forEach(p => {
+                let item = document.createElement("div");
+                item.className = "list-group-item list-group-item-action";
+                item.innerText = p.nombre;
 
-	                let item = document.createElement("div");
-	                item.className = "list-group-item list-group-item-action";
-	                item.innerText = p.nombre;
+                item.onclick = () => agregarProductoSalida(p);
 
-	                item.onclick = () => agregarProductoSalida(p);
+                resultadosDiv.appendChild(item);
+            });
+        });
+		
+		actualizarEstadoBotonesSalida();
+}
 
-	                resultadosDiv.appendChild(item);
-	            });
-	        });
-	}
+async function cargarAlmacenesSalida() {
+    let res = await fetch('/api/almacenes');
+    let data = await res.json();
 
-	async function cargarAlmacenesSalida() {
-	    let res = await fetch('/api/almacenes');
-	    let data = await res.json();
+    let select = document.getElementById("almacenSalida");
+    if (!select) return;
 
-	    let select = document.getElementById("almacenSalida");
-	    if (!select) return;
+    select.innerHTML = "";
 
-	    select.innerHTML = "";
+    data.forEach(a => {
+        select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`;
+    });
+}
 
-	    data.forEach(a => {
-	        select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`;
-	    });
-	}
+async function guardarOSobrescribirSalida() {
+    if (!salidaId) {
+        await crearSalida();
+    } else {
+        await guardarCambiosSalida();
+    }
+}
 
-	async function cargarProductosSalida() {
-	    let res = await fetch('/api/productos');
-	    let json = await res.json();
+async function cargarLocalesSalida() {
+    let res = await fetch('/api/locales');
+    let data = await res.json();
 
-	    productosSalidaGlobal = json.content || json || [];
-	}
+    let select = document.getElementById("localSalida");
+    if (!select) return;
 
-	function agregarProductoSalida(producto) {
+    select.innerHTML = `<option value="">Seleccione un local</option>`;
 
-	    let tabla = document.querySelector("#tablaSalida tbody");
+    data.forEach(local => {
+        select.innerHTML += `<option value="${local.id}">${local.nombre}</option>`;
+    });
+}
 
-	    let filas = tabla.querySelectorAll("tr");
+async function cargarProductosSalida() {
+    let res = await fetch('/api/productos');
+    let json = await res.json();
 
-	    for (let i = 0; i < filas.length; i++) {
-	        if (filas[i].dataset.id == producto.id) return;
-	    }
+    productosSalidaGlobal = json.content || json || [];
+}
 
-	    let fila = document.createElement("tr");
-	    fila.dataset.id = producto.id;
+function agregarProductoSalida(producto) {
+    let tabla = document.querySelector("#tablaSalida tbody");
+    let filas = tabla.querySelectorAll("tr");
 
-	    fila.innerHTML = `
-	        <td>${producto.categoria?.nombre || "N/A"}</td>
-	        <td>${producto.nombre}</td>
-	        <td>${producto.unidadMedida || "N/A"}</td>
-	        <td><input type="number" class="form-control" value="1"></td>
-	        <td><button class="btn btn-sm btn-danger" onclick="eliminarFilaSalida(this)">X</button></td>
-	    `;
+    for (let i = 0; i < filas.length; i++) {
+        if (filas[i].dataset.id == producto.id) return;
+    }
 
-	    tabla.appendChild(fila);
-	}
+    let fila = document.createElement("tr");
+    fila.dataset.id = producto.id;
 
-	function eliminarFilaSalida(btn) {
-	    btn.parentElement.parentElement.remove();
-	}
+    fila.innerHTML = `
+        <td>${producto.categoria?.nombre || "N/A"}</td>
+        <td>${producto.nombre}</td>
+        <td>${producto.unidadMedida || "N/A"}</td>
+        <td><input type="number" class="form-control" value="1" min="1"></td>
+        <td><button class="btn btn-sm btn-danger" onclick="eliminarFilaSalida(this)">X</button></td>
+    `;
 
-	async function crearSalida() {
+    tabla.appendChild(fila);
+}
 
-	    let res = await fetch('/api/salidas', {
-	        method: 'POST',
-	        headers: { 'Content-Type': 'application/json' },
-	        body: JSON.stringify({
-	            almacenes: { id: document.getElementById("almacenSalida").value },
-	            usuario: { id: 1 }
-	        })
-	    });
+function eliminarFilaSalida(btn) {
+    btn.parentElement.parentElement.remove();
+}
 
-	    let data = await res.json();
+async function crearSalida() {
+    let almacenId = document.getElementById("almacenSalida").value;
+    let localId = document.getElementById("localSalida").value;
 
-	    console.log("SALIDA CREADA:", data);
+    if (!almacenId) {
+        alert("Seleccione un almacén");
+        return;
+    }
 
-	    salidaId = data.id;
+    if (!localId) {
+        alert("Seleccione un local destino");
+        return;
+    }
 
-	    if (!salidaId) {
-	        alert("Error: no se creó la salida");
-	        return;
-	    }
+    let filas = document.querySelectorAll("#tablaSalida tbody tr");
+    if (filas.length === 0) {
+        alert("Agregue al menos un producto a la salida");
+        return;
+    }
 
-	    await guardarDetalleSalida();
-	}
+    let res = await fetch('/api/salidas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            almacenes: { id: Number(almacenId) },
+            locales: { id: Number(localId) },
+            usuario: { id: 1 }
+        })
+    });
 
-	async function guardarDetalleSalida() {
+    if (!res.ok) {
+        alert("No se pudo crear la salida");
+        return;
+    }
 
-	    let filas = document.querySelectorAll("#tablaSalida tbody tr");
+    let data = await res.json();
+    salidaId = data.id;
 
-	    for (let i = 0; i < filas.length; i++) {
+    if (!salidaId) {
+        alert("Error: no se creó la salida");
+        return;
+    }
 
-	        let input = filas[i].querySelector("input");
+    
+    try {
+        await guardarDetalleSalida();
+    } catch (error) {
+        
+        await fetch(`/api/salidas/${salidaId}`, { method: 'DELETE' });
+        salidaId = null;
+        alert("Error al guardar los detalles, la salida fue eliminada.");
+        return;
+    }
 
-	        let cantidad = input.value;
+    actualizarEstadoBotonesSalida();
 
-	        let res = await fetch('/api/detalle-salida', {
-	            method: 'POST',
-	            headers: { 'Content-Type': 'application/json' },
-	            body: JSON.stringify({
-	                salida: { id: salidaId },
-	                producto: { id: filas[i].dataset.id },
-	                cantidadDespacho: cantidad
-	            })
-	        });
+    alert("Salida guardada correctamente");
+}
 
-	        console.log("DETALLE:", await res.json());
-	    }
+async function guardarDetalleSalida() {
+    let filas = document.querySelectorAll("#tablaSalida tbody tr");
 
-	    alert("Detalle guardado");
-	}
+    for (let i = 0; i < filas.length; i++) {
+        let input = filas[i].querySelector("input");
+        let cantidad = input.value;
 
-	async function confirmarSalida() {
+        let res = await fetch('/api/detalle-salida', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                salida: { id: salidaId },
+                producto: { id: Number(filas[i].dataset.id) },
+                cantidadDespacho: Number(cantidad)
+            })
+        });
 
-	    if (!salidaId) {
-	        alert("Primero guarda la salida");
-	        return;
-	    }
+        if (!res.ok) {
+            alert("No se pudo guardar un detalle de la salida");
+            return;
+        }
 
-	    let res = await fetch(`/api/salidas/${salidaId}/confirmar`, {
-	        method: 'PATCH'
-	    });
+        console.log("DETALLE:", await res.json());
+    }
+}
 
-	    let data = await res.json();
+async function confirmarSalida() {
+    if (!salidaId) {
+        alert("Primero guarda la salida");
+        return;
+    }
 
-	    console.log("CONFIRMAR:", data);
+    let res = await fetch(`/api/salidas/${salidaId}/confirmar`, {
+        method: 'PATCH'
+    });
 
-	    alert("Salida confirmada");
-	}
+    if (!res.ok) {
+        let mensaje = "No se pudo confirmar la salida";
+
+        try {
+            mensaje = await res.text();
+        } catch (e) {}
+
+        alert(mensaje);
+        return;
+    }
+
+    let data = await res.json();
+    console.log("CONFIRMAR:", data);
+
+    alert("Salida confirmada");
+
+	salidaId = null;  // Restablecer la salida
+	actualizarEstadoBotonesSalida();  // Actualizar los botones visualmente
+}
+
+function actualizarEstadoBotonesSalida() {
+    const btnGuardar = document.getElementById("btnGuardarSalida");
+    const textoGuardar = document.getElementById("textoBtnGuardarSalida");
+    const btnConfirmar = document.getElementById("btnConfirmarSalida");
+    const btnCancelar = document.getElementById("btnCancelarSalida");
+
+    const yaGuardada = !!salidaId;
+
+    if (textoGuardar) {
+        textoGuardar.textContent = yaGuardada ? "Guardar cambios" : "Guardar Salida";
+    }
+
+    if (btnConfirmar) {
+        btnConfirmar.disabled = !yaGuardada;
+    }
+
+    if (btnCancelar) {
+        btnCancelar.disabled = !yaGuardada;
+    }
+}
+
+
+
+async function guardarCambiosSalida() {
+    let almacenId = document.getElementById("almacenSalida").value;
+    let localId = document.getElementById("localSalida").value;
+
+    if (!almacenId) {
+        alert("Seleccione un almacén");
+        return;
+    }
+
+    if (!localId) {
+        alert("Seleccione un local destino");
+        return;
+    }
+
+    let filas = document.querySelectorAll("#tablaSalida tbody tr");
+    if (filas.length === 0) {
+        alert("Agregue al menos un producto a la salida");
+        return;
+    }
+
+    let resSalida = await fetch(`/api/salidas/${salidaId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            almacenes: { id: Number(almacenId) },
+            locales: { id: Number(localId) },
+            usuario: { id: 1 }
+        })
+    });
+
+    if (!resSalida.ok) {
+        alert("No se pudo actualizar la salida");
+        return;
+    }
+
+    let resBorrarDetalle = await fetch(`/api/detalle-salida/salida/${salidaId}`, {
+        method: 'DELETE'
+    });
+
+    if (!resBorrarDetalle.ok) {
+        alert("No se pudo actualizar el detalle de la salida");
+        return;
+    }
+
+    await guardarDetalleSalida();
+
+    alert("Cambios guardados correctamente");
+}
+
+
+function confirmarCancelacionSalida() {
+    if (!salidaId) {
+        alert("No hay salida pendiente para cancelar");
+        return;
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById("modalCancelarSalida"));
+    modal.show();
+}
+
+
+async function cancelarSalidaPendiente() {
+    if (!salidaId) {
+        return;
+    }
+
+    let res = await fetch(`/api/salidas/${salidaId}`, {
+        method: 'DELETE'
+    });
+
+    if (!res.ok) {
+        alert("No se pudo cancelar la salida");
+        return;
+    }
+
+    const modalEl = document.getElementById("modalCancelarSalida");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) {
+        modal.hide();
+    }
+
+    limpiarFormularioSalida();
+
+    alert("Salida pendiente cancelada");
+}
+
+
+
+function limpiarFormularioSalida() {
+    salidaId = null;
+
+    const tbody = document.querySelector("#tablaSalida tbody");
+    if (tbody) {
+        tbody.innerHTML = "";
+    }
+
+    const buscador = document.getElementById("buscadorSalida");
+    if (buscador) {
+        buscador.value = "";
+    }
+
+    const resultados = document.getElementById("resultadosSalida");
+    if (resultados) {
+        resultados.innerHTML = "";
+    }
+
+    // Limpiar selects
+    const almacenSelect = document.getElementById("almacenSalida");
+    if (almacenSelect) {
+        almacenSelect.selectedIndex = 0;  // Opción vacía seleccionada
+    }
+
+    const localSelect = document.getElementById("localSalida");
+    if (localSelect) {
+        localSelect.selectedIndex = 0;  // Opción vacía seleccionada
+    }
+
+    actualizarEstadoBotonesSalida();
+}

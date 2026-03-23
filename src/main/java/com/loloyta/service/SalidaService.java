@@ -1,9 +1,9 @@
 package com.loloyta.service;
 
-import com.loloyta.model.Salida;
-
 import java.util.List;
 import java.util.Optional;
+
+import com.loloyta.model.Salida;
 
 public interface SalidaService {
 
@@ -13,9 +13,9 @@ public interface SalidaService {
 
     Salida crear(Salida salida);
 
-    Salida confirmar(Long id);
-
-    Salida actualizar(Long id, Salida salida);
+    Salida actualizar(Long id, Salida salidaActualizada);
 
     void eliminar(Long id);
+
+    Salida confirmar(Long id);
 }

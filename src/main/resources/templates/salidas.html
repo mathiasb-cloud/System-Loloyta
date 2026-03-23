@@ -11,6 +11,11 @@
             <label class="form-label">Almacén</label>
             <select id="almacenSalida" class="form-select"></select>
         </div>
+
+        <div class="col-md-6 col-lg-4">
+            <label class="form-label">Local destino</label>
+            <select id="localSalida" class="form-select"></select>
+        </div>
     </div>
 </div>
 
@@ -55,13 +60,18 @@
 </div>
 
 <div class="d-flex flex-wrap gap-2">
-    <button onclick="crearSalida()" class="btn btn-success btn-icon">
+    <button id="btnGuardarSalida" onclick="guardarOSobrescribirSalida()" class="btn btn-success btn-icon">
         <span>💾</span>
-        <span>Guardar Salida</span>
+        <span id="textoBtnGuardarSalida">Guardar Salida</span>
     </button>
 
-    <button onclick="confirmarSalida()" class="btn btn-danger btn-icon">
+    <button id="btnConfirmarSalida" onclick="confirmarSalida()" class="btn btn-danger btn-icon" disabled>
         <span>✔</span>
         <span>Confirmar Salida</span>
+    </button>
+
+    <button id="btnCancelarSalida" onclick="confirmarCancelacionSalida()" class="btn btn-outline-secondary btn-icon" disabled>
+        <span>🗑</span>
+        <span>Cancelar</span>
     </button>
 </div>

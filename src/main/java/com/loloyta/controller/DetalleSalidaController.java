@@ -1,10 +1,7 @@
 package com.loloyta.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.loloyta.model.DetalleSalida;
 import com.loloyta.repository.DetalleSalidaRepository;
@@ -19,5 +16,10 @@ public class DetalleSalidaController {
     @PostMapping
     public DetalleSalida guardar(@RequestBody DetalleSalida detalle) {
         return repository.save(detalle);
+    }
+
+    @DeleteMapping("/salida/{salidaId}")
+    public void eliminarPorSalida(@PathVariable Long salidaId) {
+        repository.deleteBySalidaId(salidaId);
     }
 }

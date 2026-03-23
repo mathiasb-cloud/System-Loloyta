@@ -29,6 +29,11 @@ public class VistaController {
     public String productos() {
         return "productos";
     }
+    
+    @GetMapping("/movimientos/detalle")
+    public String detalleMovimiento() {
+        return "detalle-movimiento";
+    }
 
 
 }

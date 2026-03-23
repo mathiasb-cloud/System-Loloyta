@@ -12,7 +12,6 @@ async function cargarMovimientos() {
     tbody.innerHTML = "";
 
     data.forEach((m, index) => {
-
         let fechaObj = new Date(m.fecha);
 
         let fecha = fechaObj.toLocaleDateString('es-PE', {
@@ -33,8 +32,6 @@ async function cargarMovimientos() {
 
         let row = document.createElement("tr");
         row.classList.add("fade-in-row");
-
-        // 🔥 aquí sí existe index
         row.style.animationDelay = `${index * 0.05}s`;
 
         row.innerHTML = `
@@ -51,13 +48,13 @@ async function cargarMovimientos() {
 
             <td>
                 <span class="fw-semibold">${m.totalItems}</span>
-                <small class="text-muted">productos</small>
+                <small class="text-muted"> productos</small>
             </td>
 
             <td>
                 <button 
                     class="btn btn-sm btn-outline-primary"
-                    onclick="verMovimiento(${m.id})"
+                    onclick="verMovimiento('${m.referencia}')"
                 >
                     <i class="bi bi-eye"></i> Ver
                 </button>
@@ -66,4 +63,8 @@ async function cargarMovimientos() {
 
         tbody.appendChild(row);
     });
+}
+
+function verMovimiento(referencia) {
+    window.location.href = `/movimientos/detalle?ref=${encodeURIComponent(referencia)}`;
 }

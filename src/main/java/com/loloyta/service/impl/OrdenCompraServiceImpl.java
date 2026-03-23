@@ -55,12 +55,10 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
 
     @Override
     public OrdenCompra actualizar(Long id, OrdenCompra ordenActualizada) {
-
         OrdenCompra orden = ordenCompraRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
 
         orden.setMetodoPago(ordenActualizada.getMetodoPago());
-        orden.setMontoTotal(ordenActualizada.getMontoTotal());
         orden.setAlmacenes(ordenActualizada.getAlmacenes());
 
         return ordenCompraRepository.save(orden);
@@ -76,56 +74,72 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
 
         if (estado.equals("CONFIRMADA")) {
 
-        	List<DetalleOrdenCompra> detalles = detalleRepository.findByOrdenCompraId(id);
+            List<DetalleOrdenCompra> detalles = detalleRepository.findByOrdenCompraId(id);
 
-        	for (DetalleOrdenCompra d : detalles) {
+            BigDecimal total = BigDecimal.ZERO;
 
-        	    Producto producto = d.getProducto();
+            for (DetalleOrdenCompra d : detalles) {
+                BigDecimal cantidad = d.getCantidad() != null ? d.getCantidad() : BigDecimal.ZERO;
+                BigDecimal precio = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
+                BigDecimal importe = cantidad.multiply(precio);
 
-        	    if (producto != null && d.getPrecioUnitario() != null) {
-        	        producto.setPrecioActual(d.getPrecioUnitario().doubleValue());
-        	        productoRepository.save(producto);
-        	    }
+                d.setImporteTotal(importe);
+                detalleRepository.save(d);
 
-        	    Stock stock = stockRepository
-        	            .findByAlmacenesIdAndProductoId(
-        	                    orden.getAlmacenes().getId(),
-        	                    d.getProducto().getId()
-        	            )
-        	            .orElse(null);
+                total = total.add(importe);
+            }
 
-        	    if (stock == null) {
-        	        stock = new Stock();
-        	        stock.setAlmacenes(orden.getAlmacenes());
-        	        stock.setProducto(d.getProducto());
-        	        stock.setCantidad(BigDecimal.ZERO);
-        	    }
+            orden.setMontoTotal(total.doubleValue());
 
-        	    if (stock.getCantidad() == null) {
-        	        stock.setCantidad(BigDecimal.ZERO);
-        	    }
+            for (DetalleOrdenCompra d : detalles) {
 
-        	    stock.setCantidad(
-        	            stock.getCantidad().add(d.getCantidad())
-        	    );
+                Producto producto = d.getProducto();
 
-        	    stock.setUltimaActualizacion(LocalDateTime.now());
+                if (producto != null && d.getPrecioUnitario() != null) {
+                    producto.setPrecioActual(d.getPrecioUnitario().doubleValue());
+                    productoRepository.save(producto);
+                }
 
-        	    stockRepository.save(stock);
+                Stock stock = stockRepository
+                        .findByAlmacenesIdAndProductoId(
+                                orden.getAlmacenes().getId(),
+                                d.getProducto().getId()
+                        )
+                        .orElse(null);
 
-        	    Movimiento mov = new Movimiento();
+                if (stock == null) {
+                    stock = new Stock();
+                    stock.setAlmacenes(orden.getAlmacenes());
+                    stock.setProducto(d.getProducto());
+                    stock.setCantidad(BigDecimal.ZERO);
+                }
 
-        	    mov.setTipo("INGRESO");
-        	    mov.setOrdenCompra(orden);
-        	    mov.setCantidad(d.getCantidad());
-        	    mov.setFecha(LocalDateTime.now());
-        	    mov.setUsuario(orden.getUsuario());
-        	    mov.setAlmacen(orden.getAlmacenes());
+                if (stock.getCantidad() == null) {
+                    stock.setCantidad(BigDecimal.ZERO);
+                }
 
-        	    movimientoRepository.save(mov);
-        	}
+                stock.setCantidad(
+                        stock.getCantidad().add(d.getCantidad())
+                );
+
+                stock.setUltimaActualizacion(LocalDateTime.now());
+
+                stockRepository.save(stock);
+
+                Movimiento mov = new Movimiento();
+                mov.setTipo("INGRESO");
+                mov.setOrdenCompra(orden);
+                mov.setCantidad(d.getCantidad());
+                mov.setFecha(LocalDateTime.now());
+                mov.setUsuario(orden.getUsuario());
+                mov.setAlmacen(orden.getAlmacenes());
+                mov.setProducto(d.getProducto());
+
+                movimientoRepository.save(mov);
+            }
         }
 
         return ordenCompraRepository.save(orden);
     }
+    
 }

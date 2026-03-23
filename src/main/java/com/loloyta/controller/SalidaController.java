@@ -1,12 +1,7 @@
 package com.loloyta.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.loloyta.model.Salida;
 import com.loloyta.service.SalidaService;
@@ -21,6 +16,16 @@ public class SalidaController {
     @PostMapping
     public Salida crear(@RequestBody Salida salida) {
         return salidaService.crear(salida);
+    }
+
+    @PutMapping("/{id}")
+    public Salida actualizar(@PathVariable Long id, @RequestBody Salida salida) {
+        return salidaService.actualizar(id, salida);
+    }
+
+    @DeleteMapping("/{id}")
+    public void eliminar(@PathVariable Long id) {
+        salidaService.eliminar(id);
     }
 
     @PatchMapping("/{id}/confirmar")
