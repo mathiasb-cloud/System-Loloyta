@@ -32,15 +32,16 @@ function renderDetalleMovimiento(m) {
     const productos = Array.isArray(m.productos) ? m.productos : [];
 
     let totalCalculadoJs = 0;
+    const esIngreso = m.tipo === "INGRESO";
 
-	const filasProductos = productos.map((item, index) => {
-	    const cantidad = Number(item.cantidad || 0);
-	    const precio = Number(item.precioActual || 0);
+    const filasProductos = productos.map((item, index) => {
+        const cantidad = Number(item.cantidad || 0);
+        const precio = Number(item.precioActual || 0);
 
-	    const importeBackend = Number(item.importe || 0);
-	    const importe = importeBackend > 0 ? importeBackend : (cantidad * precio);
+        const importeBackend = Number(item.importe || 0);
+        const importe = importeBackend > 0 ? importeBackend : (cantidad * precio);
 
-	    totalCalculadoJs += importe;
+        totalCalculadoJs += importe;
 
         return `
             <tr>
@@ -53,6 +54,7 @@ function renderDetalleMovimiento(m) {
                 <td class="text-center">${item.unidadMedida ?? "-"}</td>
                 <td class="text-center">${formatearNumero(cantidad)}</td>
                 <td class="text-end">${formatearMoneda(precio)}</td>
+                ${esIngreso ? `<td class="text-center">${item.metodoPago ?? "-"}</td>` : ""}
                 <td class="text-end fw-semibold">${formatearMoneda(importe)}</td>
             </tr>
         `;
@@ -95,7 +97,7 @@ function renderDetalleMovimiento(m) {
                         <div class="border rounded-4 p-3 bg-light text-md-end">
                             <small class="text-muted d-block">Importe total calculado</small>
                             <div class="fs-3 fw-bold text-primary">${formatearMoneda(totalCalculadoJs)}</div>
-                            <small class="text-muted">Calculado en frontend con JavaScript</small>
+                            <small class="text-muted">Revisa</small>
                         </div>
                     </div>
                 </div>
@@ -120,13 +122,14 @@ function renderDetalleMovimiento(m) {
                             <th style="width: 110px;">Unidad</th>
                             <th style="width: 120px;">Cantidad</th>
                             <th style="width: 140px;">Precio</th>
+                            ${esIngreso ? `<th style="width: 160px;">Método de Pago</th>` : ""}
                             <th style="width: 150px;">Importe</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${filasProductos || `
                             <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">
+                                <td colspan="${esIngreso ? 8 : 7}" class="text-center py-4 text-muted">
                                     No hay productos asociados a este movimiento.
                                 </td>
                             </tr>
@@ -134,7 +137,7 @@ function renderDetalleMovimiento(m) {
                     </tbody>
                     <tfoot class="table-light">
                         <tr>
-                            <th colspan="6" class="text-end">Importe Total</th>
+                            <th colspan="${esIngreso ? 7 : 6}" class="text-end">Importe Total</th>
                             <th class="text-end fs-6">${formatearMoneda(totalCalculadoJs)}</th>
                         </tr>
                     </tfoot>
@@ -153,19 +156,15 @@ function renderDocumentoRelacionado(m) {
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <small class="text-muted d-block">ID Orden</small>
                             <strong>${m.ordenCompraId ?? "-"}</strong>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <small class="text-muted d-block">Fecha</small>
                             <strong>${formatearFechaHora(m.ordenCompraFecha)}</strong>
                         </div>
-                        <div class="col-md-3">
-                            <small class="text-muted d-block">Método de pago</small>
-                            <strong>${m.ordenCompraMetodoPago ?? "-"}</strong>
-                        </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <small class="text-muted d-block">Estado</small>
                             <strong>${m.ordenCompraEstado ?? "-"}</strong>
                         </div>

@@ -6,18 +6,14 @@
 </div>
 
 <div class="main-card p-3 mb-4">
-    <div class="row g-3">
+    <div class="row g-3 align-items-end">
         <div class="col-md-6 col-lg-4">
             <label class="form-label">Almacén</label>
             <select id="almacenSelect" class="form-select"></select>
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <label class="form-label">Método de Pago</label>
-            <select id="metodoPago" class="form-select">
-                <option value="YAPE">YAPE</option>
-                <option value="EFECTIVO">EFECTIVO</option>
-            </select>
+        <div class="col-md-6 col-lg-8">
+            <div id="estadoOrdenBox" class="small text-muted"></div>
         </div>
     </div>
 </div>
@@ -27,23 +23,24 @@
 
     <div class="row g-3">
         <div class="col-lg-6">
-            <div class="search-box">
+            <div class="search-box position-relative">
                 <input
                     type="text"
                     id="buscador"
                     class="form-control"
-                    placeholder="Escribe producto..."
+                    placeholder="Buscar producto por nombre..."
+                    autocomplete="off"
                 >
             </div>
+            <div id="resultados" class="list-group shadow-sm mt-2 resultados-buscador-orden"></div>
         </div>
     </div>
-
-    <div id="resultados" class="list-group shadow-sm mt-3" style="max-width: 500px;"></div>
 </div>
 
 <div class="main-card p-3 mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h5 class="mb-0">Lista de Compra</h5>
+        <div id="resumenOrden" class="small text-muted"></div>
     </div>
 
     <div class="table-card">
@@ -54,6 +51,8 @@
                         <th>Producto</th>
                         <th style="width:140px;">Cantidad</th>
                         <th style="width:140px;">Precio</th>
+                        <th style="width:180px;">Método de Pago</th>
+                        <th style="width:140px;">Importe</th>
                         <th style="width:90px;">Acción</th>
                     </tr>
                 </thead>
@@ -64,13 +63,18 @@
 </div>
 
 <div class="d-flex flex-wrap gap-2">
-    <button onclick="crearOrden()" class="btn btn-success btn-icon">
-        <span>💾</span>
+    <button id="btnGuardarOrden" onclick="guardarOrden()" class="btn btn-success btn-icon">
+        <i class="bi bi-save me-2"></i>
         <span>Guardar Orden</span>
     </button>
 
-    <button onclick="confirmarOrden()" class="btn btn-primary btn-icon">
-        <span>✔</span>
+    <button id="btnConfirmarOrden" onclick="confirmarOrden()" class="btn btn-primary btn-icon">
+        <i class="bi bi-check2-circle me-2"></i>
         <span>Confirmar Orden</span>
+    </button>
+
+    <button id="btnCancelarOrden" onclick="cancelarOrden()" class="btn btn-outline-secondary btn-icon">
+        <i class="bi bi-x-circle me-2"></i>
+        <span>Cancelar</span>
     </button>
 </div>

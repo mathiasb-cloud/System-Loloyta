@@ -27,17 +27,21 @@ public class DetalleOrdenCompra {
 
     @Column(name = "importe_total")
     private BigDecimal importeTotal;
+    
+    @Column(name = "metodo_pago")
+    private String metodoPago;
 
     public DetalleOrdenCompra() {
     }
 
 	public DetalleOrdenCompra(OrdenCompra ordenCompra, Producto producto, BigDecimal cantidad,
-			BigDecimal precioUnitario, BigDecimal importeTotal) {
+			BigDecimal precioUnitario, BigDecimal importeTotal, String metodoPago) {
 		this.ordenCompra = ordenCompra;
 		this.producto = producto;
 		this.cantidad = cantidad;
 		this.precioUnitario = precioUnitario;
 		this.importeTotal = importeTotal;
+		this.metodoPago = metodoPago;
 	}
 
 	public Long getId() {
@@ -87,7 +91,17 @@ public class DetalleOrdenCompra {
 	public void setImporteTotal(BigDecimal importeTotal) {
 		this.importeTotal = importeTotal;
 	}
+
+	public String getMetodoPago() {
+		return metodoPago;
+	}
+
+	public void setMetodoPago(String metodoPago) {
+		this.metodoPago = metodoPago;
+	}
     
+	
+	
     
     
 

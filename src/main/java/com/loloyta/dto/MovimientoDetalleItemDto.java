@@ -14,13 +14,14 @@ public class MovimientoDetalleItemDto {
     private Double precioActual;
     private BigDecimal cantidad;
     private BigDecimal importe;
+    private String metodoPago;
 
     public MovimientoDetalleItemDto() {
     }
 
     public MovimientoDetalleItemDto(Long productoId, String productoNombre, String descripcion, String categoria,
                                     String unidadMedida, Double stockMinimo, Boolean activo, Double precioActual,
-                                    BigDecimal cantidad, BigDecimal importe) {
+                                    BigDecimal cantidad, BigDecimal importe, String metodoPago) {
         this.productoId = productoId;
         this.productoNombre = productoNombre;
         this.descripcion = descripcion;
@@ -31,6 +32,7 @@ public class MovimientoDetalleItemDto {
         this.precioActual = precioActual;
         this.cantidad = cantidad;
         this.importe = importe;
+        this.metodoPago = metodoPago;
     }
 
     public Long getProductoId() {
@@ -111,5 +113,13 @@ public class MovimientoDetalleItemDto {
 
     public void setImporte(BigDecimal importe) {
         this.importe = importe;
+    }
+
+    public String getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(String metodoPago) {
+        this.metodoPago = metodoPago;
     }
 }

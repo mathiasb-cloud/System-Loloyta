@@ -39,4 +39,9 @@ public class OrdenCompraController {
     public OrdenCompra cambiarEstado(@PathVariable Long id, @RequestParam String estado) {
         return ordenCompraService.cambiarEstado(id, estado);
     }
+
+    @DeleteMapping("/{id}")
+    public void eliminar(@PathVariable Long id) {
+        ordenCompraService.eliminar(id);
+    }
 }

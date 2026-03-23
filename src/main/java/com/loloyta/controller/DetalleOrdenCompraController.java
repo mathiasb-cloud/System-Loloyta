@@ -39,4 +39,9 @@ public class DetalleOrdenCompraController {
     public void eliminar(@PathVariable Long id) {
         service.eliminar(id);
     }
+
+    @DeleteMapping("/orden/{ordenId}")
+    public void eliminarPorOrden(@PathVariable Long ordenId) {
+        service.eliminarPorOrdenId(ordenId);
+    }
 }

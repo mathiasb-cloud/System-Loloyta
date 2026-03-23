@@ -6,7 +6,7 @@
 </div>
 
 <div class="main-card p-3 mb-4">
-    <div class="row g-3">
+    <div class="row g-3 align-items-end salida-top-row">
         <div class="col-md-6 col-lg-4">
             <label class="form-label">Almacén</label>
             <select id="almacenSalida" class="form-select"></select>
@@ -16,6 +16,41 @@
             <label class="form-label">Local destino</label>
             <select id="localSalida" class="form-select"></select>
         </div>
+
+        <div class="col-lg-4">
+            <div id="estadoSalidaBox" class="small text-muted estado-salida-box"></div>
+        </div>
+    </div>
+
+    <div class="flujo-salida-wrap mt-4">
+        <div class="flujo-salida-card">
+            <div class="flujo-salida-bloque flujo-origen">
+                <div class="flujo-salida-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="flujo-salida-content">
+                    <div class="flujo-salida-label">Origen</div>
+                    <div id="flujoAlmacenNombre" class="flujo-salida-value">Seleccione almacén</div>
+                </div>
+            </div>
+
+            <div class="flujo-salida-centro">
+                <div class="flujo-salida-linea"></div>
+                <div class="flujo-salida-arrow-circle">
+                    <i class="bi bi-arrow-right"></i>
+                </div>
+            </div>
+
+            <div class="flujo-salida-bloque flujo-destino">
+                <div class="flujo-salida-icon">
+                    <i class="bi bi-shop"></i>
+                </div>
+                <div class="flujo-salida-content">
+                    <div class="flujo-salida-label">Destino</div>
+                    <div id="flujoLocalNombre" class="flujo-salida-value">Seleccione local</div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -24,22 +59,26 @@
 
     <div class="row g-3">
         <div class="col-lg-6">
-            <div class="search-box">
+            <div class="search-box position-relative">
                 <input
                     type="text"
                     id="buscadorSalida"
                     class="form-control"
-                    placeholder="Escribe producto..."
+                    placeholder="Buscar producto por nombre..."
+                    autocomplete="off"
                 >
             </div>
+
+            <div id="resultadosSalida" class="list-group shadow-sm mt-2 resultados-buscador-salida"></div>
         </div>
     </div>
-
-    <div id="resultadosSalida" class="list-group shadow-sm mt-3" style="max-width: 500px;"></div>
 </div>
 
 <div class="main-card p-3 mb-4">
-    <h5 class="mb-3">Lista de Salida</h5>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="mb-0">Lista de Salida</h5>
+        <div id="resumenSalida" class="small text-muted"></div>
+    </div>
 
     <div class="table-card">
         <div class="table-responsive">
@@ -49,8 +88,8 @@
                         <th>Categoría</th>
                         <th>Producto</th>
                         <th>Unidad</th>
-                        <th>Cant. Despacho</th>
-                        <th>Acción</th>
+                        <th style="width: 160px;">Cant. Despacho</th>
+                        <th style="width: 90px;">Acción</th>
                     </tr>
                 </thead>
                 <tbody class="text-center"></tbody>
@@ -61,17 +100,17 @@
 
 <div class="d-flex flex-wrap gap-2">
     <button id="btnGuardarSalida" onclick="guardarOSobrescribirSalida()" class="btn btn-success btn-icon">
-        <span>💾</span>
+        <i class="bi bi-save me-2"></i>
         <span id="textoBtnGuardarSalida">Guardar Salida</span>
     </button>
 
     <button id="btnConfirmarSalida" onclick="confirmarSalida()" class="btn btn-danger btn-icon" disabled>
-        <span>✔</span>
+        <i class="bi bi-check2-circle me-2"></i>
         <span>Confirmar Salida</span>
     </button>
 
     <button id="btnCancelarSalida" onclick="confirmarCancelacionSalida()" class="btn btn-outline-secondary btn-icon" disabled>
-        <span>🗑</span>
+        <i class="bi bi-x-circle me-2"></i>
         <span>Cancelar</span>
     </button>
 </div>

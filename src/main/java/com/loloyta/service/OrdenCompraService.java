@@ -17,4 +17,5 @@ public interface OrdenCompraService {
 
     OrdenCompra cambiarEstado(Long id, String estado);
 
+    void eliminar(Long id);
 }

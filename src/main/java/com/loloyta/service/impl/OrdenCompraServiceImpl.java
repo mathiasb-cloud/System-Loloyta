@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.loloyta.model.DetalleOrdenCompra;
 import com.loloyta.model.Movimiento;
@@ -25,22 +26,23 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
 
     @Autowired
     private OrdenCompraRepository ordenCompraRepository;
-    
+
     @Autowired
     private ProductoRepository productoRepository;
-    
+
     @Autowired
     private DetalleOrdenCompraRepository detalleRepository;
 
     @Autowired
     private StockRepository stockRepository;
 
+    @Autowired
+    private MovimientoRepository movimientoRepository;
+
     @Override
     public List<OrdenCompra> listar() {
         return ordenCompraRepository.findAll();
     }
-    @Autowired
-    private MovimientoRepository movimientoRepository;
 
     @Override
     public Optional<OrdenCompra> obtenerPorId(Long id) {
@@ -49,7 +51,13 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
 
     @Override
     public OrdenCompra crear(OrdenCompra orden) {
-        orden.setEstado("PENDIENTE"); 
+        orden.setEstado("PENDIENTE");
+        if (orden.getFecha() == null) {
+            orden.setFecha(LocalDateTime.now());
+        }
+        if (orden.getMontoTotal() == null) {
+            orden.setMontoTotal(0.0);
+        }
         return ordenCompraRepository.save(orden);
     }
 
@@ -58,88 +66,117 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
         OrdenCompra orden = ordenCompraRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
 
-        orden.setMetodoPago(ordenActualizada.getMetodoPago());
+        if (!"PENDIENTE".equalsIgnoreCase(orden.getEstado())) {
+            throw new RuntimeException("Solo se puede editar una orden en estado PENDIENTE");
+        }
+
         orden.setAlmacenes(ordenActualizada.getAlmacenes());
+        orden.setUsuario(ordenActualizada.getUsuario());
 
         return ordenCompraRepository.save(orden);
     }
 
     @Override
+    @Transactional
     public OrdenCompra cambiarEstado(Long id, String estado) {
-
         OrdenCompra orden = ordenCompraRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
 
-        orden.setEstado(estado);
+        if ("CONFIRMADA".equalsIgnoreCase(orden.getEstado())) {
+            return orden;
+        }
 
-        if (estado.equals("CONFIRMADA")) {
+        if (!"CONFIRMADA".equalsIgnoreCase(estado)) {
+            orden.setEstado(estado);
+            return ordenCompraRepository.save(orden);
+        }
 
-            List<DetalleOrdenCompra> detalles = detalleRepository.findByOrdenCompraId(id);
+        List<DetalleOrdenCompra> detalles = detalleRepository.findByOrdenCompraId(id);
 
-            BigDecimal total = BigDecimal.ZERO;
+        if (detalles.isEmpty()) {
+            throw new RuntimeException("La orden no tiene productos para confirmar");
+        }
 
-            for (DetalleOrdenCompra d : detalles) {
-                BigDecimal cantidad = d.getCantidad() != null ? d.getCantidad() : BigDecimal.ZERO;
-                BigDecimal precio = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
-                BigDecimal importe = cantidad.multiply(precio);
+        BigDecimal total = BigDecimal.ZERO;
 
-                d.setImporteTotal(importe);
-                detalleRepository.save(d);
+        for (DetalleOrdenCompra d : detalles) {
+            BigDecimal cantidad = d.getCantidad() != null ? d.getCantidad() : BigDecimal.ZERO;
+            BigDecimal precio = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
 
-                total = total.add(importe);
+            if (cantidad.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new RuntimeException("La cantidad debe ser mayor a cero");
             }
 
-            orden.setMontoTotal(total.doubleValue());
-
-            for (DetalleOrdenCompra d : detalles) {
-
-                Producto producto = d.getProducto();
-
-                if (producto != null && d.getPrecioUnitario() != null) {
-                    producto.setPrecioActual(d.getPrecioUnitario().doubleValue());
-                    productoRepository.save(producto);
-                }
-
-                Stock stock = stockRepository
-                        .findByAlmacenesIdAndProductoId(
-                                orden.getAlmacenes().getId(),
-                                d.getProducto().getId()
-                        )
-                        .orElse(null);
-
-                if (stock == null) {
-                    stock = new Stock();
-                    stock.setAlmacenes(orden.getAlmacenes());
-                    stock.setProducto(d.getProducto());
-                    stock.setCantidad(BigDecimal.ZERO);
-                }
-
-                if (stock.getCantidad() == null) {
-                    stock.setCantidad(BigDecimal.ZERO);
-                }
-
-                stock.setCantidad(
-                        stock.getCantidad().add(d.getCantidad())
-                );
-
-                stock.setUltimaActualizacion(LocalDateTime.now());
-
-                stockRepository.save(stock);
-
-                Movimiento mov = new Movimiento();
-                mov.setTipo("INGRESO");
-                mov.setOrdenCompra(orden);
-                mov.setCantidad(d.getCantidad());
-                mov.setFecha(LocalDateTime.now());
-                mov.setUsuario(orden.getUsuario());
-                mov.setAlmacen(orden.getAlmacenes());
-                mov.setProducto(d.getProducto());
-
-                movimientoRepository.save(mov);
+            if (precio.compareTo(BigDecimal.ZERO) < 0) {
+                throw new RuntimeException("El precio no puede ser negativo");
             }
+
+            BigDecimal importe = cantidad.multiply(precio);
+            d.setImporteTotal(importe);
+            detalleRepository.save(d);
+
+            total = total.add(importe);
+        }
+
+        orden.setMontoTotal(total.doubleValue());
+        orden.setEstado("CONFIRMADA");
+
+        for (DetalleOrdenCompra d : detalles) {
+            Producto producto = d.getProducto();
+
+            if (producto != null && d.getPrecioUnitario() != null) {
+                producto.setPrecioActual(d.getPrecioUnitario().doubleValue());
+                productoRepository.save(producto);
+            }
+
+            Stock stock = stockRepository
+                    .findByAlmacenesIdAndProductoId(
+                            orden.getAlmacenes().getId(),
+                            d.getProducto().getId()
+                    )
+                    .orElse(null);
+
+            if (stock == null) {
+                stock = new Stock();
+                stock.setAlmacenes(orden.getAlmacenes());
+                stock.setProducto(d.getProducto());
+                stock.setCantidad(BigDecimal.ZERO);
+            }
+
+            if (stock.getCantidad() == null) {
+                stock.setCantidad(BigDecimal.ZERO);
+            }
+
+            stock.setCantidad(stock.getCantidad().add(d.getCantidad()));
+            stock.setUltimaActualizacion(LocalDateTime.now());
+            stockRepository.save(stock);
+
+            Movimiento mov = new Movimiento();
+            mov.setTipo("INGRESO");
+            mov.setOrdenCompra(orden);
+            mov.setCantidad(d.getCantidad());
+            mov.setFecha(LocalDateTime.now());
+            mov.setUsuario(orden.getUsuario());
+            mov.setAlmacen(orden.getAlmacenes());
+            mov.setProducto(d.getProducto());
+
+            movimientoRepository.save(mov);
         }
 
         return ordenCompraRepository.save(orden);
     }
-    
+
+    @Override
+    @Transactional
+    public void eliminar(Long id) {
+        OrdenCompra orden = ordenCompraRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
+
+        if (!"PENDIENTE".equalsIgnoreCase(orden.getEstado())) {
+            throw new RuntimeException("Solo se puede eliminar una orden en estado PENDIENTE");
+        }
+
+        detalleRepository.deleteByOrdenCompraId(id);
+        ordenCompraRepository.deleteById(id);
+    }
 }

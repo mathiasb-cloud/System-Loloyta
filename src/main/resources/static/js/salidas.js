@@ -5,6 +5,10 @@ async function initSalidas() {
     await cargarAlmacenesSalida();
     await cargarLocalesSalida();
     await cargarProductosSalida();
+	document.getElementById("almacenSalida")?.addEventListener("change", actualizarFlujoSalidaVisual);
+	document.getElementById("localSalida")?.addEventListener("change", actualizarFlujoSalidaVisual);
+
+	
 
     document.getElementById("buscadorSalida")
         ?.addEventListener("keyup", function() {
@@ -31,6 +35,7 @@ async function initSalidas() {
         });
 		
 		actualizarEstadoBotonesSalida();
+		actualizarFlujoSalidaVisual();
 }
 
 async function cargarAlmacenesSalida() {
@@ -349,13 +354,66 @@ function limpiarFormularioSalida() {
     
     const almacenSelect = document.getElementById("almacenSalida");
     if (almacenSelect) {
-        almacenSelect.selectedIndex = 0;  // Opción vacía seleccionada
+        almacenSelect.selectedIndex = 0;  
     }
 
     const localSelect = document.getElementById("localSalida");
     if (localSelect) {
-        localSelect.selectedIndex = 0;  // Opción vacía seleccionada
+        localSelect.selectedIndex = 0;  
     }
 
     actualizarEstadoBotonesSalida();
+}
+
+
+
+
+
+
+
+function actualizarFlujoSalidaVisual() {
+    const almacenSelect = document.getElementById("almacenSalida");
+    const localSelect = document.getElementById("localSalida");
+
+    const flujoAlmacenNombre = document.getElementById("flujoAlmacenNombre");
+    const flujoLocalNombre = document.getElementById("flujoLocalNombre");
+    const estadoSalidaBox = document.getElementById("estadoSalidaBox");
+
+    const nombreAlmacen = almacenSelect?.selectedOptions?.[0]?.text?.trim() || "Seleccione almacén";
+    const nombreLocal = localSelect?.selectedOptions?.[0]?.text?.trim() || "Seleccione local";
+
+    if (flujoAlmacenNombre) {
+        flujoAlmacenNombre.textContent = nombreAlmacen;
+    }
+
+    if (flujoLocalNombre) {
+        flujoLocalNombre.textContent = nombreLocal;
+    }
+
+    if (estadoSalidaBox) {
+        const almacenValido = almacenSelect?.value;
+        const localValido = localSelect?.value;
+
+        if (almacenValido && localValido) {
+            estadoSalidaBox.innerHTML = `
+                <span class="badge text-bg-light border text-success">
+                    <i class="bi bi-arrow-left-right me-1"></i>
+                    Flujo configurado
+                </span>
+                <span class="ms-2">Se enviará desde <strong>${escapeHtml(nombreAlmacen)}</strong> hacia <strong>${escapeHtml(nombreLocal)}</strong>.</span>
+            `;
+        } else if (almacenValido || localValido) {
+            estadoSalidaBox.innerHTML = `
+                <span class="badge text-bg-light border text-warning">
+                    <i class="bi bi-exclamation-circle me-1"></i>
+                    Flujo incompleto
+                </span>
+                <span class="ms-2">Completa origen y destino para continuar.</span>
+            `;
+        } else {
+            estadoSalidaBox.innerHTML = `
+                <span class="text-muted">Selecciona el almacén de origen y el local de destino.</span>
+            `;
+        }
+    }
 }

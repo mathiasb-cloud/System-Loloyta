@@ -1,7 +1,6 @@
 package com.loloyta.service;
 
 import java.util.List;
-
 import com.loloyta.model.DetalleOrdenCompra;
 
 public interface DetalleOrdenCompraService {
@@ -16,4 +15,5 @@ public interface DetalleOrdenCompraService {
 
     void eliminar(Long id);
 
+    void eliminarPorOrdenId(Long ordenId);
 }

@@ -185,6 +185,7 @@ public class MovimientoServiceImpl implements MovimientoService {
                 item.setPrecioActual(precio.doubleValue());
                 item.setCantidad(cantidad);
                 item.setImporte(importe);
+                item.setMetodoPago(d.getMetodoPago());
 
                 items.add(item);
                 total = total.add(importe);

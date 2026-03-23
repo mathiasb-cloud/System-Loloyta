@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.loloyta.model.DetalleOrdenCompra;
 import com.loloyta.repository.DetalleOrdenCompraRepository;
@@ -28,30 +29,22 @@ public class DetalleOrdenCompraServiceImpl implements DetalleOrdenCompraService 
 
     @Override
     public DetalleOrdenCompra crear(DetalleOrdenCompra detalle) {
-
-        
-        BigDecimal importe = detalle.getPrecioUnitario()
-                .multiply(detalle.getCantidad());
-
+        BigDecimal importe = detalle.getPrecioUnitario().multiply(detalle.getCantidad());
         detalle.setImporteTotal(importe);
-
         return repository.save(detalle);
     }
 
     @Override
     public DetalleOrdenCompra actualizar(Long id, DetalleOrdenCompra detalleActualizado) {
-
         DetalleOrdenCompra detalle = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Detalle no encontrado"));
 
         detalle.setProducto(detalleActualizado.getProducto());
         detalle.setCantidad(detalleActualizado.getCantidad());
         detalle.setPrecioUnitario(detalleActualizado.getPrecioUnitario());
+        detalle.setMetodoPago(detalleActualizado.getMetodoPago());
 
-        
-        BigDecimal importe = detalle.getPrecioUnitario()
-                .multiply(detalle.getCantidad());
-
+        BigDecimal importe = detalle.getPrecioUnitario().multiply(detalle.getCantidad());
         detalle.setImporteTotal(importe);
 
         return repository.save(detalle);
@@ -60,5 +53,11 @@ public class DetalleOrdenCompraServiceImpl implements DetalleOrdenCompraService 
     @Override
     public void eliminar(Long id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void eliminarPorOrdenId(Long ordenId) {
+        repository.deleteByOrdenCompraId(ordenId);
     }
 }
