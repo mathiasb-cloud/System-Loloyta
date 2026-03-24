@@ -12,5 +12,7 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
     List<Movimiento> findBySalidaId(Long salidaId);
     
     List<Movimiento> findByMermaId(Long mermaId);
+    
+    List<Movimiento> findAllByOrderByFechaDesc();
 
 }

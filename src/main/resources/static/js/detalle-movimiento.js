@@ -285,7 +285,8 @@ function formatearNumero(valor) {
 }
 
 function volverMovimientos() {
-    window.location.href = "/movimientos";
+    window.location.href = "/index";
+    sessionStorage.setItem("abrirVistaAlCargar", "/movimientos");
 }
 
 function renderError(mensaje) {

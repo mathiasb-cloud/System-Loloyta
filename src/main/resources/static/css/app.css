@@ -942,4 +942,43 @@
 		        transform: rotate(90deg);
 		    }
 		}
+		
+		
+		.stock-badge {
+		    display: inline-flex;
+		    align-items: center;
+		    justify-content: center;
+		    min-width: 88px;
+		    padding: 0.38rem 0.7rem;
+		    border-radius: 999px;
+		    font-weight: 700;
+		    font-size: 0.88rem;
+		    border: 1px solid transparent;
+		}
+
+		.stock-badge-ok {
+		    background: #ecfdf3;
+		    color: #067647;
+		    border-color: #abefc6;
+		}
+
+		.stock-badge-min {
+		    background: #fff7e6;
+		    color: #b54708;
+		    border-color: #f7b27a;
+		}
+
+		.stock-badge-low {
+		    background: #fef3f2;
+		    color: #b42318;
+		    border-color: #fecdca;
+		}
+
+		.stock-row-low {
+		    background: rgba(180, 35, 24, 0.03);
+		}
+
+		.stock-row-min {
+		    background: rgba(181, 71, 8, 0.03);
+		}
    

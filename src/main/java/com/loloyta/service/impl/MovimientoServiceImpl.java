@@ -61,7 +61,7 @@ public class MovimientoServiceImpl implements MovimientoService {
     @Override
     public List<MovimientoResumenDto> listarResumen() {
 
-        List<Movimiento> movimientos = repository.findAll();
+    	List<Movimiento> movimientos = repository.findAllByOrderByFechaDesc();
 
         Map<String, List<Movimiento>> agrupados = movimientos.stream()
                 .collect(Collectors.groupingBy(m -> {
@@ -90,6 +90,8 @@ public class MovimientoServiceImpl implements MovimientoService {
                     lista.size()
             ));
         }
+        
+        resumen.sort((a, b) -> b.getFecha().compareTo(a.getFecha()));
 
         return resumen;
     }

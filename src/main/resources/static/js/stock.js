@@ -19,22 +19,67 @@ function initStock() {
         renderStock(data);
     }
 
-    function renderStock(data) {
-        let tbody = document.querySelector("#tablaStock tbody");
-        if (!tbody) return;
+	function renderStock(data) {
+	    let tbody = document.querySelector("#tablaStock tbody");
+	    if (!tbody) return;
 
-        tbody.innerHTML = "";
+	    tbody.innerHTML = "";
 
-        data.forEach(s => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${s.producto?.nombre || "N/A"}</td>
-                    <td>${s.almacenes?.nombre || "N/A"}</td>
-                    <td>${s.cantidad ?? 0}</td>
-                </tr>
-            `;
-        });
-    }
+	    data.forEach(s => {
+	        const stockMinimo = Number(s.producto?.stockMinimo ?? 0);
+	        const cantidad = Number(s.cantidad ?? 0);
+	        const estado = obtenerEstadoStock(cantidad, stockMinimo);
+
+	        tbody.innerHTML += `
+	            <tr class="${estado.rowClass}">
+	                <td>${s.producto?.id ?? "N/A"}</td>
+	                <td>${s.producto?.nombre || "N/A"}</td>
+	                <td>${s.producto?.descripcion || "-"}</td>
+	                <td>${s.producto?.unidadMedida || "-"}</td>
+	                <td>${stockMinimo}</td>
+	                <td>${s.almacenes?.nombre || "N/A"}</td>
+	                <td>
+	                    <span class="stock-badge ${estado.badgeClass}">
+	                        <i class="${estado.icon} me-2"></i>
+	                        ${cantidad}
+	                    </span>
+	                </td>
+	            </tr>
+	        `;
+	    });
+	}
+	
+	
+	
+	function obtenerEstadoStock(cantidad, stockMinimo) {
+	    const cant = Number(cantidad ?? 0);
+	    const min = Number(stockMinimo ?? 0);
+
+	    if (cant < min) {
+	        return {
+	            badgeClass: "stock-badge-low",
+	            rowClass: "stock-row-low",
+	            icon: "bi bi-exclamation-triangle-fill",
+	            texto: cant
+	        };
+	    }
+
+	    if (cant === min) {
+	        return {
+	            badgeClass: "stock-badge-min",
+	            rowClass: "stock-row-min",
+	            icon: "bi bi-exclamation-circle-fill",
+	            texto: cant
+	        };
+	    }
+
+	    return {
+	        badgeClass: "stock-badge-ok",
+	        rowClass: "",
+	        icon: "bi bi-check-circle-fill",
+	        texto: cant
+	    };
+	}
 
     async function cargarAlmacenesStock() {
         let res = await fetch('/api/almacenes');

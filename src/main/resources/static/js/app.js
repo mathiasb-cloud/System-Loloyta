@@ -38,4 +38,20 @@ function cargar(event, url, element = null) {
         });
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    const vistaPendiente = sessionStorage.getItem("abrirVistaAlCargar");
+
+    if (vistaPendiente) {
+        sessionStorage.removeItem("abrirVistaAlCargar");
+        const link = [...document.querySelectorAll(".nav-dashboard .nav-link")]
+            .find(a => a.getAttribute("onclick")?.includes(vistaPendiente));
+
+        cargar(
+            { preventDefault: () => {} },
+            vistaPendiente,
+            link || null
+        );
+    }
+});
+
 window.cargar = cargar;

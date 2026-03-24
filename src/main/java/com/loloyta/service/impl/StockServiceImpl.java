@@ -68,7 +68,12 @@ public class StockServiceImpl implements StockService {
                 .orElseThrow(() -> new RuntimeException("Stock no encontrado"));
 
         if (stock.getCantidad().compareTo(cantidad) < 0) {
-            throw new RuntimeException("Stock insuficiente");
+            String nombreProducto = stock.getProducto() != null ? stock.getProducto().getNombre() : "Producto";
+            throw new RuntimeException(
+                "Stock insuficiente para " + nombreProducto +
+                ". Disponible: " + stock.getCantidad() +
+                ", solicitado: " + cantidad
+            );
         }
 
         stock.setCantidad(stock.getCantidad().subtract(cantidad));
