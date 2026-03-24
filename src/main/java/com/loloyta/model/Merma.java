@@ -23,7 +23,7 @@ public class Merma {
 
     private LocalDateTime fecha;
 
-    private String estado; // PENDIENTE, CONFIRMADA, CANCELADA
+    private String estado; // PENDIENTE, CONFIRMADA,
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
