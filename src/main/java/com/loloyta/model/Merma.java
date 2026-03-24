@@ -1,7 +1,6 @@
 package com.loloyta.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,6 +23,8 @@ public class Merma {
 
     private LocalDateTime fecha;
 
+    private String estado; // PENDIENTE, CONFIRMADA, CANCELADA
+
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
@@ -31,12 +32,18 @@ public class Merma {
     public Merma() {
     }
 
-    public Merma(Almacenes almacen, MotivoMerma motivo, String observacion, LocalDateTime fecha, Usuario usuario) {
+    public Merma(Almacenes almacen, MotivoMerma motivo, String observacion,
+                 LocalDateTime fecha, String estado, Usuario usuario) {
         this.almacen = almacen;
         this.motivo = motivo;
         this.observacion = observacion;
         this.fecha = fecha;
+        this.estado = estado;
         this.usuario = usuario;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public Almacenes getAlmacen() {
@@ -53,10 +60,6 @@ public class Merma {
 
     public void setMotivo(MotivoMerma motivo) {
         this.motivo = motivo;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public void setId(Long id) {
@@ -77,6 +80,14 @@ public class Merma {
 
     public void setFecha(LocalDateTime fecha) {
         this.fecha = fecha;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
     public Usuario getUsuario() {

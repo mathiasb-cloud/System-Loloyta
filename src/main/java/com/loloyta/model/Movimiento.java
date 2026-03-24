@@ -27,6 +27,10 @@ public class Movimiento {
     @ManyToOne
     @JoinColumn(name = "orden_compra_id")
     private OrdenCompra ordenCompra;
+    
+    @ManyToOne
+    @JoinColumn(name = "merma_id")
+    private Merma merma;
 
     @ManyToOne
     @JoinColumn(name = "salida_id")
@@ -111,6 +115,16 @@ public class Movimiento {
 	public void setId(Long id) {
 		this.id = id;
 	}
+
+	public Merma getMerma() {
+		return merma;
+	}
+
+	public void setMerma(Merma merma) {
+		this.merma = merma;
+	}
+	
+	
 	
 	
     

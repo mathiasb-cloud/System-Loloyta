@@ -1,6 +1,7 @@
 package com.loloyta.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "detalle_merma")
@@ -18,12 +19,12 @@ public class DetalleMerma {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
-    private Double cantidad;
+    private BigDecimal cantidad;
 
     public DetalleMerma() {
     }
 
-    public DetalleMerma(Merma merma, Producto producto, Double cantidad) {
+    public DetalleMerma(Merma merma, Producto producto, BigDecimal cantidad) {
         this.merma = merma;
         this.producto = producto;
         this.cantidad = cantidad;
@@ -33,15 +34,23 @@ public class DetalleMerma {
         return id;
     }
 
+    public Merma getMerma() {
+        return merma;
+    }
+
+    public void setMerma(Merma merma) {
+        this.merma = merma;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
 
-    public Double getCantidad() {
+    public BigDecimal getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(Double cantidad) {
+    public void setCantidad(BigDecimal cantidad) {
         this.cantidad = cantidad;
     }
 
@@ -51,13 +60,5 @@ public class DetalleMerma {
 
     public void setProducto(Producto producto) {
         this.producto = producto;
-    }
-
-    public Merma getMerma() {
-        return merma;
-    }
-
-    public void setMerma(Merma merma) {
-        this.merma = merma;
     }
 }
