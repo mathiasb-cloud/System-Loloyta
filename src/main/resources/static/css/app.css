@@ -26,6 +26,16 @@
             gap: .5rem;
             flex-wrap: wrap;
         }
+		
+		.badge-merma-soft {
+		    background: #fef3f2;
+		    color: #b42318;
+		    border: 1px solid #fecdca;
+		}
+		
+		.swal2-popup {
+		    border-radius: 15px !important;
+		}
 
         .nav-dashboard .nav-link {
             border-radius: 999px;
@@ -761,6 +771,174 @@
 		    }
 
 		    .flujo-salida-arrow-circle i {
+		        transform: rotate(90deg);
+		    }
+		}
+		
+		
+		
+		
+		
+		
+		.estado-merma-box {
+		    min-height: 38px;
+		    display: flex;
+		    align-items: center;
+		}
+
+		.merma-flow-card {
+		    padding: 1.15rem 1.25rem;
+		    border: 1px solid #eceff3;
+		    border-radius: 18px;
+		    background: linear-gradient(180deg, #fffdfd 0%, #fff8f8 100%);
+		    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+		}
+
+		.merma-flow-top {
+		    display: grid;
+		    grid-template-columns: 1fr 40px 1fr 40px 1fr;
+		    gap: 0.85rem;
+		    align-items: center;
+		}
+
+		.merma-flow-pill {
+		    display: flex;
+		    align-items: center;
+		    gap: 0.85rem;
+		    min-height: 86px;
+		    padding: 0.95rem 1rem;
+		    border-radius: 16px;
+		    background: #ffffff;
+		    border: 1px solid #eef1f4;
+		}
+
+		.merma-flow-icon {
+		    width: 52px;
+		    height: 52px;
+		    border-radius: 15px;
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    font-size: 1.2rem;
+		    flex-shrink: 0;
+		}
+
+		.merma-flow-danger {
+		    background: linear-gradient(135deg, #ffe1e1 0%, #fff0f0 100%);
+		    color: #b42318;
+		}
+
+		.merma-flow-dark {
+		    background: linear-gradient(135deg, #e9eef5 0%, #f6f8fb 100%);
+		    color: #334155;
+		}
+
+		.merma-flow-warning {
+		    background: linear-gradient(135deg, #fff1d8 0%, #fff8ea 100%);
+		    color: #b76e00;
+		}
+
+		.merma-flow-label {
+		    font-size: 0.78rem;
+		    color: #6b7280;
+		    font-weight: 600;
+		    text-transform: uppercase;
+		    margin-bottom: 0.18rem;
+		}
+
+		.merma-flow-value {
+		    font-size: 1.05rem;
+		    font-weight: 700;
+		    color: #0f172a;
+		    line-height: 1.2;
+		    word-break: break-word;
+		}
+
+		.merma-flow-divider {
+		    display: flex;
+		    justify-content: center;
+		    align-items: center;
+		    color: #c2410c;
+		    font-size: 1rem;
+		}
+
+		.merma-tip-box {
+		    min-height: 44px;
+		    display: flex;
+		    align-items: center;
+		    padding: 0.85rem 1rem;
+		    border: 1px solid #f4e3cf;
+		    border-radius: 14px;
+		    background: #fffaf4;
+		    color: #8a5a12;
+		    font-size: 0.95rem;
+		}
+
+		.resultados-buscador-merma {
+		    max-width: 100%;
+		    border-radius: 12px;
+		    overflow: hidden;
+		}
+
+		.resultados-buscador-merma .list-group-item {
+		    border: 0;
+		    border-bottom: 1px solid #f1f3f5;
+		    padding: 0.85rem 1rem;
+		    transition: background-color 0.18s ease;
+		}
+
+		.resultados-buscador-merma .list-group-item:last-child {
+		    border-bottom: 0;
+		}
+
+		.resultados-buscador-merma .list-group-item:hover {
+		    background-color: #f8f9fa;
+		}
+
+		#buscadorMerma.form-control:focus,
+		#almacenMerma.form-select:focus,
+		#motivoMerma.form-select:focus,
+		#fechaMerma.form-control:focus,
+		#observacionMerma.form-control:focus {
+		    box-shadow: 0 0 0 0.18rem rgba(220, 53, 69, 0.10);
+		}
+
+		.stock-chip {
+		    display: inline-flex;
+		    align-items: center;
+		    gap: 0.35rem;
+		    padding: 0.32rem 0.55rem;
+		    border-radius: 999px;
+		    font-size: 0.84rem;
+		    font-weight: 600;
+		}
+
+		.stock-chip-ok {
+		    background: #ecfdf3;
+		    color: #067647;
+		}
+
+		.stock-chip-low {
+		    background: #fff4e5;
+		    color: #b54708;
+		}
+
+		.stock-chip-zero {
+		    background: #fef3f2;
+		    color: #b42318;
+		}
+
+		.merma-loss-cell {
+		    font-weight: 700;
+		    color: #b42318;
+		}
+
+		@media (max-width: 992px) {
+		    .merma-flow-top {
+		        grid-template-columns: 1fr;
+		    }
+
+		    .merma-flow-divider {
 		        transform: rotate(90deg);
 		    }
 		}

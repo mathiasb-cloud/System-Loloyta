@@ -30,6 +30,14 @@ public class DetalleMermaServiceImpl implements DetalleMermaService {
 
     @Override
     public DetalleMerma crear(DetalleMerma detalle) {
+        if (detalle.getMerma() == null || detalle.getMerma().getId() == null) {
+            throw new RuntimeException("Debe indicar la merma");
+        }
+
+        if (detalle.getProducto() == null || detalle.getProducto().getId() == null) {
+            throw new RuntimeException("Debe indicar el producto");
+        }
+
         validarCantidad(detalle.getCantidad());
         return repository.save(detalle);
     }
@@ -38,6 +46,10 @@ public class DetalleMermaServiceImpl implements DetalleMermaService {
     public DetalleMerma actualizar(Long id, DetalleMerma detalleActualizado) {
         DetalleMerma detalle = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Detalle de merma no encontrado"));
+
+        if (detalleActualizado.getProducto() == null || detalleActualizado.getProducto().getId() == null) {
+            throw new RuntimeException("Debe indicar el producto");
+        }
 
         validarCantidad(detalleActualizado.getCantidad());
 

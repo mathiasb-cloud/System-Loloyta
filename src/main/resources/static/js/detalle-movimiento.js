@@ -33,6 +33,7 @@ function renderDetalleMovimiento(m) {
 
     let totalCalculadoJs = 0;
     const esIngreso = m.tipo === "INGRESO";
+	const esMerma = m.tipo === "MERMA";
 
     const filasProductos = productos.map((item, index) => {
         const cantidad = Number(item.cantidad || 0);
@@ -201,6 +202,44 @@ function renderDocumentoRelacionado(m) {
                         <div class="col-md-3">
                             <small class="text-muted d-block">Local destino</small>
                             <strong>${m.localDestinoNombre ?? "-"}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    if (m.referencia && m.referencia.startsWith("MER-")) {
+        return `
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Detalle de Merma
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">ID Merma</small>
+                            <strong>${m.mermaId ?? "-"}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Fecha</small>
+                            <strong>${formatearFechaHora(m.mermaFecha)}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Estado</small>
+                            <strong>${m.mermaEstado ?? "-"}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Motivo</small>
+                            <strong>${m.motivoMermaNombre ?? "-"}</strong>
+                        </div>
+                        <div class="col-md-12">
+                            <small class="text-muted d-block">Descripción del motivo</small>
+                            <strong>${m.motivoMermaDescripcion ?? "-"}</strong>
+                        </div>
+                        <div class="col-md-12">
+                            <small class="text-muted d-block">Observación</small>
+                            <strong>${m.mermaObservacion ?? "-"}</strong>
                         </div>
                     </div>
                 </div>

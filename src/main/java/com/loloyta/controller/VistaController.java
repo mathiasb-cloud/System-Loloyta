@@ -34,6 +34,11 @@ public class VistaController {
     public String detalleMovimiento() {
         return "detalle-movimiento";
     }
+    
+    @GetMapping("/mermas")
+    public String mermas() {
+        return "mermas";
+    }
 
 
 }

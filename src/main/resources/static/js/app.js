@@ -24,6 +24,7 @@ function cargar(event, url, element = null) {
                 if (url.includes("productos") && typeof initProductos === "function") initProductos();
                 if (url.includes("ordenes") && typeof initOrdenes === "function") initOrdenes();
                 if (url.includes("salidas") && typeof initSalidas === "function") initSalidas();
+				if (url.includes("mermas") && typeof initMermas === "function") initMermas();
                 if (url.includes("movimientos") && typeof initMovimientos === "function") initMovimientos();
             }, 100);
         })

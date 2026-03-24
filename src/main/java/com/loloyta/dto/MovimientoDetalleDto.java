@@ -10,7 +10,6 @@ public class MovimientoDetalleDto {
     private String tipo;
     private LocalDateTime fecha;
     private String almacenNombre;
-
     private String usuarioNombre;
 
     private Long ordenCompraId;
@@ -23,6 +22,13 @@ public class MovimientoDetalleDto {
     private LocalDateTime salidaFecha;
     private String salidaEstado;
     private String localDestinoNombre;
+
+    private Long mermaId;
+    private LocalDateTime mermaFecha;
+    private String mermaEstado;
+    private String motivoMermaNombre;
+    private String motivoMermaDescripcion;
+    private String mermaObservacion;
 
     private Integer totalItems;
     private BigDecimal importeTotalCalculado;
@@ -142,6 +148,54 @@ public class MovimientoDetalleDto {
 
     public void setLocalDestinoNombre(String localDestinoNombre) {
         this.localDestinoNombre = localDestinoNombre;
+    }
+
+    public Long getMermaId() {
+        return mermaId;
+    }
+
+    public void setMermaId(Long mermaId) {
+        this.mermaId = mermaId;
+    }
+
+    public LocalDateTime getMermaFecha() {
+        return mermaFecha;
+    }
+
+    public void setMermaFecha(LocalDateTime mermaFecha) {
+        this.mermaFecha = mermaFecha;
+    }
+
+    public String getMermaEstado() {
+        return mermaEstado;
+    }
+
+    public void setMermaEstado(String mermaEstado) {
+        this.mermaEstado = mermaEstado;
+    }
+
+    public String getMotivoMermaNombre() {
+        return motivoMermaNombre;
+    }
+
+    public void setMotivoMermaNombre(String motivoMermaNombre) {
+        this.motivoMermaNombre = motivoMermaNombre;
+    }
+
+    public String getMotivoMermaDescripcion() {
+        return motivoMermaDescripcion;
+    }
+
+    public void setMotivoMermaDescripcion(String motivoMermaDescripcion) {
+        this.motivoMermaDescripcion = motivoMermaDescripcion;
+    }
+
+    public String getMermaObservacion() {
+        return mermaObservacion;
+    }
+
+    public void setMermaObservacion(String mermaObservacion) {
+        this.mermaObservacion = mermaObservacion;
     }
 
     public Integer getTotalItems() {

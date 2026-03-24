@@ -1,0 +1,158 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="section-title">Mermas</h2>
+        <p class="section-subtitle">
+            Registra pérdidas de productos con trazabilidad, control de stock y costo estimado.
+        </p>
+    </div>
+</div>
+
+<div class="main-card p-3 mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-6 col-lg-3">
+            <label class="form-label">Almacén</label>
+            <select id="almacenMerma" class="form-select"></select>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <label class="form-label">Motivo de merma</label>
+            <select id="motivoMerma" class="form-select"></select>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <label class="form-label">Fecha</label>
+            <input type="datetime-local" id="fechaMerma" class="form-control">
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div id="estadoMermaBox" class="small text-muted estado-merma-box"></div>
+        </div>
+    </div>
+
+    <div class="merma-flow-card mt-4">
+        <div class="merma-flow-top">
+            <div class="merma-flow-pill">
+                <div class="merma-flow-icon merma-flow-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div>
+                    <div class="merma-flow-label">Motivo seleccionado</div>
+                    <div id="mermaMotivoVisual" class="merma-flow-value">Seleccione motivo</div>
+                </div>
+            </div>
+
+            <div class="merma-flow-divider">
+                <i class="bi bi-arrow-right"></i>
+            </div>
+
+            <div class="merma-flow-pill">
+                <div class="merma-flow-icon merma-flow-dark">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div>
+                    <div class="merma-flow-label">Almacén afectado</div>
+                    <div id="mermaAlmacenVisual" class="merma-flow-value">Seleccione almacén</div>
+                </div>
+            </div>
+
+            <div class="merma-flow-divider">
+                <i class="bi bi-arrow-right"></i>
+            </div>
+
+            <div class="merma-flow-pill">
+                <div class="merma-flow-icon merma-flow-warning">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div>
+                    <div class="merma-flow-label">Pérdida estimada</div>
+                    <div id="mermaPerdidaVisual" class="merma-flow-value">S/ 0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <label class="form-label">Observación</label>
+            <textarea
+                id="observacionMerma"
+                class="form-control"
+                rows="3"
+                maxlength="250"
+                placeholder="Describe el contexto de la merma si es necesario..."
+            ></textarea>
+            <div class="form-text">
+                Recomendado para pérdidas por vencimiento, contaminación, daño o diferencias de inventario.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main-card p-3 mb-4">
+    <h5 class="mb-3">Buscar Producto</h5>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="search-box position-relative">
+                <input
+                    type="text"
+                    id="buscadorMerma"
+                    class="form-control"
+                    placeholder="Buscar producto por nombre..."
+                    autocomplete="off"
+                >
+            </div>
+
+            <div id="resultadosMerma" class="list-group shadow-sm mt-2 resultados-buscador-merma"></div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="merma-tip-box">
+                <i class="bi bi-info-circle me-2"></i>
+                Registra solo cantidades reales. El sistema validará el stock disponible antes de confirmar.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main-card p-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="mb-0">Detalle de Merma</h5>
+        <div id="resumenMerma" class="small text-muted"></div>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle mb-0" id="tablaMerma">
+                <thead class="text-center">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Unidad</th>
+                        <th>Stock Actual</th>
+                        <th style="width: 160px;">Cantidad Merma</th>
+                        <th style="width: 140px;">Costo Unit.</th>
+                        <th style="width: 150px;">Pérdida</th>
+                        <th style="width: 90px;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2">
+    <button id="btnGuardarMerma" onclick="guardarMerma()" class="btn btn-success btn-icon">
+        <i class="bi bi-save me-2"></i>
+        <span>Guardar Merma</span>
+    </button>
+
+    <button id="btnConfirmarMerma" onclick="confirmarMerma()" class="btn btn-danger btn-icon">
+        <i class="bi bi-check2-circle me-2"></i>
+        <span>Confirmar Merma</span>
+    </button>
+
+    <button id="btnCancelarMerma" onclick="cancelarMerma()" class="btn btn-outline-secondary btn-icon">
+        <i class="bi bi-x-circle me-2"></i>
+        <span>Cancelar</span>
+    </button>
+</div>

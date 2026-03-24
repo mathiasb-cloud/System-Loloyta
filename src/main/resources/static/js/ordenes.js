@@ -12,7 +12,6 @@ async function initOrdenes() {
     await cargarProductos();
     configurarBuscador();
     restaurarBorradorLocal();
-    inicializarModalesOrden();
     renderizarEstadoOrden();
     actualizarResumenOrden();
 }
@@ -107,6 +106,34 @@ function configurarBuscador() {
         if (!resultadosDiv.contains(e.target) && e.target !== input) {
             resultadosDiv.innerHTML = "";
         }
+    });
+}
+
+function mostrarExito(mensaje = "Operación realizada correctamente") {
+    Swal.fire({
+        title: "¡Buen trabajo!",
+        text: mensaje,
+        icon: "success",
+        timer: 1800,
+        showConfirmButton: false
+    });
+}
+
+function mostrarError(mensaje = "Ocurrió un error") {
+    Swal.fire({
+        title: "Error",
+        text: mensaje,
+        icon: "error",
+        confirmButtonText: "Entendido"
+    });
+}
+
+function mostrarInfo(mensaje = "Verifica la información") {
+    Swal.fire({
+        title: "Atención",
+        text: mensaje,
+        icon: "warning",
+        confirmButtonText: "Entendido"
     });
 }
 
@@ -218,12 +245,12 @@ function validarOrden() {
     const items = obtenerProductosEnTabla();
 
     if (!almacenId) {
-        mostrarToastOrden("Selecciona un almacén.", "warning");
+        mostrarInfo("Selecciona un almacén.");
         return false;
     }
 
     if (items.length === 0) {
-        mostrarToastOrden("Agrega al menos un producto a la lista.", "warning");
+        mostrarInfo("Agrega al menos un producto a la lista.");
         return false;
     }
 
@@ -232,22 +259,22 @@ function validarOrden() {
         const precio = Number(item.precioUnitario);
 
         if (!item.productoId) {
-            mostrarToastOrden("Hay un producto inválido en la lista.", "danger");
+            mostrarError("Hay un producto inválido en la lista.");
             return false;
         }
 
         if (!Number.isFinite(cantidad) || cantidad <= 0) {
-            mostrarToastOrden(`La cantidad de "${item.productoNombre}" debe ser mayor a 0.`, "warning");
+            mostrarInfo(`La cantidad de "${item.productoNombre}" debe ser mayor a 0.`);
             return false;
         }
 
         if (!Number.isFinite(precio) || precio < 0) {
-            mostrarToastOrden(`El precio de "${item.productoNombre}" no puede ser negativo.`, "warning");
+            mostrarInfo(`El precio de "${item.productoNombre}" no puede ser negativo.`);
             return false;
         }
 
         if (!item.metodoPago) {
-            mostrarToastOrden(`Selecciona método de pago para "${item.productoNombre}".`, "warning");
+            mostrarInfo(`Selecciona método de pago para "${item.productoNombre}".`);
             return false;
         }
     }

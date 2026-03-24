@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.loloyta.dto.MovimientoResumenDto;
 import com.loloyta.model.*;
 import com.loloyta.repository.AlmacenesRepository;
+import com.loloyta.repository.DetalleMermaRepository;
 import com.loloyta.repository.MovimientoRepository;
 import com.loloyta.repository.OrdenCompraRepository;
 import com.loloyta.repository.ProductoRepository;
@@ -48,6 +49,9 @@ public class MovimientoServiceImpl implements MovimientoService {
 
     @Autowired
     private DetalleSalidaRepository detalleSalidaRepository;
+    
+    @Autowired
+    private DetalleMermaRepository detalleMermaRepository;
 
     @Override
     public List<Movimiento> listar() {
@@ -65,6 +69,8 @@ public class MovimientoServiceImpl implements MovimientoService {
                         return "OC-" + m.getOrdenCompra().getId();
                     } else if (m.getSalida() != null) {
                         return "SAL-" + m.getSalida().getId();
+                    } else if (m.getMerma() != null) {
+                        return "MER-" + m.getMerma().getId();
                     } else {
                         return "OTRO-" + m.getId();
                     }
@@ -133,6 +139,8 @@ public class MovimientoServiceImpl implements MovimientoService {
                         return referencia.equals("OC-" + m.getOrdenCompra().getId());
                     } else if (m.getSalida() != null) {
                         return referencia.equals("SAL-" + m.getSalida().getId());
+                    } else if (m.getMerma() != null) {
+                        return referencia.equals("MER-" + m.getMerma().getId());
                     } else {
                         return referencia.equals("OTRO-" + m.getId());
                     }
@@ -224,6 +232,49 @@ public class MovimientoServiceImpl implements MovimientoService {
                 item.setPrecioActual(p.getPrecioActual());
                 item.setCantidad(cantidad);
                 item.setImporte(importe);
+
+                items.add(item);
+                total = total.add(importe);
+            }
+        }
+        
+        
+        else if (primero.getMerma() != null) {
+            Merma merma = primero.getMerma();
+
+            dto.setMermaId(merma.getId());
+            dto.setMermaFecha(merma.getFecha());
+            dto.setMermaEstado(merma.getEstado());
+            dto.setMermaObservacion(merma.getObservacion());
+
+            if (merma.getMotivo() != null) {
+                dto.setMotivoMermaNombre(merma.getMotivo().getNombre());
+                dto.setMotivoMermaDescripcion(merma.getMotivo().getDescripcion());
+            }
+
+            List<DetalleMerma> detalles = detalleMermaRepository.findByMermaId(merma.getId());
+
+            for (DetalleMerma d : detalles) {
+                Producto p = d.getProducto();
+
+                BigDecimal cantidad = d.getCantidad() != null ? d.getCantidad() : BigDecimal.ZERO;
+                BigDecimal precio = p.getPrecioActual() != null
+                        ? BigDecimal.valueOf(p.getPrecioActual())
+                        : BigDecimal.ZERO;
+                BigDecimal importe = cantidad.multiply(precio);
+
+                MovimientoDetalleItemDto item = new MovimientoDetalleItemDto();
+                item.setProductoId(p.getId());
+                item.setProductoNombre(p.getNombre());
+                item.setDescripcion(p.getDescripcion());
+                item.setCategoria(p.getCategoria() != null ? p.getCategoria().getNombre() : null);
+                item.setUnidadMedida(p.getUnidadMedida());
+                item.setStockMinimo(p.getStockMinimo());
+                item.setActivo(p.getActivo());
+                item.setPrecioActual(p.getPrecioActual());
+                item.setCantidad(cantidad);
+                item.setImporte(importe);
+                item.setMetodoPago(null);
 
                 items.add(item);
                 total = total.add(importe);
