@@ -5,129 +5,237 @@ async function initSalidas() {
     await cargarAlmacenesSalida();
     await cargarLocalesSalida();
     await cargarProductosSalida();
-	document.getElementById("almacenSalida")?.addEventListener("change", actualizarFlujoSalidaVisual);
-	document.getElementById("localSalida")?.addEventListener("change", actualizarFlujoSalidaVisual);
 
-	
+    document.getElementById("almacenSalida")?.addEventListener("change", async () => {
+        actualizarFlujoSalidaVisual();
+        actualizarResumenSalida();
+    });
 
-    document.getElementById("buscadorSalida")
-        ?.addEventListener("keyup", function() {
+    document.getElementById("localSalida")?.addEventListener("change", actualizarFlujoSalidaVisual);
 
-            let texto = this.value.toLowerCase();
-            let resultadosDiv = document.getElementById("resultadosSalida");
-            resultadosDiv.innerHTML = "";
-
-            if (texto.length === 0) return;
-
-            let filtrados = productosSalidaGlobal.filter(p =>
-                p.nombre.toLowerCase().includes(texto)
-            );
-
-            filtrados.forEach(p => {
-                let item = document.createElement("div");
-                item.className = "list-group-item list-group-item-action";
-                item.innerText = p.nombre;
-
-                item.onclick = () => agregarProductoSalida(p);
-
-                resultadosDiv.appendChild(item);
-            });
-        });
-		
-		actualizarEstadoBotonesSalida();
-		actualizarFlujoSalidaVisual();
+    configurarBuscadorSalida();
+    actualizarEstadoBotonesSalida();
+    actualizarFlujoSalidaVisual();
+    actualizarResumenSalida();
 }
 
-async function cargarAlmacenesSalida() {
-    let res = await fetch('/api/almacenes');
-    let data = await res.json();
+function configurarBuscadorSalida() {
+    const input = document.getElementById("buscadorSalida");
+    const resultadosDiv = document.getElementById("resultadosSalida");
 
-    let select = document.getElementById("almacenSalida");
-    if (!select) return;
+    if (!input || !resultadosDiv) return;
 
-    select.innerHTML = "";
+    input.addEventListener("input", function () {
+        const texto = this.value.toLowerCase().trim();
+        resultadosDiv.innerHTML = "";
 
-    data.forEach(a => {
-        select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`;
+        if (!texto) return;
+
+        const idsAgregados = [...document.querySelectorAll("#tablaSalida tbody tr")]
+            .map(fila => String(fila.dataset.id));
+
+        const filtrados = productosSalidaGlobal
+            .filter(p => p.nombre.toLowerCase().includes(texto))
+            .filter(p => !idsAgregados.includes(String(p.id)))
+            .slice(0, 8);
+
+        if (filtrados.length === 0) {
+            resultadosDiv.innerHTML = `
+                <div class="list-group-item text-muted small">
+                    No se encontraron productos.
+                </div>
+            `;
+            return;
+        }
+
+        filtrados.forEach(p => {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+            item.innerHTML = `
+                <div class="text-start">
+                    <div class="fw-medium">${escapeHtml(p.nombre)}</div>
+                    <small class="text-muted">${escapeHtml(p.categoria?.nombre || "")}</small>
+                </div>
+                <small class="text-muted">${escapeHtml(p.unidadMedida || "")}</small>
+            `;
+
+            item.onclick = () => {
+                agregarProductoSalida(p);
+
+                input.value = "";
+                resultadosDiv.innerHTML = "";
+                input.blur();
+
+                actualizarResumenSalida();
+            };
+
+            resultadosDiv.appendChild(item);
+        });
+    });
+
+    input.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            resultadosDiv.innerHTML = "";
+        }
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!resultadosDiv.contains(e.target) && e.target !== input) {
+            resultadosDiv.innerHTML = "";
+        }
     });
 }
 
-async function guardarOSobrescribirSalida() {
-    if (!salidaId) {
-        await crearSalida();
-    } else {
-        await guardarCambiosSalida();
-    }
+async function cargarAlmacenesSalida() {
+    const res = await fetch('/api/almacenes');
+    const data = await res.json();
+
+    const select = document.getElementById("almacenSalida");
+    if (!select) return;
+
+    select.innerHTML = `<option value="">Seleccione almacén</option>`;
+
+    data.forEach(a => {
+        select.innerHTML += `<option value="${a.id}">${escapeHtml(a.nombre)}</option>`;
+    });
 }
 
 async function cargarLocalesSalida() {
-    let res = await fetch('/api/locales');
-    let data = await res.json();
+    const res = await fetch('/api/locales');
+    const data = await res.json();
 
-    let select = document.getElementById("localSalida");
+    const select = document.getElementById("localSalida");
     if (!select) return;
 
     select.innerHTML = `<option value="">Seleccione un local</option>`;
 
     data.forEach(local => {
-        select.innerHTML += `<option value="${local.id}">${local.nombre}</option>`;
+        select.innerHTML += `<option value="${local.id}">${escapeHtml(local.nombre)}</option>`;
     });
 }
 
 async function cargarProductosSalida() {
-    let res = await fetch('/api/productos');
-    let json = await res.json();
+    const res = await fetch('/api/productos');
+    const json = await res.json();
 
     productosSalidaGlobal = json.content || json || [];
 }
 
 function agregarProductoSalida(producto) {
-    let tabla = document.querySelector("#tablaSalida tbody");
-    let filas = tabla.querySelectorAll("tr");
+    const tabla = document.querySelector("#tablaSalida tbody");
+    const filas = tabla.querySelectorAll("tr");
 
     for (let i = 0; i < filas.length; i++) {
-        if (filas[i].dataset.id == producto.id) return;
+        if (filas[i].dataset.id == producto.id) {
+            mostrarInfoSalida("Ese producto ya está en la lista.");
+            return;
+        }
     }
 
-    let fila = document.createElement("tr");
+    const fila = document.createElement("tr");
     fila.dataset.id = producto.id;
 
     fila.innerHTML = `
-        <td>${producto.categoria?.nombre || "N/A"}</td>
-        <td>${producto.nombre}</td>
-        <td>${producto.unidadMedida || "N/A"}</td>
-        <td><input type="number" class="form-control" value="1" min="1"></td>
-        <td><button class="btn btn-sm btn-danger" onclick="eliminarFilaSalida(this)">X</button></td>
+        <td>${escapeHtml(producto.categoria?.nombre || "N/A")}</td>
+        <td>${escapeHtml(producto.nombre)}</td>
+        <td>${escapeHtml(producto.unidadMedida || "N/A")}</td>
+        <td>
+            <input type="number" class="form-control cantidad-salida-item" value="1" min="1" step="1">
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm btn-danger" onclick="eliminarFilaSalida(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
     `;
 
     tabla.appendChild(fila);
+
+    fila.querySelector(".cantidad-salida-item")?.addEventListener("input", () => {
+        actualizarResumenSalida();
+    });
+
+    actualizarResumenSalida();
 }
 
 function eliminarFilaSalida(btn) {
-    btn.parentElement.parentElement.remove();
+    btn.closest("tr").remove();
+    actualizarResumenSalida();
 }
 
-async function crearSalida() {
-    let almacenId = document.getElementById("almacenSalida").value;
-    let localId = document.getElementById("localSalida").value;
+function obtenerItemsSalida() {
+    const filas = document.querySelectorAll("#tablaSalida tbody tr");
+
+    return [...filas].map(fila => {
+        const cantidadInput = fila.querySelector(".cantidad-salida-item");
+
+        return {
+            productoId: Number(fila.dataset.id),
+            cantidadDespacho: Number(cantidadInput?.value || 0)
+        };
+    });
+}
+
+function validarSalida() {
+    const almacenId = document.getElementById("almacenSalida")?.value;
+    const localId = document.getElementById("localSalida")?.value;
+    const filas = document.querySelectorAll("#tablaSalida tbody tr");
 
     if (!almacenId) {
-        alert("Seleccione un almacén");
-        return;
+        mostrarInfoSalida("Seleccione un almacén.");
+        return false;
     }
 
     if (!localId) {
-        alert("Seleccione un local destino");
-        return;
+        mostrarInfoSalida("Seleccione un local destino.");
+        return false;
     }
 
-    let filas = document.querySelectorAll("#tablaSalida tbody tr");
     if (filas.length === 0) {
-        alert("Agregue al menos un producto a la salida");
-        return;
+        mostrarInfoSalida("Agregue al menos un producto a la salida.");
+        return false;
     }
 
-    let res = await fetch('/api/salidas', {
+    for (const fila of filas) {
+        const nombre = fila.children[1]?.textContent?.trim() || "producto";
+        const cantidad = Number(fila.querySelector(".cantidad-salida-item")?.value || 0);
+
+        if (!Number.isFinite(cantidad) || cantidad <= 0) {
+            mostrarInfoSalida(`La cantidad de despacho para "${nombre}" debe ser mayor a cero.`);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+async function guardarOSobrescribirSalida() {
+    if (!validarSalida()) return;
+
+    try {
+        mostrarCargandoSalida(salidaId ? "Guardando cambios..." : "Guardando salida...");
+
+        if (!salidaId) {
+            await crearSalida();
+        } else {
+            await guardarCambiosSalida();
+        }
+
+        cerrarCargandoSalida();
+        mostrarExitoSalida(salidaId ? "Cambios guardados correctamente." : "Salida guardada correctamente.");
+    } catch (error) {
+        console.error(error);
+        cerrarCargandoSalida();
+        mostrarErrorSalida(error.message || "No se pudo guardar la salida.");
+    }
+}
+
+async function crearSalida() {
+    const almacenId = document.getElementById("almacenSalida").value;
+    const localId = document.getElementById("localSalida").value;
+
+    const res = await fetch('/api/salidas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -138,134 +246,58 @@ async function crearSalida() {
     });
 
     if (!res.ok) {
-        alert("No se pudo crear la salida");
-        return;
+        const msg = await leerMensajeErrorSalida(res);
+        throw new Error(msg || "No se pudo crear la salida.");
     }
 
-    let data = await res.json();
+    const data = await res.json();
     salidaId = data.id;
 
     if (!salidaId) {
-        alert("Error: no se creó la salida");
-        return;
+        throw new Error("No se pudo obtener el ID de la salida.");
     }
 
-    
     try {
         await guardarDetalleSalida();
     } catch (error) {
-        
         await fetch(`/api/salidas/${salidaId}`, { method: 'DELETE' });
         salidaId = null;
-        alert("Error al guardar los detalles, la salida fue eliminada.");
-        return;
+        throw error;
     }
 
     actualizarEstadoBotonesSalida();
-
-    alert("Salida guardada correctamente");
+    actualizarFlujoSalidaVisual();
 }
 
 async function guardarDetalleSalida() {
-    let filas = document.querySelectorAll("#tablaSalida tbody tr");
+    const filas = document.querySelectorAll("#tablaSalida tbody tr");
 
     for (let i = 0; i < filas.length; i++) {
-        let input = filas[i].querySelector("input");
-        let cantidad = input.value;
+        const input = filas[i].querySelector(".cantidad-salida-item");
+        const cantidad = Number(input?.value || 0);
 
-        let res = await fetch('/api/detalle-salida', {
+        const res = await fetch('/api/detalle-salida', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 salida: { id: salidaId },
                 producto: { id: Number(filas[i].dataset.id) },
-                cantidadDespacho: Number(cantidad)
+                cantidadDespacho: cantidad
             })
         });
 
         if (!res.ok) {
-            alert("No se pudo guardar un detalle de la salida");
-            return;
+            const msg = await leerMensajeErrorSalida(res);
+            throw new Error(msg || "No se pudo guardar un detalle de la salida.");
         }
-
-        console.log("DETALLE:", await res.json());
     }
 }
-
-async function confirmarSalida() {
-    if (!salidaId) {
-        alert("Primero guarda la salida");
-        return;
-    }
-
-    let res = await fetch(`/api/salidas/${salidaId}/confirmar`, {
-        method: 'PATCH'
-    });
-
-    if (!res.ok) {
-        let mensaje = "No se pudo confirmar la salida";
-
-        try {
-            mensaje = await res.text();
-        } catch (e) {}
-
-        alert(mensaje);
-        return;
-    }
-
-    let data = await res.json();
-    console.log("CONFIRMAR:", data);
-
-    alert("Salida confirmada");
-
-	salidaId = null;  // Restablecer la salida
-	actualizarEstadoBotonesSalida();  // Actualizar los botones visualmente
-}
-
-function actualizarEstadoBotonesSalida() {
-    const btnGuardar = document.getElementById("btnGuardarSalida");
-    const textoGuardar = document.getElementById("textoBtnGuardarSalida");
-    const btnConfirmar = document.getElementById("btnConfirmarSalida");
-    const btnCancelar = document.getElementById("btnCancelarSalida");
-
-    const yaGuardada = !!salidaId;
-
-    if (textoGuardar) {
-        textoGuardar.textContent = yaGuardada ? "Guardar cambios" : "Guardar Salida";
-    }
-
-    if (btnConfirmar) {
-        btnConfirmar.disabled = !yaGuardada;
-    }
-
-    if (btnCancelar) {
-        btnCancelar.disabled = !yaGuardada;
-    }
-}
-
-
 
 async function guardarCambiosSalida() {
-    let almacenId = document.getElementById("almacenSalida").value;
-    let localId = document.getElementById("localSalida").value;
+    const almacenId = document.getElementById("almacenSalida").value;
+    const localId = document.getElementById("localSalida").value;
 
-    if (!almacenId) {
-        alert("Seleccione un almacén");
-        return;
-    }
-
-    if (!localId) {
-        alert("Seleccione un local destino");
-        return;
-    }
-
-    let filas = document.querySelectorAll("#tablaSalida tbody tr");
-    if (filas.length === 0) {
-        alert("Agregue al menos un producto a la salida");
-        return;
-    }
-
-    let resSalida = await fetch(`/api/salidas/${salidaId}`, {
+    const resSalida = await fetch(`/api/salidas/${salidaId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -276,62 +308,95 @@ async function guardarCambiosSalida() {
     });
 
     if (!resSalida.ok) {
-        alert("No se pudo actualizar la salida");
-        return;
+        const msg = await leerMensajeErrorSalida(resSalida);
+        throw new Error(msg || "No se pudo actualizar la salida.");
     }
 
-    let resBorrarDetalle = await fetch(`/api/detalle-salida/salida/${salidaId}`, {
+    const resBorrarDetalle = await fetch(`/api/detalle-salida/salida/${salidaId}`, {
         method: 'DELETE'
     });
 
     if (!resBorrarDetalle.ok) {
-        alert("No se pudo actualizar el detalle de la salida");
-        return;
+        const msg = await leerMensajeErrorSalida(resBorrarDetalle);
+        throw new Error(msg || "No se pudo actualizar el detalle de la salida.");
     }
 
     await guardarDetalleSalida();
-
-    alert("Cambios guardados correctamente");
+    actualizarEstadoBotonesSalida();
+    actualizarFlujoSalidaVisual();
 }
 
-
-function confirmarCancelacionSalida() {
+async function confirmarSalida() {
     if (!salidaId) {
-        alert("No hay salida pendiente para cancelar");
+        mostrarInfoSalida("Primero guarda la salida.");
         return;
     }
 
-    const modal = new bootstrap.Modal(document.getElementById("modalCancelarSalida"));
-    modal.show();
+    const ok = await confirmarSwalSalida(
+        "Confirmar salida",
+        "Se descontará el stock del almacén y se registrará el movimiento.",
+        "Sí, confirmar"
+    );
+
+    if (!ok) return;
+
+    try {
+        mostrarCargandoSalida("Confirmando salida...");
+
+        const res = await fetch(`/api/salidas/${salidaId}/confirmar`, {
+            method: 'PATCH'
+        });
+
+        if (!res.ok) {
+            const mensaje = await leerMensajeErrorSalida(res);
+            throw new Error(mensaje || "No se pudo confirmar la salida.");
+        }
+
+        limpiarFormularioSalida();
+        cerrarCargandoSalida();
+        mostrarExitoSalida("Salida confirmada correctamente.");
+    } catch (error) {
+        console.error(error);
+        cerrarCargandoSalida();
+        mostrarErrorSalida(error.message || "No se pudo confirmar la salida.");
+    }
 }
 
-
-async function cancelarSalidaPendiente() {
+async function cancelarSalida() {
     if (!salidaId) {
+        mostrarInfoSalida("No hay salida pendiente para cancelar.");
         return;
     }
 
-    let res = await fetch(`/api/salidas/${salidaId}`, {
-        method: 'DELETE'
-    });
+    const ok = await confirmarSwalSalida(
+        "Cancelar salida",
+        "Se eliminará la salida pendiente y toda la lista actual.",
+        "Sí, cancelar"
+    );
 
-    if (!res.ok) {
-        alert("No se pudo cancelar la salida");
-        return;
+    if (!ok) return;
+
+    try {
+        mostrarCargandoSalida("Cancelando salida...");
+
+        const res = await fetch(`/api/salidas/${salidaId}`, {
+            method: 'DELETE'
+        });
+
+        if (!res.ok) {
+            const msg = await leerMensajeErrorSalida(res);
+            throw new Error(msg || "No se pudo cancelar la salida.");
+        }
+
+        limpiarFormularioSalida();
+        cerrarCargandoSalida();
+        mostrarExitoSalida("Salida pendiente cancelada.");
+    } catch (error) {
+        console.error(error);
+        cerrarCargandoSalida();
+        mostrarErrorSalida(error.message || "No se pudo cancelar la salida.");
     }
-
-    const modalEl = document.getElementById("modalCancelarSalida");
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    if (modal) {
-        modal.hide();
-    }
-
-    limpiarFormularioSalida();
-
-    alert("Salida pendiente cancelada");
 }
-
-
 
 function limpiarFormularioSalida() {
     salidaId = null;
@@ -351,25 +416,59 @@ function limpiarFormularioSalida() {
         resultados.innerHTML = "";
     }
 
-    
     const almacenSelect = document.getElementById("almacenSalida");
     if (almacenSelect) {
-        almacenSelect.selectedIndex = 0;  
+        almacenSelect.value = "";
     }
 
     const localSelect = document.getElementById("localSalida");
     if (localSelect) {
-        localSelect.selectedIndex = 0;  
+        localSelect.value = "";
     }
 
     actualizarEstadoBotonesSalida();
+    actualizarFlujoSalidaVisual();
+    actualizarResumenSalida();
 }
 
+function actualizarEstadoBotonesSalida() {
+    const textoGuardar = document.getElementById("textoBtnGuardarSalida");
+    const btnConfirmar = document.getElementById("btnConfirmarSalida");
+    const btnCancelar = document.getElementById("btnCancelarSalida");
 
+    const yaGuardada = !!salidaId;
 
+    if (textoGuardar) {
+        textoGuardar.textContent = yaGuardada ? "Guardar cambios" : "Guardar Salida";
+    }
 
+    if (btnConfirmar) {
+        btnConfirmar.disabled = !yaGuardada;
+    }
 
+    if (btnCancelar) {
+        btnCancelar.disabled = !yaGuardada;
+    }
+}
 
+function actualizarResumenSalida() {
+    const filas = document.querySelectorAll("#tablaSalida tbody tr");
+    const resumen = document.getElementById("resumenSalida");
+
+    let total = 0;
+
+    filas.forEach(fila => {
+        const input = fila.querySelector(".cantidad-salida-item");
+        total += Number(input?.value || 0);
+    });
+
+    if (resumen) {
+        resumen.innerHTML = `
+            <strong>${filas.length}</strong> producto(s) ·
+            Cantidad total: <strong>${total}</strong>
+        `;
+    }
+}
 
 function actualizarFlujoSalidaVisual() {
     const almacenSelect = document.getElementById("almacenSalida");
@@ -416,4 +515,82 @@ function actualizarFlujoSalidaVisual() {
             `;
         }
     }
+}
+
+function mostrarCargandoSalida(titulo = "Procesando...") {
+    Swal.fire({
+        title: titulo,
+        text: "Por favor espera",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+}
+
+function cerrarCargandoSalida() {
+    Swal.close();
+}
+
+function mostrarExitoSalida(mensaje = "Operación realizada correctamente") {
+    Swal.fire({
+        title: "¡Buen trabajo!",
+        text: mensaje,
+        icon: "success",
+        timer: 1800,
+        showConfirmButton: false
+    });
+}
+
+function mostrarErrorSalida(mensaje = "Ocurrió un error") {
+    Swal.fire({
+        title: "Error",
+        text: mensaje,
+        icon: "error",
+        confirmButtonText: "Entendido"
+    });
+}
+
+function mostrarInfoSalida(mensaje = "Verifica la información") {
+    Swal.fire({
+        title: "Atención",
+        text: mensaje,
+        icon: "warning",
+        confirmButtonText: "Entendido"
+    });
+}
+
+async function confirmarSwalSalida(titulo, texto, confirmText = "Sí, continuar") {
+    const result = await Swal.fire({
+        title: titulo,
+        text: texto,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: confirmText,
+        cancelButtonText: "Volver",
+        reverseButtons: true,
+        focusCancel: true
+    });
+
+    return result.isConfirmed;
+}
+
+async function leerMensajeErrorSalida(response) {
+    try {
+        const text = await response.text();
+        return text || null;
+    } catch {
+        return null;
+    }
+}
+
+function escapeHtml(texto) {
+    return String(texto || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
