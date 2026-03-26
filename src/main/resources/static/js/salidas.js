@@ -57,6 +57,16 @@ function configurarBuscadorSalida() {
                     <div class="fw-medium">${escapeHtml(p.nombre)}</div>
                     <small class="text-muted">${escapeHtml(p.categoria?.nombre || "")}</small>
                 </div>
+                <div class="small text-muted mt-1">
+
+                            Precio: <strong>
+                                ${Number(p.precioActual || 0).toLocaleString('es-PE', {
+                                    style: 'currency',
+                                    currency: 'PEN'
+                                })}
+                            </strong>
+                        </div>
+
                 <small class="text-muted">${escapeHtml(p.unidadMedida || "")}</small>
             `;
 
@@ -143,6 +153,9 @@ function agregarProductoSalida(producto) {
         <td>
             <input type="number" class="form-control cantidad-salida-item" value="1" min="1" step="1">
         </td>
+        <td class="precio-item">
+                ${Number(producto.precioActual || 0).toFixed(2)}
+            </td>
         <td>
             <button type="button" class="btn btn-sm btn-danger" onclick="eliminarFilaSalida(this)">
                 <i class="bi bi-trash"></i>
