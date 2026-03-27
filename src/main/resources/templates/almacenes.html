@@ -1,0 +1,120 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="section-title">Almacenes</h2>
+        <p class="section-subtitle">Administra los puntos de almacenamiento del sistema.</p>
+    </div>
+</div>
+
+<div class="toolbar">
+    <div>
+        <button onclick="abrirModalAlmacen()" class="btn btn-success btn-icon">
+            <i class="bi bi-plus-circle me-2"></i>
+            <span>Nuevo Almacén</span>
+        </button>
+    </div>
+
+    <div class="toolbar-group">
+        <label class="form-label mb-1">Buscar almacén</label>
+        <div class="search-input-group">
+            <span class="search-icon">
+                <i class="bi bi-search"></i>
+            </span>
+            <input
+                type="text"
+                id="buscadorAlmacen"
+                class="form-control search-input-pro"
+                placeholder="Busca por nombre o ubicación..."
+                autocomplete="off"
+            >
+            <button
+                type="button"
+                class="search-clear-btn d-none"
+                id="limpiarBuscadorAlmacen"
+                onclick="limpiarBuscadorAlmacen()"
+                aria-label="Limpiar búsqueda"
+            >
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="form-text">Filtra rápidamente por nombre o ubicación.</div>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle mb-0" id="tablaAlmacenes">
+            <thead class="text-center">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Ubicación</th>
+                    <th>Estado</th>
+                    <th>Fecha de creación</th>
+                    <th style="width: 180px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="text-center"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalAlmacen" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-0">Almacén</h5>
+                    <small class="text-muted">Completa la información del almacén.</small>
+                </div>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="almacenId">
+
+                <div id="almacenFormAlert" class="alert alert-warning d-none py-2 mb-3" role="alert"></div>
+
+                <form id="formAlmacen" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input
+                            type="text"
+                            id="almacenNombre"
+                            class="form-control"
+                            maxlength="80"
+                            autocomplete="off"
+                        >
+                        <div class="form-text">Ej.: Almacén Central, Cámara Fría, Insumos Secos.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ubicación</label>
+                        <input
+                            type="text"
+                            id="almacenUbicacion"
+                            class="form-control"
+                            maxlength="120"
+                            autocomplete="off"
+                        >
+                        <div class="form-text">Ej.: Sótano, Piso 2, Local Miraflores.</div>
+                    </div>
+
+                    <div class="mb-0">
+                        <label class="form-label">Activo</label>
+                        <select id="almacenActivo" class="form-select">
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardarAlmacen" onclick="guardarAlmacen()" class="btn btn-primary">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

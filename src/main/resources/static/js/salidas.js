@@ -19,13 +19,34 @@ async function initSalidas() {
     actualizarResumenSalida();
 }
 
+async function obtenerStockDisponibleSalida(productoId, almacenId) {
+    if (!productoId || !almacenId) return 0;
+
+    try {
+        const res = await fetch(`/api/stock/buscar?productoId=${productoId}&almacenId=${almacenId}`);
+        if (!res.ok) return 0;
+
+        const data = await res.json();
+        return Number(data?.cantidad || 0);
+    } catch {
+        return 0;
+    }
+}
+
+function obtenerClaseStockSalida(stockActual, stockMinimo) {
+    const stock = Number(stockActual || 0);
+    const minimo = Number(stockMinimo || 0);
+
+    return stock <= minimo ? "text-danger" : "text-success";
+}
+
 function configurarBuscadorSalida() {
     const input = document.getElementById("buscadorSalida");
     const resultadosDiv = document.getElementById("resultadosSalida");
 
     if (!input || !resultadosDiv) return;
 
-    input.addEventListener("input", function () {
+    input.addEventListener("input", async function () {
         const texto = this.value.toLowerCase().trim();
         resultadosDiv.innerHTML = "";
 
@@ -48,26 +69,43 @@ function configurarBuscadorSalida() {
             return;
         }
 
-        filtrados.forEach(p => {
+        const almacenId = document.getElementById("almacenSalida")?.value || "";
+
+        for (const p of filtrados) {
+            const stockActual = almacenId
+                ? await obtenerStockDisponibleSalida(p.id, almacenId)
+                : 0;
+
+            const claseStock = obtenerClaseStockSalida(stockActual, p.stockMinimo);
+
             const item = document.createElement("button");
             item.type = "button";
             item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+
             item.innerHTML = `
                 <div class="text-start">
                     <div class="fw-medium">${escapeHtml(p.nombre)}</div>
-                    <small class="text-muted">${escapeHtml(p.categoria?.nombre || "")}</small>
+                    <small class="text-muted d-block">${escapeHtml(p.categoria?.nombre || "")}</small>
                 </div>
-                <div class="small text-muted mt-1">
 
-                            Precio: <strong>
-                                ${Number(p.precioActual || 0).toLocaleString('es-PE', {
-                                    style: 'currency',
-                                    currency: 'PEN'
-                                })}
-                            </strong>
-                        </div>
+                <div class="d-flex align-items-center gap-3 bloque-derecha">
+                    <div class="precio-item">
+                        <span class="label-precio">Precio:</span>
+                        <span class="valor-precio">
+                            ${Number(p.precioActual || 0).toLocaleString('es-PE', {
+                                style: 'currency',
+                                currency: 'PEN'
+                            })}
+                        </span>
+                    </div>
 
-                <small class="text-muted">${escapeHtml(p.unidadMedida || "")}</small>
+                    <div class="text-end">
+                        <small class="text-muted d-block">${escapeHtml(p.unidadMedida || "")}</small>
+                        <small class="${claseStock} fw-semibold d-block">
+                            Stock: ${stockActual}
+                        </small>
+                    </div>
+                </div>
             `;
 
             item.onclick = () => {
@@ -81,7 +119,7 @@ function configurarBuscadorSalida() {
             };
 
             resultadosDiv.appendChild(item);
-        });
+        }
     });
 
     input.addEventListener("keydown", function (e) {
@@ -146,28 +184,40 @@ function agregarProductoSalida(producto) {
     const fila = document.createElement("tr");
     fila.dataset.id = producto.id;
 
-    fila.innerHTML = `
-        <td>${escapeHtml(producto.categoria?.nombre || "N/A")}</td>
-        <td>${escapeHtml(producto.nombre)}</td>
-        <td>${escapeHtml(producto.unidadMedida || "N/A")}</td>
-        <td>
-            <input type="number" class="form-control cantidad-salida-item" value="1" min="1" step="1">
-        </td>
-        <td class="precio-item">
-                ${Number(producto.precioActual || 0).toFixed(2)}
-            </td>
-        <td>
-            <button type="button" class="btn btn-sm btn-danger" onclick="eliminarFilaSalida(this)">
-                <i class="bi bi-trash"></i>
-            </button>
-        </td>
-    `;
+	fila.innerHTML = `
+	    <td>${escapeHtml(producto.categoria?.nombre || "N/A")}</td>
+	    <td>${escapeHtml(producto.nombre)}</td>
+	    <td>${escapeHtml(producto.unidadMedida || "N/A")}</td>
+
+	    <td>
+	        <input type="number" class="form-control cantidad-salida-item" value="1" min="1" step="1">
+	    </td>
+
+	    <td class="precio-item">
+	        ${Number(producto.precioActual || 0).toLocaleString('es-PE', {
+	            style: 'currency',
+	            currency: 'PEN'
+	        })}
+	    </td>
+
+	    <td class="importe-item fw-semibold text-center">
+	        S/ 0.00
+	    </td>
+
+	    <td>
+	        <button type="button" class="btn btn-sm btn-danger" onclick="eliminarFilaSalida(this)">
+	            <i class="bi bi-trash"></i>
+	        </button>
+	    </td>
+	`;
 
     tabla.appendChild(fila);
+	calcularImporteFila(fila);
 
-    fila.querySelector(".cantidad-salida-item")?.addEventListener("input", () => {
-        actualizarResumenSalida();
-    });
+	fila.querySelector(".cantidad-salida-item")?.addEventListener("input", () => {
+	    calcularImporteFila(fila);
+	    actualizarResumenSalida();
+	});
 
     actualizarResumenSalida();
 }
@@ -467,20 +517,40 @@ function actualizarEstadoBotonesSalida() {
 function actualizarResumenSalida() {
     const filas = document.querySelectorAll("#tablaSalida tbody tr");
     const resumen = document.getElementById("resumenSalida");
+    const totalBox = document.getElementById("montoTotalSalida");
+	
 
-    let total = 0;
+    let totalCantidad = 0;
+    let totalImporte = 0;
 
     filas.forEach(fila => {
-        const input = fila.querySelector(".cantidad-salida-item");
-        total += Number(input?.value || 0);
+        const cantidad = Number(fila.querySelector(".cantidad-salida-item")?.value || 0);
+
+        totalCantidad += cantidad;
+        totalImporte += calcularImporteFila(fila);
     });
 
+    
     if (resumen) {
         resumen.innerHTML = `
-            <strong>${filas.length}</strong> producto(s) ·
-            Cantidad total: <strong>${total}</strong>
+            <strong>${filas.length}</strong> producto(s) · 
+            Cantidad total: <strong>${totalCantidad}</strong>
         `;
     }
+
+    
+
+	if (totalBox) {
+	    totalBox.textContent = totalImporte.toLocaleString('es-PE', {
+	        style: 'currency',
+	        currency: 'PEN'
+	    });
+
+	    
+	    totalBox.classList.remove("anim-total");
+	    void totalBox.offsetWidth;
+	    totalBox.classList.add("anim-total");
+	}
 }
 
 function actualizarFlujoSalidaVisual() {
@@ -606,4 +676,24 @@ function escapeHtml(texto) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+}
+
+function calcularImporteFila(fila) {
+    const cantidad = Number(fila.querySelector(".cantidad-salida-item")?.value || 0);
+
+    const precioTexto = fila.querySelector(".precio-item")?.textContent || "0";
+    const precio = Number(precioTexto.replace(/[^\d.-]/g, "") || 0);
+
+    const importe = cantidad * precio;
+
+    const celdaImporte = fila.querySelector(".importe-item");
+
+    if (celdaImporte) {
+        celdaImporte.textContent = importe.toLocaleString('es-PE', {
+            style: 'currency',
+            currency: 'PEN'
+        });
+    }
+
+    return importe;
 }

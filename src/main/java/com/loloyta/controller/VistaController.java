@@ -39,6 +39,11 @@ public class VistaController {
     public String mermas() {
         return "mermas";
     }
+    
+    @GetMapping("/almacenes")
+    public String almacenes() {
+        return "almacenes";
+    }
 
 
 }

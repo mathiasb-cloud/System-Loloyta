@@ -73,27 +73,43 @@ function configurarBuscador() {
             return;
         }
 
-        filtrados.forEach(p => {
-            const item = document.createElement("button");
-            item.type = "button";
-            item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
-            item.innerHTML = `
-                <div class="text-start">
-                    <div class="fw-medium">${escapeHtml(p.nombre)}</div>
-                    <small class="text-muted">${escapeHtml(p.categoria?.nombre || "")}</small>
-                </div>
-                <small class="text-muted">${escapeHtml(p.unidadMedida || "")}</small>
-            `;
+		filtrados.forEach(p => {
+		    const item = document.createElement("button");
+		    item.type = "button";
+		    item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
 
-            item.onclick = () => {
-                agregarProductoTabla(p);
-                input.value = "";
-                resultadosDiv.innerHTML = "";
-                input.focus();
-            };
+		    item.innerHTML = `
+		        <div class="text-start">
+		            <div class="fw-medium">${escapeHtml(p.nombre)}</div>
+		            <small class="text-muted d-block">${escapeHtml(p.categoria?.nombre || "")}</small>
+		        </div>
 
-            resultadosDiv.appendChild(item);
-        });
+		        <div class="d-flex align-items-center gap-3 bloque-derecha">
+		            <div class="precio-item">
+		                <span class="label-precio">Precio:</span>
+		                <span class="valor-precio">
+		                    ${Number(p.precioActual || 0).toLocaleString('es-PE', {
+		                        style: 'currency',
+		                        currency: 'PEN'
+		                    })}
+		                </span>
+		            </div>
+
+		            <div class="text-end">
+		                <small class="text-muted d-block">${escapeHtml(p.unidadMedida || "")}</small>
+		            </div>
+		        </div>
+		    `;
+
+		    item.onclick = () => {
+		        agregarProductoTabla(p);
+		        document.getElementById("buscador").value = "";
+		        resultadosDiv.innerHTML = "";
+		        document.getElementById("buscador").blur();
+		    };
+
+		    resultadosDiv.appendChild(item);
+		});
     });
 
     input.addEventListener("keydown", function (e) {
@@ -107,6 +123,15 @@ function configurarBuscador() {
             resultadosDiv.innerHTML = "";
         }
     });
+}
+
+function escapeHtml(texto) {
+    return String(texto || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
 function mostrarExito(mensaje = "Operación realizada correctamente") {
