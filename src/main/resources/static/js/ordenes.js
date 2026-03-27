@@ -8,8 +8,8 @@ let modalLoadingOrdenInstance = null;
 let accionPendienteOrden = null;
 
 async function initOrdenes() {
-	console.log("INIT ORDENES");
-    await cargarAlmacenes();
+    console.log("INIT ORDENES");
+    await cargarAlmacenesOrden();
     await cargarProductos();
     configurarBuscador();
     restaurarBorradorLocal();
@@ -19,29 +19,37 @@ async function initOrdenes() {
 
 
 
-async function cargarAlmacenes() {
+async function cargarAlmacenesOrden() {
     try {
-        const res = await fetch('/api/almacenes');
+        console.log("Llamando API almacenes...");
 
-        if (!res.ok) {
-            throw new Error(`No se pudo cargar almacenes: ${res.status}`);
+        let res = await fetch('/api/almacenes');
+
+        console.log("Status:", res.status);
+
+        let data = await res.json();
+
+        console.log("Data recibida:", data);
+
+        let select = document.getElementById("almacenSelect");
+
+        console.log("Select encontrado:", select);
+
+        if (!select) {
+            console.error("No existe #almacenSelect en el DOM");
+            return;
         }
 
-        const data = await res.json();
+        select.innerHTML = "";
 
-        const select = document.getElementById("almacenSelect");
-        if (!select) return;
+        data.forEach(a => {
+            console.log("Pintando:", a);
 
-        select.innerHTML = `<option value="">Seleccione almacén</option>`;
-
-        data
-            .filter(a => a.activo !== false)
-            .forEach(a => {
-                select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`;
-            });
+            select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`;
+        });
 
     } catch (error) {
-        console.error("Error cargando almacenes en órdenes:", error);
+        console.error("Error cargando almacenes:", error);
     }
 }
 
@@ -798,3 +806,5 @@ async function cancelarOrden() {
         mostrarError(error.message || "No se pudo cancelar");
     }
 }
+
+console.log("ordenes.js cargado");
