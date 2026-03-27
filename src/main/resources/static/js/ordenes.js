@@ -8,6 +8,7 @@ let modalLoadingOrdenInstance = null;
 let accionPendienteOrden = null;
 
 async function initOrdenes() {
+	console.log("INIT ORDENES");
     await cargarAlmacenes();
     await cargarProductos();
     configurarBuscador();
@@ -19,24 +20,29 @@ async function initOrdenes() {
 
 
 async function cargarAlmacenes() {
-    const res = await fetch("/api/almacenes");
-    const data = await res.json();
+    try {
+        const res = await fetch('/api/almacenes');
 
-    const select = document.getElementById("almacenSelect");
-    if (!select) return;
+        if (!res.ok) {
+            throw new Error(`No se pudo cargar almacenes: ${res.status}`);
+        }
 
-    select.innerHTML = `<option value="">Seleccione almacén</option>`;
+        const data = await res.json();
 
-    data
-        .filter(a => a.activo !== false)
-        .forEach(a => {
-            select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`;
-        });
+        const select = document.getElementById("almacenSelect");
+        if (!select) return;
 
-    select.addEventListener("change", () => {
-        guardarBorradorLocal();
-        renderizarEstadoOrden();
-    });
+        select.innerHTML = `<option value="">Seleccione almacén</option>`;
+
+        data
+            .filter(a => a.activo !== false)
+            .forEach(a => {
+                select.innerHTML += `<option value="${a.id}">${a.nombre}</option>`;
+            });
+
+    } catch (error) {
+        console.error("Error cargando almacenes en órdenes:", error);
+    }
 }
 
 async function cargarProductos() {

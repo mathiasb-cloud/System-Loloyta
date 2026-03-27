@@ -1,5 +1,6 @@
 package com.loloyta.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,18 +29,27 @@ public class AlmacenesServiceImpl implements AlmacenesService {
 
     @Override
     public Almacenes guardarAlmacen(Almacenes almacen) {
+        if (almacen.getFechaCreacion() == null) {
+            almacen.setFechaCreacion(LocalDateTime.now());
+        }
+
+        if (almacen.getActivo() == null) {
+            almacen.setActivo(true);
+        }
+
         return almacenesRepository.save(almacen);
     }
 
     @Override
     public Almacenes actualizarAlmacen(Long id, Almacenes almacenActualizado) {
-
         Almacenes almacen = almacenesRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Almacen no encontrado"));
 
         almacen.setNombre(almacenActualizado.getNombre());
         almacen.setUbicacion(almacenActualizado.getUbicacion());
         almacen.setActivo(almacenActualizado.getActivo());
+
+       
 
         return almacenesRepository.save(almacen);
     }
