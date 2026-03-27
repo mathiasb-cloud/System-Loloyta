@@ -1,5 +1,6 @@
 package com.loloyta.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class MovimientoResumenDto {
@@ -8,15 +9,18 @@ public class MovimientoResumenDto {
     private LocalDateTime fecha;
     private String referencia;
     private Integer totalItems;
+    private BigDecimal importeTotal;
 
     public MovimientoResumenDto() {
     }
 
-    public MovimientoResumenDto(String tipo, LocalDateTime fecha, String referencia, Integer totalItems) {
+    public MovimientoResumenDto(String tipo, LocalDateTime fecha, String referencia, Integer totalItems, BigDecimal importeTotal) {
         this.tipo = tipo;
         this.fecha = fecha;
         this.referencia = referencia;
         this.totalItems = totalItems;
+        this.importeTotal = importeTotal;
+        
     }
 
     public String getTipo() {
@@ -50,4 +54,14 @@ public class MovimientoResumenDto {
     public void setTotalItems(Integer totalItems) {
         this.totalItems = totalItems;
     }
+
+	public BigDecimal getImporteTotal() {
+		return importeTotal;
+	}
+
+	public void setImporteTotal(BigDecimal importeTotal) {
+		this.importeTotal = importeTotal;
+	}
+    
+    
 }

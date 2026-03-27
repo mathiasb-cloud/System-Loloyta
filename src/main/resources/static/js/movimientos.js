@@ -52,7 +52,7 @@ async function cargarMovimientos() {
             </td>
 			
 			<td class="col-importe">
-			    ${Number(m.importe || 0).toLocaleString('es-PE', {
+			    ${Number(m.importeTotal || 0).toLocaleString('es-PE', {
 			        style: 'currency',
 			        currency: 'PEN'
 			    })}

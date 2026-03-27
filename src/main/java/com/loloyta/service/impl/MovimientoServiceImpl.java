@@ -61,7 +61,7 @@ public class MovimientoServiceImpl implements MovimientoService {
     @Override
     public List<MovimientoResumenDto> listarResumen() {
 
-    	List<Movimiento> movimientos = repository.findAllByOrderByFechaDesc();
+        List<Movimiento> movimientos = repository.findAllByOrderByFechaDesc();
 
         Map<String, List<Movimiento>> agrupados = movimientos.stream()
                 .collect(Collectors.groupingBy(m -> {
@@ -83,14 +83,28 @@ public class MovimientoServiceImpl implements MovimientoService {
             List<Movimiento> lista = entry.getValue();
             Movimiento primero = lista.get(0);
 
+            BigDecimal importeTotal = BigDecimal.ZERO;
+
+            for (Movimiento m : lista) {
+                BigDecimal cantidad = m.getCantidad() != null ? m.getCantidad() : BigDecimal.ZERO;
+
+                BigDecimal precio = BigDecimal.ZERO;
+                if (m.getProducto() != null && m.getProducto().getPrecioActual() != null) {
+                    precio = BigDecimal.valueOf(m.getProducto().getPrecioActual());
+                }
+
+                importeTotal = importeTotal.add(cantidad.multiply(precio));
+            }
+
             resumen.add(new MovimientoResumenDto(
                     primero.getTipo(),
                     primero.getFecha(),
                     entry.getKey(),
-                    lista.size()
+                    lista.size(),
+                    importeTotal
             ));
         }
-        
+
         resumen.sort((a, b) -> b.getFecha().compareTo(a.getFecha()));
 
         return resumen;

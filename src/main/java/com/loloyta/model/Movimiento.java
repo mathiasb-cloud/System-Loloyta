@@ -41,9 +41,6 @@ public class Movimiento {
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
-    
-    @Transient
-    private BigDecimal importe;
 
     public Movimiento() {}
 
@@ -126,16 +123,6 @@ public class Movimiento {
 	public void setMerma(Merma merma) {
 		this.merma = merma;
 	}
-
-	public BigDecimal getImporte() {
-		return importe;
-	}
-
-	public void setImporte(BigDecimal importe) {
-		this.importe = importe;
-	}
-	
-	
 	
 	
 	
