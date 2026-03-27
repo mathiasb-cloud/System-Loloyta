@@ -50,6 +50,13 @@ async function cargarMovimientos() {
                 <span class="fw-semibold">${m.totalItems}</span>
                 <small class="text-muted"> productos</small>
             </td>
+			
+			<td class="col-importe">
+			    ${Number(m.importe || 0).toLocaleString('es-PE', {
+			        style: 'currency',
+			        currency: 'PEN'
+			    })}
+			</td>
 
             <td>
                 <button 
