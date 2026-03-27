@@ -44,6 +44,11 @@ public class VistaController {
     public String almacenes() {
         return "almacenes";
     }
+    
+    @GetMapping("/locales")
+    public String locales() {
+        return "locales";
+    }
 
 
 }
