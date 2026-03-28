@@ -1,7 +1,6 @@
 package com.loloyta.model;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -21,6 +20,10 @@ public class Stock {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
+    @ManyToOne
+    @JoinColumn(name = "proveedor_id")
+    private Proveedor proveedor; // nullable
+
     private BigDecimal cantidad;
 
     @Column(name = "ultima_actualizacion")
@@ -29,19 +32,17 @@ public class Stock {
     public Stock() {
     }
 
-    public Stock(Almacenes almacenes, Producto producto, BigDecimal cantidad, LocalDateTime ultimaActualizacion) {
+    public Stock(Almacenes almacenes, Producto producto, Proveedor proveedor,
+                 BigDecimal cantidad, LocalDateTime ultimaActualizacion) {
         this.almacenes = almacenes;
         this.producto = producto;
+        this.proveedor = proveedor;
         this.cantidad = cantidad;
         this.ultimaActualizacion = ultimaActualizacion;
     }
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Almacenes getAlmacenes() {
@@ -58,6 +59,14 @@ public class Stock {
 
     public void setProducto(Producto producto) {
         this.producto = producto;
+    }
+
+    public Proveedor getProveedor() {
+        return proveedor;
+    }
+
+    public void setProveedor(Proveedor proveedor) {
+        this.proveedor = proveedor;
     }
 
     public BigDecimal getCantidad() {
