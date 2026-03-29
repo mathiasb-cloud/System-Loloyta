@@ -1,8 +1,11 @@
 let localesGlobal = [];
+let almacenesLocalesGlobal = [];
 let modalLocalInstance = null;
+
 
 async function initLocales() {
     inicializarModalLocal();
+    await cargarAlmacenesLocalesCrud();
     configurarBuscadorLocal();
     await cargarLocalesCrud();
 }
@@ -35,7 +38,7 @@ function renderTablaLocales(data) {
     if (!data.length) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="text-center py-4 text-muted">
+                <td colspan="7" class="text-center py-4 text-muted">
                     No hay locales registrados.
                 </td>
             </tr>
@@ -49,6 +52,7 @@ function renderTablaLocales(data) {
                 <td>${l.id ?? "-"}</td>
                 <td class="fw-semibold">${escapeHtmlLocal(l.nombre || "-")}</td>
                 <td>${escapeHtmlLocal(l.ubicacion || "-")}</td>
+                <td>${escapeHtmlLocal(l.almacen?.nombre || "Sin almacén")}</td>
                 <td>
                     <span class="badge ${l.activo ? 'text-bg-success' : 'text-bg-secondary'}">
                         ${l.activo ? 'Activo' : 'Inactivo'}
@@ -68,6 +72,31 @@ function renderTablaLocales(data) {
             </tr>
         `;
     });
+}
+
+
+
+async function cargarAlmacenesLocalesCrud() {
+    try {
+        const res = await fetch("/api/almacenes");
+        if (!res.ok) throw new Error("No se pudieron cargar los almacenes.");
+
+        almacenesLocalesGlobal = await res.json();
+
+        const select = document.getElementById("localAlmacenId");
+        if (!select) return;
+
+        select.innerHTML = `<option value="">Seleccione almacén</option>`;
+
+        almacenesLocalesGlobal
+            .filter(a => a.activo !== false)
+            .forEach(a => {
+                select.innerHTML += `<option value="${a.id}">${escapeHtmlLocal(a.nombre || "")}</option>`;
+            });
+    } catch (error) {
+        console.error(error);
+        mostrarErrorLocal(error.message || "No se pudieron cargar los almacenes.");
+    }
 }
 
 function configurarBuscadorLocal() {
@@ -123,6 +152,7 @@ function editarLocal(id) {
     document.getElementById("localNombre").value = local.nombre ?? "";
     document.getElementById("localUbicacion").value = local.ubicacion ?? "";
     document.getElementById("localActivo").value = String(Boolean(local.activo));
+    document.getElementById("localAlmacenId").value = local.almacen?.id ? String(local.almacen.id) : "";
 
     modalLocalInstance?.show();
 }
@@ -134,7 +164,10 @@ async function guardarLocal() {
     const payload = {
         nombre: document.getElementById("localNombre").value.trim(),
         ubicacion: document.getElementById("localUbicacion").value.trim(),
-        activo: document.getElementById("localActivo").value === "true"
+        activo: document.getElementById("localActivo").value === "true",
+        almacen: {
+            id: Number(document.getElementById("localAlmacenId").value)
+        }
     };
 
     try {
@@ -196,6 +229,7 @@ async function desactivarLocalCrud(id, nombre) {
 function validarFormularioLocal() {
     const nombre = document.getElementById("localNombre")?.value.trim() || "";
     const ubicacion = document.getElementById("localUbicacion")?.value.trim() || "";
+    const almacenId = document.getElementById("localAlmacenId")?.value || "";
 
     if (nombre.length < 2) {
         mostrarInfoLocal("El nombre del local debe tener al menos 2 caracteres.");
@@ -207,6 +241,11 @@ function validarFormularioLocal() {
         return false;
     }
 
+    if (!almacenId) {
+        mostrarInfoLocal("Selecciona el almacén asociado al local.");
+        return false;
+    }
+
     return true;
 }
 
@@ -215,6 +254,7 @@ function limpiarFormularioLocal() {
     document.getElementById("localNombre").value = "";
     document.getElementById("localUbicacion").value = "";
     document.getElementById("localActivo").value = "true";
+    document.getElementById("localAlmacenId").value = "";
 }
 
 function setTituloModalLocal(titulo, subtitulo) {

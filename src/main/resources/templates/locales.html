@@ -48,6 +48,7 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Ubicación</th>
+					<th>Almacén</th>
                     <th>Estado</th>
                     <th>Fecha de creación</th>
                     <th style="width: 180px;">Acciones</th>
@@ -95,6 +96,14 @@
                             autocomplete="off"
                         >
                         <div class="form-text">Dirección o referencia del local.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Almacén asociado</label>
+                        <select id="localAlmacenId" class="form-select">
+                            <option value="">Seleccione almacén</option>
+                        </select>
+                        <div class="form-text">Cada local debe estar relacionado con su propio almacén.</div>
                     </div>
 
                     <div class="mb-0">
