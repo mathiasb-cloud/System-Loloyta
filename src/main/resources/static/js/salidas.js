@@ -1,5 +1,6 @@
 let salidaId = null;
 let productosSalidaGlobal = [];
+let buscadorSalidaClickRegistrado = false;
 
 async function initSalidas() {
     await cargarAlmacenesSalida();
@@ -125,7 +126,10 @@ function configurarBuscadorSalida() {
                 </div>
             `;
 
-            item.onclick = () => {
+            item.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
                 agregarProductoSalida(p);
 
                 input.value = "";
@@ -133,7 +137,7 @@ function configurarBuscadorSalida() {
                 input.blur();
 
                 actualizarResumenSalida();
-            };
+            });
 
             resultadosDiv.appendChild(item);
         });
@@ -145,13 +149,39 @@ function configurarBuscadorSalida() {
         }
     });
 
-    document.addEventListener("click", function (e) {
-        if (!resultadosDiv.contains(e.target) && e.target !== input) {
-            resultadosDiv.innerHTML = "";
-        }
-    });
+    if (!buscadorSalidaClickRegistrado) {
+        document.addEventListener("click", function (e) {
+            const inputActual = document.getElementById("buscadorSalida");
+            const resultadosActual = document.getElementById("resultadosSalida");
+
+            if (!inputActual || !resultadosActual) return;
+
+            if (!resultadosActual.contains(e.target) && e.target !== inputActual) {
+                resultadosActual.innerHTML = "";
+            }
+        });
+
+        buscadorSalidaClickRegistrado = true;
+    }
 }
 
+
+function recalcularFilaSalida(fila) {
+    const cantidadInput = fila.querySelector(".cantidad-salida-item");
+    const precioCell = fila.querySelector(".precio-item");
+    const subtotalCell = fila.querySelector(".subtotal-item");
+
+    const cantidad = Number(cantidadInput?.value || 0);
+    const precio = Number(precioCell?.textContent || 0);
+    const subtotal = cantidad * precio;
+
+    if (subtotalCell) {
+        subtotalCell.textContent = subtotal.toLocaleString("es-PE", {
+            style: "currency",
+            currency: "PEN"
+        });
+    }
+}
 
 async function cargarAlmacenesSalida() {
     const res = await fetch('/api/almacenes');
