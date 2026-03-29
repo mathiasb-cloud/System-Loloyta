@@ -6,13 +6,28 @@ const MERMA_STORAGE_KEY = "loloyta_merma_borrador";
 async function initMermas() {
     await cargarAlmacenesMerma();
     await cargarMotivosMerma();
-    await cargarProductosMerma();
     setFechaActualMerma();
     configurarBuscadorMerma();
     restaurarBorradorMermaLocal();
     enlazarEventosMerma();
     actualizarFlujoMermaVisual();
     actualizarResumenMerma();
+
+    document.getElementById("almacenMerma")?.addEventListener("change", async () => {
+        await cargarProductosMermaPorAlmacen();
+
+        const input = document.getElementById("buscadorMerma");
+        const resultados = document.getElementById("resultadosMerma");
+
+        if (input) input.value = "";
+        if (resultados) resultados.innerHTML = "";
+
+        actualizarResumenMerma();
+    });
+
+    if (document.getElementById("almacenMerma")?.value) {
+        await cargarProductosMermaPorAlmacen();
+    }
 }
 
 function enlazarEventosMerma() {
@@ -96,13 +111,42 @@ async function cargarMotivosMerma() {
     }
 }
 
-async function cargarProductosMerma() {
-    const res = await fetch("/api/productos");
-    const json = await res.json();
-    productosGlobalMerma = (json.content || json || []).filter(p => p.activo !== false);
-}
+async function cargarProductosMermaPorAlmacen() {
+    const almacenId = document.getElementById("almacenMerma")?.value;
 
+    productosMermaGlobal = [];
+
+    if (!almacenId) return;
+
+    try {
+        const res = await fetch(`/api/stock/almacen/${almacenId}`);
+        if (!res.ok) throw new Error("No se pudieron cargar los productos del almacén.");
+
+        const data = await res.json();
+
+        productosMermaGlobal = data
+            .filter(s => s.producto && s.producto.activo !== false)
+            .map(s => ({
+                ...s.producto,
+                proveedor: s.proveedor || null,
+                stockActual: Number(s.cantidad || 0)
+            }));
+    } catch (error) {
+        console.error(error);
+        mostrarErrorMerma(error.message || "No se pudieron cargar los productos del almacén.");
+    }
+}
 function configurarBuscadorMerma() {
+	const almacenId = document.getElementById("almacenMerma")?.value;
+
+	if (!almacenId) {
+	    resultadosDiv.innerHTML = `
+	        <div class="list-group-item text-muted small">
+	            Selecciona un almacén para buscar productos.
+	        </div>
+	    `;
+	    return;
+	}
     const input = document.getElementById("buscadorMerma");
     const resultadosDiv = document.getElementById("resultadosMerma");
 

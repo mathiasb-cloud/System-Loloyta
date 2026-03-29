@@ -8,13 +8,20 @@ let modalLoadingOrdenInstance = null;
 let accionPendienteOrden = null;
 
 async function initOrdenes() {
-    console.log("INIT ORDENES");
     await cargarAlmacenesOrden();
-    await cargarProductos();
     configurarBuscador();
     restaurarBorradorLocal();
     renderizarEstadoOrden();
     actualizarResumenOrden();
+
+    document.getElementById("almacenSelect")?.addEventListener("change", async function () {
+        await cargarProductosPorAlmacenOrden();
+        guardarBorradorLocal();
+    });
+
+    if (document.getElementById("almacenSelect")?.value) {
+        await cargarProductosPorAlmacenOrden();
+    }
 }
 
 
@@ -53,10 +60,32 @@ async function cargarAlmacenesOrden() {
     }
 }
 
-async function cargarProductos() {
-    const res = await fetch("/api/productos");
-    const json = await res.json();
-    productosGlobal = (json.content || json || []).filter(p => p.activo !== false);
+async function cargarProductosPorAlmacenOrden() {
+    const almacenId = document.getElementById("almacenSelect")?.value;
+
+    productosGlobal = [];
+
+    if (!almacenId) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/stock/almacen/${almacenId}`);
+        if (!res.ok) throw new Error("No se pudieron cargar los productos del almacén.");
+
+        const data = await res.json();
+
+        productosGlobal = data
+            .filter(s => s.producto && s.producto.activo !== false)
+            .map(s => ({
+                ...s.producto,
+                proveedor: s.proveedor || null,
+                stockActual: Number(s.cantidad || 0)
+            }));
+    } catch (error) {
+        console.error(error);
+        mostrarError(error.message || "No se pudieron cargar los productos del almacén.");
+    }
 }
 
 function configurarBuscador() {
@@ -66,6 +95,17 @@ function configurarBuscador() {
     if (!input || !resultadosDiv) return;
 
     input.addEventListener("input", function () {
+		
+		const almacenId = document.getElementById("almacenSelect")?.value;
+		if (!almacenId) {
+		    resultadosDiv.innerHTML = `
+		        <div class="list-group-item text-muted small">
+		            Selecciona un almacén para buscar productos.
+		        </div>
+		    `;
+		    return;
+		}
+		
         const texto = this.value.toLowerCase().trim();
         resultadosDiv.innerHTML = "";
 

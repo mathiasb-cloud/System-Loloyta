@@ -30,6 +30,8 @@ function cargar(event, url, element = null) {
                 if (url.includes("movimientos") && typeof initMovimientos === "function") initMovimientos();
 				if (url.includes("locales") && typeof initLocales === "function") initLocales();
                 if (url.includes("mermas") && typeof initMermas === "function") initMermas();
+				if (url.includes("proveedores") && typeof initProveedores === "function") initProveedores();
+				if (url.includes("stock-auditoria") && typeof initStockAuditoria === "function") initStockAuditoria();
             }, 100);
         })
         .catch(error => {

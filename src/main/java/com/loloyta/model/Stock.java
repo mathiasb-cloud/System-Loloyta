@@ -1,11 +1,17 @@
 package com.loloyta.model;
 
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "stock")
+@Table(
+    name = "stock",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"almacen_id", "producto_id"})
+    }
+)
 public class Stock {
 
     @Id
@@ -13,16 +19,16 @@ public class Stock {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "almacen_id")
+    @JoinColumn(name = "almacen_id", nullable = false)
     private Almacenes almacenes;
 
     @ManyToOne
-    @JoinColumn(name = "producto_id")
+    @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
     @ManyToOne
     @JoinColumn(name = "proveedor_id")
-    private Proveedor proveedor; // nullable
+    private Proveedor proveedor; // opcional
 
     private BigDecimal cantidad;
 

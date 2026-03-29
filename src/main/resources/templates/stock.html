@@ -1,18 +1,18 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
     <div>
-        <h2 class="section-title">Stock</h2>
-        <p class="section-subtitle">Consulta cantidades por producto y almacén.</p>
+        <h2 class="section-title">Stock por Almacén</h2>
+        <p class="section-subtitle">Asigna productos a almacenes y gestiona su proveedor opcional.</p>
+    </div>
+
+    <div>
+		<button onclick="cargar(event, '/stock-auditoria', this)" class="btn btn-success btn-icon">
+		    <i class="bi bi-ui-checks-grid me-2"></i>
+		    <span>Auditar Asignación</span>
+		</button>
     </div>
 </div>
 
 <div class="toolbar">
-    <div>
-        <button onclick="cargarStock()" class="btn btn-primary btn-icon">
-            <span>↻</span>
-            <span>Actualizar</span>
-        </button>
-    </div>
-
     <div class="toolbar-group">
         <label class="form-label mb-1">Filtrar por almacén</label>
         <select id="filtroAlmacen" class="form-select">
@@ -42,10 +42,90 @@
                     <th>Unidad</th>
                     <th>Stock Mínimo</th>
                     <th>Almacén</th>
+                    <th>Proveedor</th>
                     <th>Cantidad</th>
+                    <th style="width: 140px;">Acciones</th>
                 </tr>
             </thead>
             <tbody class="text-center"></tbody>
         </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalAsignacionStock" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-0">Asignar Producto a Almacén</h5>
+                    <small class="text-muted">Define qué producto pertenece a qué almacén y su proveedor.</small>
+                </div>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="formAsignacionStock" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Almacén</label>
+                            <select id="stockAlmacenId" class="form-select"></select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Producto</label>
+                            <select id="stockProductoId" class="form-select"></select>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Proveedor</label>
+                            <select id="stockProveedorId" class="form-select">
+                                <option value="">Sin proveedor</option>
+                            </select>
+                            <div class="form-text">Opcional. Puedes dejarlo vacío.</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button onclick="guardarAsignacionStock()" class="btn btn-primary">
+                    Guardar asignación
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalProveedorStock" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-0">Actualizar Proveedor</h5>
+                    <small class="text-muted">Cambia el proveedor del producto en este almacén.</small>
+                </div>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="editarStockProductoId">
+                <input type="hidden" id="editarStockAlmacenId">
+
+                <div class="mb-0">
+                    <label class="form-label">Proveedor</label>
+                    <select id="editarStockProveedorId" class="form-select">
+                        <option value="">Sin proveedor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button onclick="guardarProveedorStock()" class="btn btn-primary">
+                    Guardar cambios
+                </button>
+            </div>
+        </div>
     </div>
 </div>

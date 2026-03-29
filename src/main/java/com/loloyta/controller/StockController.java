@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.loloyta.dto.StockAuditoriaProductoDto;
+import com.loloyta.dto.StockAuditoriaRequestDto;
 import com.loloyta.model.Stock;
 import com.loloyta.service.StockService;
 
@@ -21,10 +23,32 @@ public class StockController {
         return stockService.listar();
     }
 
-    @GetMapping
-    @RequestMapping("/buscar")
+    @GetMapping("/almacen/{almacenId}")
+    public List<Stock> listarPorAlmacen(@PathVariable Long almacenId) {
+        return stockService.listarPorAlmacen(almacenId);
+    }
+
+    @GetMapping("/buscar")
     public Stock obtener(@RequestParam Long productoId, @RequestParam Long almacenId) {
         return stockService.obtenerPorProductoYAlmacen(productoId, almacenId);
+    }
+
+    @PostMapping("/asignar")
+    public Stock asignarProductoAAlmacen(
+            @RequestParam Long productoId,
+            @RequestParam Long almacenId,
+            @RequestParam(required = false) Long proveedorId) {
+
+        return stockService.asignarProductoAAlmacen(productoId, almacenId, proveedorId);
+    }
+
+    @PatchMapping("/proveedor")
+    public Stock actualizarProveedor(
+            @RequestParam Long productoId,
+            @RequestParam Long almacenId,
+            @RequestParam(required = false) Long proveedorId) {
+
+        return stockService.actualizarProveedor(productoId, almacenId, proveedorId);
     }
 
     @PostMapping("/aumentar")
@@ -43,5 +67,15 @@ public class StockController {
             @RequestParam BigDecimal cantidad) {
 
         return stockService.disminuirStock(productoId, almacenId, cantidad);
+    }
+    
+    @GetMapping("/auditoria/{almacenId}")
+    public List<StockAuditoriaProductoDto> listarAuditoria(@PathVariable Long almacenId) {
+        return stockService.listarAuditoriaPorAlmacen(almacenId);
+    }
+
+    @PostMapping("/auditoria/guardar")
+    public void guardarAuditoria(@RequestBody StockAuditoriaRequestDto request) {
+        stockService.guardarAuditoriaAsignacion(request);
     }
 }

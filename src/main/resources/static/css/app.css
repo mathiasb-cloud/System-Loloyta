@@ -1513,3 +1513,111 @@ body {
 		    text-align: right;
 		    font-variant-numeric: tabular-nums;
 		}
+		
+		#tablaProveedores td .badge {
+		    min-width: 78px;
+		    font-weight: 600;
+		}
+
+		#modalProveedor .modal-content {
+		    border: 1px solid var(--border-soft);
+		    border-radius: 22px;
+		    box-shadow: 0 18px 40px rgba(126, 3, 6, 0.08);
+		}
+
+		#modalProveedor .modal-header,
+		#modalProveedor .modal-footer {
+		    border-color: #f3e7dd;
+		}
+
+		#modalProveedor .form-control:focus,
+		#modalProveedor .form-select:focus,
+		#buscadorProveedor.form-control:focus {
+		    box-shadow: 0 0 0 0.18rem rgba(126, 3, 6, 0.10);
+		    border-color: rgba(126, 3, 6, 0.25);
+		}
+		
+		#modalAsignacionStock .modal-content,
+		#modalProveedorStock .modal-content {
+		    border: 1px solid var(--border-soft);
+		    border-radius: 22px;
+		    box-shadow: 0 18px 40px rgba(126, 3, 6, 0.08);
+		}
+
+		#modalAsignacionStock .modal-header,
+		#modalAsignacionStock .modal-footer,
+		#modalProveedorStock .modal-header,
+		#modalProveedorStock .modal-footer {
+		    border-color: #f3e7dd;
+		}
+
+		#modalAsignacionStock .form-control:focus,
+		#modalAsignacionStock .form-select:focus,
+		#modalProveedorStock .form-control:focus,
+		#modalProveedorStock .form-select:focus,
+		#buscadorStock.form-control:focus,
+		#filtroAlmacen.form-select:focus {
+		    box-shadow: 0 0 0 0.18rem rgba(126, 3, 6, 0.10);
+		    border-color: rgba(126, 3, 6, 0.25);
+		}
+		
+		
+		.auditoria-flow-box {
+		    display: flex;
+		    align-items: center;
+		    gap: 14px;
+		    background: #fff7f2;
+		    border: 1px solid #f1dfd6;
+		    border-radius: 16px;
+		    padding: 14px 16px;
+		    min-height: 58px;
+		}
+
+		.auditoria-flow-icon {
+		    width: 42px;
+		    height: 42px;
+		    border-radius: 12px;
+		    background: rgba(126, 3, 6, 0.08);
+		    color: #7e0306;
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    font-size: 1.1rem;
+		}
+
+		.auditoria-flow-label {
+		    font-size: .8rem;
+		    color: #8b6d63;
+		}
+
+		.auditoria-flow-value {
+		    font-weight: 700;
+		    color: #2f241f;
+		}
+
+		.auditoria-stock-chip {
+		    display: inline-flex;
+		    align-items: center;
+		    justify-content: center;
+		    min-width: 54px;
+		    padding: 6px 10px;
+		    border-radius: 999px;
+		    font-weight: 700;
+		    font-size: .85rem;
+		}
+
+		.auditoria-stock-chip-ok {
+		    background: #e9f7ef;
+		    color: #1d7a46;
+		}
+
+		.auditoria-stock-chip-zero {
+		    background: #fff1f0;
+		    color: #b42318;
+		}
+
+		.auditoria-check {
+		    width: 1.1rem;
+		    height: 1.1rem;
+		    cursor: pointer;
+		}

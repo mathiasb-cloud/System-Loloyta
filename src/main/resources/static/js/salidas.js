@@ -4,11 +4,16 @@ let productosSalidaGlobal = [];
 async function initSalidas() {
     await cargarAlmacenesSalida();
     await cargarLocalesSalida();
-    await cargarProductosSalida();
 
     document.getElementById("almacenSalida")?.addEventListener("change", async () => {
+        await cargarProductosSalidaPorAlmacen();
         actualizarFlujoSalidaVisual();
         actualizarResumenSalida();
+
+        const resultadosDiv = document.getElementById("resultadosSalida");
+        const input = document.getElementById("buscadorSalida");
+        if (resultadosDiv) resultadosDiv.innerHTML = "";
+        if (input) input.value = "";
     });
 
     document.getElementById("localSalida")?.addEventListener("change", actualizarFlujoSalidaVisual);
@@ -17,6 +22,10 @@ async function initSalidas() {
     actualizarEstadoBotonesSalida();
     actualizarFlujoSalidaVisual();
     actualizarResumenSalida();
+
+    if (document.getElementById("almacenSalida")?.value) {
+        await cargarProductosSalidaPorAlmacen();
+    }
 }
 
 async function obtenerStockDisponibleSalida(productoId, almacenId) {
@@ -41,6 +50,20 @@ function obtenerClaseStockSalida(stockActual, stockMinimo) {
 }
 
 function configurarBuscadorSalida() {
+	
+	
+	const almacenId = document.getElementById("almacenSalida")?.value;
+
+	if (!almacenId) {
+	    resultadosDiv.innerHTML = `
+	        <div class="list-group-item text-muted small">
+	            Selecciona un almacén para buscar productos.
+	        </div>
+	    `;
+	    return;
+	}
+	
+	
     const input = document.getElementById("buscadorSalida");
     const resultadosDiv = document.getElementById("resultadosSalida");
 
@@ -163,11 +186,30 @@ async function cargarLocalesSalida() {
     });
 }
 
-async function cargarProductosSalida() {
-    const res = await fetch('/api/productos');
-    const json = await res.json();
+async function cargarProductosSalidaPorAlmacen() {
+    const almacenId = document.getElementById("almacenSalida")?.value;
 
-    productosSalidaGlobal = json.content || json || [];
+    productosSalidaGlobal = [];
+
+    if (!almacenId) return;
+
+    try {
+        const res = await fetch(`/api/stock/almacen/${almacenId}`);
+        if (!res.ok) throw new Error("No se pudieron cargar los productos del almacén.");
+
+        const data = await res.json();
+
+        productosSalidaGlobal = data
+            .filter(s => s.producto && s.producto.activo !== false)
+            .map(s => ({
+                ...s.producto,
+                proveedor: s.proveedor || null,
+                stockActual: Number(s.cantidad || 0)
+            }));
+    } catch (error) {
+        console.error(error);
+        mostrarErrorSalida(error.message || "No se pudieron cargar los productos del almacén.");
+    }
 }
 
 function agregarProductoSalida(producto) {

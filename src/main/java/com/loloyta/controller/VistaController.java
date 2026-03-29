@@ -49,6 +49,16 @@ public class VistaController {
     public String locales() {
         return "locales";
     }
+    
+    @GetMapping("/proveedores")
+    public String proveedores() {
+        return "proveedores";
+    }
+    
+    @GetMapping("/stock-auditoria")
+    public String stockAuditoria() {
+        return "stock-auditoria";
+    }
 
 
 }

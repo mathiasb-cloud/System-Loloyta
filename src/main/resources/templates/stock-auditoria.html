@@ -1,0 +1,75 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="section-title">Auditoría de Productos por Almacén</h2>
+        <p class="section-subtitle">Asigna masivamente los productos que pertenecen a un almacén y define su proveedor opcional.</p>
+    </div>
+</div>
+
+<div class="main-card p-3 mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label">Almacén</label>
+            <select id="auditoriaAlmacenId" class="form-select"></select>
+        </div>
+
+        <div class="col-md-7">
+            <div class="auditoria-flow-box">
+                <div class="auditoria-flow-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div>
+                    <div class="auditoria-flow-label">Auditoría activa</div>
+                    <div id="auditoriaAlmacenNombre" class="auditoria-flow-value">Selecciona un almacén para comenzar</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toolbar">
+    <div class="toolbar-group search-box">
+        <label class="form-label mb-1">Buscar producto</label>
+        <input
+            type="text"
+            id="buscadorAuditoriaStock"
+            class="form-control"
+            placeholder="Buscar por nombre, descripción o categoría..."
+        >
+    </div>
+
+    <div class="toolbar-group">
+        <label class="form-label mb-1">Resumen</label>
+        <div id="resumenAuditoriaStock" class="small text-muted pt-2"></div>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle mb-0" id="tablaAuditoriaStock">
+            <thead class="text-center">
+                <tr>
+                    <th style="width: 70px;">Asignar</th>
+                    <th>Producto</th>
+                    <th>Descripción</th>
+                    <th>Categoría</th>
+                    <th>Unidad</th>
+                    <th>Proveedor</th>
+                    <th>Stock Actual</th>
+                </tr>
+            </thead>
+            <tbody class="text-center"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+    <button class="btn btn-outline-secondary btn-icon" onclick="restaurarAuditoriaStock()">
+        <i class="bi bi-arrow-counterclockwise me-2"></i>
+        <span>Restaurar</span>
+    </button>
+
+    <button class="btn btn-primary btn-icon" onclick="abrirConfirmacionGuardarAuditoriaStock()">
+        <i class="bi bi-check2-circle me-2"></i>
+        <span>Guardar cambios</span>
+    </button>
+</div>
