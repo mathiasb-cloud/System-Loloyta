@@ -1,4 +1,4 @@
-let productosGlobalMerma = [];
+let productosMermaGlobal = [];
 let mermaId = null;
 
 const MERMA_STORAGE_KEY = "loloyta_merma_borrador";
@@ -13,17 +13,20 @@ async function initMermas() {
     actualizarFlujoMermaVisual();
     actualizarResumenMerma();
 
-    document.getElementById("almacenMerma")?.addEventListener("change", async () => {
-        await cargarProductosMermaPorAlmacen();
+	document.getElementById("almacenMerma")?.addEventListener("change", async () => {
+	    await cargarProductosMermaPorAlmacen();
+	    await refrescarStocksTablaMerma();
 
-        const input = document.getElementById("buscadorMerma");
-        const resultados = document.getElementById("resultadosMerma");
+	    const input = document.getElementById("buscadorMerma");
+	    const resultados = document.getElementById("resultadosMerma");
 
-        if (input) input.value = "";
-        if (resultados) resultados.innerHTML = "";
+	    if (input) input.value = "";
+	    if (resultados) resultados.innerHTML = "";
 
-        actualizarResumenMerma();
-    });
+	    guardarBorradorMermaLocal();
+	    actualizarFlujoMermaVisual();
+	    actualizarResumenMerma();
+	});
 
     if (document.getElementById("almacenMerma")?.value) {
         await cargarProductosMermaPorAlmacen();
@@ -111,6 +114,8 @@ async function cargarMotivosMerma() {
     }
 }
 
+
+
 async function cargarProductosMermaPorAlmacen() {
     const almacenId = document.getElementById("almacenMerma")?.value;
 
@@ -120,7 +125,9 @@ async function cargarProductosMermaPorAlmacen() {
 
     try {
         const res = await fetch(`/api/stock/almacen/${almacenId}`);
-        if (!res.ok) throw new Error("No se pudieron cargar los productos del almacén.");
+        if (!res.ok) {
+            throw new Error("No se pudieron cargar los productos del almacén.");
+        }
 
         const data = await res.json();
 
@@ -136,31 +143,35 @@ async function cargarProductosMermaPorAlmacen() {
         mostrarErrorMerma(error.message || "No se pudieron cargar los productos del almacén.");
     }
 }
-function configurarBuscadorMerma() {
-	const almacenId = document.getElementById("almacenMerma")?.value;
 
-	if (!almacenId) {
-	    resultadosDiv.innerHTML = `
-	        <div class="list-group-item text-muted small">
-	            Selecciona un almacén para buscar productos.
-	        </div>
-	    `;
-	    return;
-	}
+
+function configurarBuscadorMerma() {
     const input = document.getElementById("buscadorMerma");
     const resultadosDiv = document.getElementById("resultadosMerma");
 
     if (!input || !resultadosDiv) return;
 
-    input.addEventListener("input", async function () {
+    input.addEventListener("input", function () {
         const texto = this.value.toLowerCase().trim();
         resultadosDiv.innerHTML = "";
 
+        const almacenId = document.getElementById("almacenMerma")?.value;
+
+        if (!almacenId) {
+            resultadosDiv.innerHTML = `
+                <div class="list-group-item text-muted small">
+                    Selecciona un almacén para buscar productos.
+                </div>
+            `;
+            return;
+        }
+
         if (!texto) return;
 
-        const idsAgregados = obtenerItemsMermaTabla().map(x => String(x.productoId));
+        const idsAgregados = [...document.querySelectorAll("#tablaMerma tbody tr")]
+            .map(fila => String(fila.dataset.id));
 
-        const filtrados = productosGlobalMerma
+        const filtrados = productosMermaGlobal
             .filter(p => p.nombre.toLowerCase().includes(texto))
             .filter(p => !idsAgregados.includes(String(p.id)))
             .slice(0, 8);
@@ -174,40 +185,53 @@ function configurarBuscadorMerma() {
             return;
         }
 
-        const almacenId = document.getElementById("almacenMerma")?.value || "";
-
-        for (const p of filtrados) {
-            let stockActual = null;
-
-            if (almacenId) {
-                stockActual = await obtenerStockDisponible(p.id, almacenId);
-            }
+        filtrados.forEach(p => {
+            const stockActual = Number(p.stockActual || 0);
+            const stockMinimo = Number(p.stockMinimo || 0);
+            const claseStock = stockActual <= stockMinimo ? "text-danger" : "text-success";
 
             const item = document.createElement("button");
             item.type = "button";
             item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+
             item.innerHTML = `
                 <div class="text-start">
                     <div class="fw-medium">${escapeHtml(p.nombre)}</div>
-                    <small class="text-muted">${escapeHtml(p.categoria?.nombre || "")}</small>
+                    <small class="text-muted d-block">${escapeHtml(p.categoria?.nombre || "")}</small>
                 </div>
-                <div class="text-end">
-                    <small class="text-muted d-block">${escapeHtml(p.unidadMedida || "")}</small>
-                    <small class="${(Number(stockActual || 0) > 0) ? 'text-success' : 'text-danger'}">
-                        Stock: ${formatearNumero(stockActual || 0)}
-                    </small>
+
+                <div class="d-flex align-items-center gap-3 bloque-derecha">
+                    <div class="precio-item">
+                        <span class="label-precio">Precio:</span>
+                        <span class="valor-precio">
+                            ${Number(p.precioActual || 0).toLocaleString('es-PE', {
+                                style: 'currency',
+                                currency: 'PEN'
+                            })}
+                        </span>
+                    </div>
+
+                    <div class="text-end">
+                        <small class="text-muted d-block">${escapeHtml(p.unidadMedida || "")}</small>
+                        <small class="${claseStock} fw-semibold d-block">
+                            Stock: ${stockActual}
+                        </small>
+                    </div>
                 </div>
             `;
 
-            item.onclick = async () => {
-                await agregarProductoTablaMerma(p);
-                input.value = "";
-                resultadosDiv.innerHTML = "";
-                input.focus();
-            };
+			item.onclick = async () => {
+			    await agregarProductoTablaMerma(p);
+
+			    input.value = "";
+			    resultadosDiv.innerHTML = "";
+			    input.blur();
+
+			    actualizarResumenMerma();
+			};
 
             resultadosDiv.appendChild(item);
-        }
+        });
     });
 
     input.addEventListener("keydown", function (e) {
@@ -591,10 +615,11 @@ async function refrescarStocksTablaMerma() {
 
     for (const fila of filas) {
         const productoId = fila.querySelector("td[data-id]")?.dataset.id;
-        const producto = productosGlobalMerma.find(p => String(p.id) === String(productoId));
+        const producto = productosMermaGlobal.find(p => String(p.id) === String(productoId));
 
         const stockActual = await obtenerStockDisponible(productoId, almacenId);
         const stockCell = fila.querySelector(".stock-actual-cell");
+
         if (stockCell) {
             stockCell.innerHTML = renderStockChip(stockActual, producto?.stockMinimo);
         }
@@ -633,8 +658,12 @@ async function restaurarBorradorMermaLocal() {
         if (fecha && data.fecha) fecha.value = data.fecha;
         if (observacion) observacion.value = data.observacion || "";
 
+        if (data.almacenId) {
+            await cargarProductosMermaPorAlmacen();
+        }
+
         for (const item of (data.items || [])) {
-            const producto = productosGlobalMerma.find(p => String(p.id) === String(item.productoId));
+            const producto = productosMermaGlobal.find(p => String(p.id) === String(item.productoId));
             if (!producto) continue;
 
             await agregarProductoTablaMerma(producto, item.cantidad);

@@ -12,6 +12,7 @@ async function initSalidas() {
 
         const resultadosDiv = document.getElementById("resultadosSalida");
         const input = document.getElementById("buscadorSalida");
+
         if (resultadosDiv) resultadosDiv.innerHTML = "";
         if (input) input.value = "";
     });
@@ -50,28 +51,25 @@ function obtenerClaseStockSalida(stockActual, stockMinimo) {
 }
 
 function configurarBuscadorSalida() {
-	
-	
-	const almacenId = document.getElementById("almacenSalida")?.value;
-
-	if (!almacenId) {
-	    resultadosDiv.innerHTML = `
-	        <div class="list-group-item text-muted small">
-	            Selecciona un almacén para buscar productos.
-	        </div>
-	    `;
-	    return;
-	}
-	
-	
     const input = document.getElementById("buscadorSalida");
     const resultadosDiv = document.getElementById("resultadosSalida");
 
     if (!input || !resultadosDiv) return;
 
-    input.addEventListener("input", async function () {
+    input.addEventListener("input", function () {
         const texto = this.value.toLowerCase().trim();
         resultadosDiv.innerHTML = "";
+
+        const almacenId = document.getElementById("almacenSalida")?.value;
+
+        if (!almacenId) {
+            resultadosDiv.innerHTML = `
+                <div class="list-group-item text-muted small">
+                    Selecciona un almacén para buscar productos.
+                </div>
+            `;
+            return;
+        }
 
         if (!texto) return;
 
@@ -92,14 +90,10 @@ function configurarBuscadorSalida() {
             return;
         }
 
-        const almacenId = document.getElementById("almacenSalida")?.value || "";
-
-        for (const p of filtrados) {
-            const stockActual = almacenId
-                ? await obtenerStockDisponibleSalida(p.id, almacenId)
-                : 0;
-
-            const claseStock = obtenerClaseStockSalida(stockActual, p.stockMinimo);
+        filtrados.forEach(p => {
+            const stockActual = Number(p.stockActual || 0);
+            const stockMinimo = Number(p.stockMinimo || 0);
+            const claseStock = stockActual <= stockMinimo ? "text-danger" : "text-success";
 
             const item = document.createElement("button");
             item.type = "button";
@@ -142,7 +136,7 @@ function configurarBuscadorSalida() {
             };
 
             resultadosDiv.appendChild(item);
-        }
+        });
     });
 
     input.addEventListener("keydown", function (e) {
@@ -157,6 +151,7 @@ function configurarBuscadorSalida() {
         }
     });
 }
+
 
 async function cargarAlmacenesSalida() {
     const res = await fetch('/api/almacenes');
@@ -186,6 +181,7 @@ async function cargarLocalesSalida() {
     });
 }
 
+
 async function cargarProductosSalidaPorAlmacen() {
     const almacenId = document.getElementById("almacenSalida")?.value;
 
@@ -195,7 +191,9 @@ async function cargarProductosSalidaPorAlmacen() {
 
     try {
         const res = await fetch(`/api/stock/almacen/${almacenId}`);
-        if (!res.ok) throw new Error("No se pudieron cargar los productos del almacén.");
+        if (!res.ok) {
+            throw new Error("No se pudieron cargar los productos del almacén.");
+        }
 
         const data = await res.json();
 
@@ -211,59 +209,41 @@ async function cargarProductosSalidaPorAlmacen() {
         mostrarErrorSalida(error.message || "No se pudieron cargar los productos del almacén.");
     }
 }
-
 function agregarProductoSalida(producto) {
-    const tabla = document.querySelector("#tablaSalida tbody");
-    const filas = tabla.querySelectorAll("tr");
+    const tbody = document.querySelector("#tablaSalida tbody");
+    if (!tbody) return;
 
-    for (let i = 0; i < filas.length; i++) {
-        if (filas[i].dataset.id == producto.id) {
-            mostrarInfoSalida("Ese producto ya está en la lista.");
-            return;
-        }
-    }
+    const yaExiste = [...tbody.querySelectorAll("tr")].some(tr => String(tr.dataset.id) === String(producto.id));
+    if (yaExiste) return;
 
     const fila = document.createElement("tr");
     fila.dataset.id = producto.id;
 
-	fila.innerHTML = `
-	    <td>${escapeHtml(producto.categoria?.nombre || "N/A")}</td>
-	    <td>${escapeHtml(producto.nombre)}</td>
-	    <td>${escapeHtml(producto.unidadMedida || "N/A")}</td>
+    fila.innerHTML = `
+        <td>${escapeHtml(producto.categoria?.nombre || "-")}</td>
+        <td>${escapeHtml(producto.nombre || "-")}</td>
+        <td>${escapeHtml(producto.unidadMedida || "-")}</td>
+        <td>
+            <input type="number" class="form-control cantidad-salida-item" value="1" min="1" step="1">
+        </td>
+        <td class="precio-item">${Number(producto.precioActual || 0).toFixed(2)}</td>
+        <td class="subtotal-item fw-semibold text-center">S/ 0.00</td>
+        <td>
+            <button type="button" class="btn btn-sm btn-danger" onclick="eliminarFilaSalida(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    `;
 
-	    <td>
-	        <input type="number" class="form-control cantidad-salida-item" value="1" min="1" step="1">
-	    </td>
+    tbody.appendChild(fila);
 
-	    <td class="precio-item">
-	        ${Number(producto.precioActual || 0).toLocaleString('es-PE', {
-	            style: 'currency',
-	            currency: 'PEN'
-	        })}
-	    </td>
+    fila.querySelector(".cantidad-salida-item")?.addEventListener("input", () => {
+        recalcularFilaSalida(fila);
+        actualizarResumenSalida();
+    });
 
-	    <td class="importe-item fw-semibold text-center">
-	        S/ 0.00
-	    </td>
-
-	    <td>
-	        <button type="button" class="btn btn-sm btn-danger" onclick="eliminarFilaSalida(this)">
-	            <i class="bi bi-trash"></i>
-	        </button>
-	    </td>
-	`;
-
-    tabla.appendChild(fila);
-	calcularImporteFila(fila);
-
-	fila.querySelector(".cantidad-salida-item")?.addEventListener("input", () => {
-	    calcularImporteFila(fila);
-	    actualizarResumenSalida();
-	});
-
-    actualizarResumenSalida();
+    recalcularFilaSalida(fila);
 }
-
 function eliminarFilaSalida(btn) {
     btn.closest("tr").remove();
     actualizarResumenSalida();
