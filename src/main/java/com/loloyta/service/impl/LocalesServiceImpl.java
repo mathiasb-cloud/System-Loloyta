@@ -1,5 +1,6 @@
 package com.loloyta.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,14 @@ public class LocalesServiceImpl implements LocalesService {
 
     @Override
     public Locales guardarLocal(Locales local) {
+        if (local.getFechaCreacion() == null) {
+            local.setFechaCreacion(LocalDateTime.now());
+        }
+
+        if (local.getActivo() == null) {
+            local.setActivo(true);
+        }
+
         return localesRepository.save(local);
     }
 
@@ -40,6 +49,7 @@ public class LocalesServiceImpl implements LocalesService {
         local.setNombre(localActualizado.getNombre());
         local.setUbicacion(localActualizado.getUbicacion());
         local.setActivo(localActualizado.getActivo());
+        local.setAlmacen(localActualizado.getAlmacen());
 
         return localesRepository.save(local);
     }
@@ -53,5 +63,10 @@ public class LocalesServiceImpl implements LocalesService {
         local.setActivo(false);
 
         localesRepository.save(local);
+    }
+    
+    @Override
+    public List<Locales> listarPorAlmacen(Long almacenId) {
+        return localesRepository.findByAlmacenId(almacenId);
     }
 }

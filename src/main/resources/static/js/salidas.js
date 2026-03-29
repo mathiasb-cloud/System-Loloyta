@@ -5,17 +5,19 @@ async function initSalidas() {
     await cargarAlmacenesSalida();
     await cargarLocalesSalida();
 
-    document.getElementById("almacenSalida")?.addEventListener("change", async () => {
-        await cargarProductosSalidaPorAlmacen();
-        actualizarFlujoSalidaVisual();
-        actualizarResumenSalida();
+	document.getElementById("almacenSalida")?.addEventListener("change", async () => {
+	    await cargarProductosSalidaPorAlmacen();
+	    await cargarLocalesPorAlmacenSalida();
 
-        const resultadosDiv = document.getElementById("resultadosSalida");
-        const input = document.getElementById("buscadorSalida");
+	    actualizarFlujoSalidaVisual();
+	    actualizarResumenSalida();
 
-        if (resultadosDiv) resultadosDiv.innerHTML = "";
-        if (input) input.value = "";
-    });
+	    const resultadosDiv = document.getElementById("resultadosSalida");
+	    const input = document.getElementById("buscadorSalida");
+
+	    if (resultadosDiv) resultadosDiv.innerHTML = "";
+	    if (input) input.value = "";
+	});
 
     document.getElementById("localSalida")?.addEventListener("change", actualizarFlujoSalidaVisual);
 
@@ -719,3 +721,34 @@ function calcularImporteFila(fila) {
 
     return importe;
 }
+
+
+
+async function cargarLocalesPorAlmacenSalida() {
+    const almacenId = document.getElementById("almacenSalida")?.value;
+    const select = document.getElementById("localSalida");
+
+    if (!select) return;
+
+    select.innerHTML = `<option value="">Seleccione local</option>`;
+
+    if (!almacenId) return;
+
+    try {
+        const res = await fetch(`/api/locales/almacen/${almacenId}`);
+        if (!res.ok) throw new Error("No se pudieron cargar los locales del almacén");
+
+        const data = await res.json();
+
+        data
+            .filter(l => l.activo !== false)
+            .forEach(l => {
+                select.innerHTML += `<option value="${l.id}">${l.nombre}</option>`;
+            });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+

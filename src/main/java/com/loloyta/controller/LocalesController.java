@@ -39,4 +39,9 @@ public class LocalesController {
     public void desactivar(@PathVariable Long id) {
         localesService.desactivarLocal(id);
     }
+    
+    @GetMapping("/almacen/{almacenId}")
+    public List<Locales> listarPorAlmacen(@PathVariable Long almacenId) {
+        return localesService.listarPorAlmacen(almacenId);
+    }
 }

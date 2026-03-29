@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -16,6 +18,10 @@ public class Locales {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+	
+	@ManyToOne
+	@JoinColumn(name = "almacen_id")
+	private Almacenes almacen;
 
     private String nombre;
 
@@ -75,5 +81,15 @@ public class Locales {
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
+
+	public Almacenes getAlmacen() {
+		return almacen;
+	}
+
+	public void setAlmacen(Almacenes almacen) {
+		this.almacen = almacen;
+	}
+    
+    
 
 }

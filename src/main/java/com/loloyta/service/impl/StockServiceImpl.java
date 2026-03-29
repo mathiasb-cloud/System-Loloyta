@@ -215,7 +215,10 @@ public class StockServiceImpl implements StockService {
                     BigDecimal cantidad = existente.getCantidad() != null ? existente.getCantidad() : BigDecimal.ZERO;
 
                     if (cantidad.compareTo(BigDecimal.ZERO) > 0) {
-                        throw new RuntimeException("No se puede desasignar el producto " + producto.getNombre() + " porque tiene stock mayor a 0");
+                        throw new IllegalStateException(
+                            "No se puede desasignar el producto \"" + producto.getNombre() +
+                            "\" del almacén porque cuenta con stock disponible."
+                        );
                     }
 
                     stockRepository.delete(existente);

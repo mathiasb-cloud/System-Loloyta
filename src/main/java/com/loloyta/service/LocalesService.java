@@ -16,5 +16,7 @@ public interface LocalesService {
     Locales actualizarLocal(Long id, Locales local);
 
     void desactivarLocal(Long id);
+    
+    List<Locales> listarPorAlmacen(Long almacenId);
 
 }

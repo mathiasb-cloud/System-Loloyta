@@ -52,9 +52,19 @@ public class SalidaServiceImpl implements SalidaService {
         if (salida.getLocales() == null || salida.getLocales().getId() == null) {
             throw new RuntimeException("Debe seleccionar un local destino");
         }
+        
+        if (salida.getLocales().getAlmacen() == null || salida.getLocales().getAlmacen().getId() == null) {
+            throw new RuntimeException("El local seleccionado no tiene un almacén asociado");
+        }
+
+        if (!salida.getLocales().getAlmacen().getId().equals(salida.getAlmacenes().getId())) {
+            throw new RuntimeException("La salida solo puede realizarse al local que pertenece a ese almacén");
+        }
 
         salida.setEstado("PENDIENTE");
         salida.setFecha(LocalDateTime.now());
+        
+        
 
         return salidaRepository.save(salida);
     }
@@ -68,6 +78,14 @@ public class SalidaServiceImpl implements SalidaService {
         salida.setAlmacenes(salidaActualizada.getAlmacenes());
         salida.setLocales(salidaActualizada.getLocales());
         salida.setUsuario(salidaActualizada.getUsuario());
+        
+        if (salida.getLocales().getAlmacen() == null || salida.getLocales().getAlmacen().getId() == null) {
+            throw new RuntimeException("El local seleccionado no tiene un almacén asociado");
+        }
+
+        if (!salida.getLocales().getAlmacen().getId().equals(salida.getAlmacenes().getId())) {
+            throw new RuntimeException("La salida solo puede realizarse al local que pertenece a ese almacén");
+        }
 
         return salidaRepository.save(salida);
     }
