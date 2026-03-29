@@ -3,23 +3,20 @@ let productosSalidaGlobal = [];
 
 async function initSalidas() {
     await cargarAlmacenesSalida();
-    await cargarLocalesSalida();
 
-	document.getElementById("almacenSalida")?.addEventListener("change", async () => {
-	    await cargarProductosSalidaPorAlmacen();
-	    await cargarLocalesPorAlmacenSalida();
+    document.getElementById("almacenSalida")?.addEventListener("change", async () => {
+        await cargarProductosSalidaPorAlmacen();
+        await cargarLocalAutomaticoPorAlmacenSalida();
 
-	    actualizarFlujoSalidaVisual();
-	    actualizarResumenSalida();
+        actualizarFlujoSalidaVisual();
+        actualizarResumenSalida();
 
-	    const resultadosDiv = document.getElementById("resultadosSalida");
-	    const input = document.getElementById("buscadorSalida");
+        const resultadosDiv = document.getElementById("resultadosSalida");
+        const input = document.getElementById("buscadorSalida");
 
-	    if (resultadosDiv) resultadosDiv.innerHTML = "";
-	    if (input) input.value = "";
-	});
-
-    document.getElementById("localSalida")?.addEventListener("change", actualizarFlujoSalidaVisual);
+        if (resultadosDiv) resultadosDiv.innerHTML = "";
+        if (input) input.value = "";
+    });
 
     configurarBuscadorSalida();
     actualizarEstadoBotonesSalida();
@@ -28,6 +25,7 @@ async function initSalidas() {
 
     if (document.getElementById("almacenSalida")?.value) {
         await cargarProductosSalidaPorAlmacen();
+        await cargarLocalAutomaticoPorAlmacenSalida();
     }
 }
 
@@ -747,6 +745,39 @@ async function cargarLocalesPorAlmacenSalida() {
             });
     } catch (error) {
         console.error(error);
+    }
+}
+
+async function cargarLocalAutomaticoPorAlmacenSalida() {
+    const almacenId = document.getElementById("almacenSalida")?.value;
+    const select = document.getElementById("localSalida");
+
+    if (!select) return;
+
+    select.innerHTML = `<option value="">Seleccione local</option>`;
+
+    if (!almacenId) return;
+
+    try {
+        const res = await fetch(`/api/locales/almacen/${almacenId}`);
+        if (!res.ok) {
+            throw new Error("No se pudo cargar el local del almacén.");
+        }
+
+        const data = await res.json();
+
+        const localesActivos = (data || []).filter(l => l.activo !== false);
+
+        if (localesActivos.length > 0) {
+            const local = localesActivos[0];
+            select.innerHTML = `<option value="${local.id}">${local.nombre}</option>`;
+            select.value = String(local.id);
+        } else {
+            select.innerHTML = `<option value="">Sin local asociado</option>`;
+        }
+    } catch (error) {
+        console.error(error);
+        select.innerHTML = `<option value="">No disponible</option>`;
     }
 }
 
