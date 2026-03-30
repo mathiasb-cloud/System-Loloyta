@@ -1,100 +1,104 @@
 package com.loloyta.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
-	@Id
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 80)
     private String nombre;
 
-    @Column(unique = true)
-    private String usuario;
+    @Column(nullable = false, length = 80)
+    private String apellido;
 
-    private String contrasena;
+    @Column(length = 120, unique = true)
+    private String correo;
 
-    private String rol;
+    @Column(length = 20, unique = true)
+    private String dni;
 
-    private Boolean activo;
+    @Column(length = 20)
+    private String telefono;
 
-    @Column(name = "fecha_creacion")
+    @Column(nullable = false, unique = true, length = 50)
+    private String username;
+
+    @JsonIgnore
+    @Column(nullable = false, length = 255)
+    private String password;
+
+    @Column(nullable = false)
+    private Boolean activo = true;
+
+    @Column(nullable = false)
     private LocalDateTime fechaCreacion;
 
-    public Usuario() {
+    private LocalDateTime ultimoAcceso;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rol_id", nullable = false)
+    private Rol rol;
+
+    @OneToMany(mappedBy = "usuario")
+    @JsonIgnore
+    private List<Movimiento> movimientos;
+
+    @PrePersist
+    public void prePersist() {
+        if (fechaCreacion == null) {
+            fechaCreacion = LocalDateTime.now();
+        }
+        if (activo == null) {
+            activo = true;
+        }
     }
 
-    public Usuario(String nombre, String usuario, LocalDateTime fechaCreacion, String contrasena, String rol, Boolean activo) {
-        this.nombre = nombre;
-        this.usuario = usuario;
-        this.fechaCreacion = fechaCreacion;
-        this.contrasena = contrasena;
-        this.rol = rol;
-        this.activo = activo;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getApellido() { return apellido; }
+    public void setApellido(String apellido) { this.apellido = apellido; }
 
-    public String getNombre() {
-        return nombre;
-    }
+    public String getCorreo() { return correo; }
+    public void setCorreo(String correo) { this.correo = correo; }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    public String getDni() { return dni; }
+    public void setDni(String dni) { this.dni = dni; }
 
-    public String getContrasena() {
-        return contrasena;
-    }
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
 
-    public void setContrasena(String contrasena) {
-        this.contrasena = contrasena;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public String getUsuario() {
-        return usuario;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public void setUsuario(String usuario) {
-        this.usuario = usuario;
-    }
+    public Boolean getActivo() { return activo; }
+    public void setActivo(Boolean activo) { this.activo = activo; }
 
-    public String getRol() {
-        return rol;
-    }
+    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
+    public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
 
-    public void setRol(String rol) {
-        this.rol = rol;
-    }
+    public LocalDateTime getUltimoAcceso() { return ultimoAcceso; }
+    public void setUltimoAcceso(LocalDateTime ultimoAcceso) { this.ultimoAcceso = ultimoAcceso; }
 
-    public Boolean getActivo() {
-        return activo;
-    }
+    public Rol getRol() { return rol; }
+    public void setRol(Rol rol) { this.rol = rol; }
 
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
+    public List<Movimiento> getMovimientos() { return movimientos; }
+    public void setMovimientos(List<Movimiento> movimientos) { this.movimientos = movimientos; }
 }
