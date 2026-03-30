@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import com.loloyta.model.DetalleSalida;
 import com.loloyta.model.Movimiento;
 import com.loloyta.model.Salida;
+import com.loloyta.repository.AlmacenesRepository;
 import com.loloyta.repository.DetalleSalidaRepository;
+import com.loloyta.repository.LocalesRepository;
 import com.loloyta.repository.MovimientoRepository;
 import com.loloyta.repository.SalidaRepository;
 import com.loloyta.service.SalidaService;
@@ -31,6 +33,12 @@ public class SalidaServiceImpl implements SalidaService {
 
     @Autowired
     private MovimientoRepository movimientoRepository;
+    
+    @Autowired
+    private LocalesRepository localesRepository;
+
+    @Autowired
+    private AlmacenesRepository almacenesRepository;
 
     @Override
     public List<Salida> listar() {
@@ -45,50 +53,70 @@ public class SalidaServiceImpl implements SalidaService {
     @Override
     public Salida crear(Salida salida) {
 
-        if (salida.getAlmacenes() == null || salida.getAlmacenes().getId() == null) {
-            throw new RuntimeException("Debe seleccionar un almacén");
-        }
-
-        if (salida.getLocales() == null || salida.getLocales().getId() == null) {
-            throw new RuntimeException("Debe seleccionar un local destino");
-        }
-        
-        if (salida.getLocales().getAlmacen() == null || salida.getLocales().getAlmacen().getId() == null) {
-            throw new RuntimeException("El local seleccionado no tiene un almacén asociado");
-        }
-
-        if (!salida.getLocales().getAlmacen().getId().equals(salida.getAlmacenes().getId())) {
-            throw new RuntimeException("La salida solo puede realizarse al local que pertenece a ese almacén");
-        }
-
-        salida.setEstado("PENDIENTE");
-        salida.setFecha(LocalDateTime.now());
-        
-        
-
-        return salidaRepository.save(salida);
+    if (salida.getAlmacenes() == null || salida.getAlmacenes().getId() == null) {
+        throw new RuntimeException("Debe seleccionar un almacén");
     }
+
+    if (salida.getLocales() == null || salida.getLocales().getId() == null) {
+        throw new RuntimeException("Debe seleccionar un local destino");
+    }
+
+    var almacen = almacenesRepository.findById(salida.getAlmacenes().getId())
+            .orElseThrow(() -> new RuntimeException("Almacén no encontrado"));
+
+    var local = localesRepository.findById(salida.getLocales().getId())
+            .orElseThrow(() -> new RuntimeException("Local no encontrado"));
+
+    if (local.getAlmacen() == null || local.getAlmacen().getId() == null) {
+        throw new RuntimeException("El local seleccionado no tiene un almacén asociado");
+    }
+
+    if (!local.getAlmacen().getId().equals(almacen.getId())) {
+        throw new RuntimeException("La salida solo puede realizarse al local que pertenece a ese almacén");
+    }
+
+    salida.setAlmacenes(almacen);
+    salida.setLocales(local);
+    salida.setEstado("PENDIENTE");
+    salida.setFecha(LocalDateTime.now());
+
+    return salidaRepository.save(salida);
+}
 
     @Override
     public Salida actualizar(Long id, Salida salidaActualizada) {
 
-        Salida salida = salidaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Salida no encontrada"));
+    Salida salida = salidaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Salida no encontrada"));
 
-        salida.setAlmacenes(salidaActualizada.getAlmacenes());
-        salida.setLocales(salidaActualizada.getLocales());
-        salida.setUsuario(salidaActualizada.getUsuario());
-        
-        if (salida.getLocales().getAlmacen() == null || salida.getLocales().getAlmacen().getId() == null) {
-            throw new RuntimeException("El local seleccionado no tiene un almacén asociado");
-        }
-
-        if (!salida.getLocales().getAlmacen().getId().equals(salida.getAlmacenes().getId())) {
-            throw new RuntimeException("La salida solo puede realizarse al local que pertenece a ese almacén");
-        }
-
-        return salidaRepository.save(salida);
+    if (salidaActualizada.getAlmacenes() == null || salidaActualizada.getAlmacenes().getId() == null) {
+        throw new RuntimeException("Debe seleccionar un almacén");
     }
+
+    if (salidaActualizada.getLocales() == null || salidaActualizada.getLocales().getId() == null) {
+        throw new RuntimeException("Debe seleccionar un local destino");
+    }
+
+    var almacen = almacenesRepository.findById(salidaActualizada.getAlmacenes().getId())
+            .orElseThrow(() -> new RuntimeException("Almacén no encontrado"));
+
+    var local = localesRepository.findById(salidaActualizada.getLocales().getId())
+            .orElseThrow(() -> new RuntimeException("Local no encontrado"));
+
+    if (local.getAlmacen() == null || local.getAlmacen().getId() == null) {
+        throw new RuntimeException("El local seleccionado no tiene un almacén asociado");
+    }
+
+    if (!local.getAlmacen().getId().equals(almacen.getId())) {
+        throw new RuntimeException("La salida solo puede realizarse al local que pertenece a ese almacén");
+    }
+
+    salida.setAlmacenes(almacen);
+    salida.setLocales(local);
+    salida.setUsuario(salidaActualizada.getUsuario());
+
+    return salidaRepository.save(salida);
+}
 
     @Override
     public void eliminar(Long id) {

@@ -27,48 +27,117 @@ async function cargarAlmacenes() {
 }
 
 function renderTablaAlmacenes(data) {
-    const tbody = document.querySelector("#tablaAlmacenes tbody");
-    if (!tbody) return;
+    const contenedor = document.getElementById("contenedorAlmacenesCards");
+    if (!contenedor) return;
 
-    tbody.innerHTML = "";
+    contenedor.innerHTML = "";
 
     if (!data.length) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="6" class="text-center py-4 text-muted">
-                    No hay almacenes registrados.
-                </td>
-            </tr>
+        contenedor.innerHTML = `
+            <div class="almacen-empty-state">
+                <div class="almacen-empty-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <h5 class="mb-2">No hay almacenes registrados</h5>
+                <p class="text-muted mb-0">Crea tu primer almacén para comenzar a organizar el stock.</p>
+            </div>
         `;
         return;
     }
 
     data.forEach(a => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${a.id ?? "-"}</td>
-                <td class="fw-semibold">${escapeHtmlAlmacen(a.nombre || "-")}</td>
-                <td>${escapeHtmlAlmacen(a.ubicacion || "-")}</td>
-                <td>
-                    <span class="badge ${a.activo ? 'text-bg-success' : 'text-bg-secondary'}">
-                        ${a.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                </td>
-                <td>${formatearFechaAlmacen(a.fechaCreacion)}</td>
-                <td>
-                    <div class="d-flex justify-content-center gap-2 flex-wrap">
-                        <button class="btn btn-sm btn-outline-primary" onclick="editarAlmacen(${a.id})">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick='eliminarAlmacen(${a.id}, ${JSON.stringify(a.nombre || "")})'>
-                            <i class="bi bi-trash"></i>
-                        </button>
+        const activo = Boolean(a.activo);
+        const iniciales = obtenerInicialesAlmacen(a.nombre || "AL");
+
+        contenedor.innerHTML += `
+            <div class="almacen-item">
+                <div class="card h-100 border-0 shadow-sm hover-elevate almacen-card-modern">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="almacen-avatar me-3">
+                                ${iniciales}
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-0 fw-bold">
+                                    ${escapeHtmlAlmacen(a.nombre || "-")}
+                                </h5>
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    ${escapeHtmlAlmacen(a.ubicacion || "Sin ubicación registrada")}
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mb-3 flex-wrap">
+                            <span class="badge rounded-pill ${activo ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}">
+                                ${activo ? "Activo" : "Inactivo"}
+                            </span>
+
+                            <span class="badge rounded-pill bg-almacen-soft text-almacen">
+                                ID #${a.id ?? "-"}
+                            </span>
+                        </div>
+
+                        <hr class="text-muted opacity-25">
+
+                        <div class="almacen-info-lista">
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded-3">
+                                <span class="small fw-bold">
+                                    <i class="bi bi-calendar3 text-almacen me-2"></i>
+                                    Fecha de creación
+                                </span>
+                                <span class="small text-muted fw-semibold">
+                                    ${formatearFechaAlmacen(a.fechaCreacion)}
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-3">
+                                <span class="small fw-bold">
+                                    <i class="bi bi-boxes text-warning me-2"></i>
+                                    Estado operativo
+                                </span>
+                                <span class="badge rounded-pill ${activo ? 'bg-success' : 'bg-secondary'}">
+                                    ${activo ? "Disponible" : "Pausado"}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                </td>
-            </tr>
+
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary w-100 rounded-pill shadow-sm fw-bold"
+                                    onclick="editarAlmacen(${a.id})">
+                                <i class="bi bi-pencil-square me-1"></i>
+                                Editar
+                            </button>
+
+                            <button class="btn btn-outline-danger w-100 rounded-pill shadow-sm fw-bold"
+                                    onclick='eliminarAlmacen(${a.id}, ${JSON.stringify(a.nombre || "")})'>
+                                <i class="bi bi-trash me-1"></i>
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
     });
 }
+
+function obtenerInicialesAlmacen(nombre) {
+    const palabras = String(nombre || "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+    if (palabras.length === 0) return "AL";
+    if (palabras.length === 1) return palabras[0].substring(0, 2).toUpperCase();
+
+    return (palabras[0][0] + palabras[1][0]).toUpperCase();
+}
+
+
 
 function configurarBuscadorAlmacen() {
     const input = document.getElementById("buscadorAlmacen");

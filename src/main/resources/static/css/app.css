@@ -493,9 +493,55 @@ body {
         .table-card {
             border: 1px solid #eef2f7;
             border-radius: 16px;
-            overflow: hidden;
+            overflow: visible;
             background: #fff;
         }
+		
+		#resumenSalida {
+		    position: relative;
+		    z-index: 1;
+		}
+
+		#tablaSalida {
+		    position: relative;
+		    z-index: 5;
+		}
+
+		#tablaSalida tbody tr {
+		    position: relative;
+		}
+
+		#tablaSalida td {
+		    position: relative;
+		    overflow: visible !important;
+		}
+		
+		#tablaSalida .cantidad-alerta-container {
+		    position: absolute;
+		    left: 0;
+		    right: 0;
+		    bottom: calc(100% + 10px);
+		    z-index: 99999;
+		}
+
+		#tablaSalida .cantidad-alerta-tooltip {
+		    z-index: 100000;
+		}
+		
+		.main-card > div:first-child {
+		    position: relative;
+		    z-index: 1;
+		}
+
+		.table-card {
+		    position: relative;
+		    z-index: 10;
+		}
+		
+		.table-card .table-responsive {
+		    border-radius: 16px;
+		    overflow: visible;
+		}
 
         .table thead th {
             background: #111827 !important;
@@ -1620,4 +1666,268 @@ body {
 		    width: 1.1rem;
 		    height: 1.1rem;
 		    cursor: pointer;
+		}
+		
+		
+		.almacenes-grid {
+		    display: grid;
+		    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+		    gap: 22px;
+		    margin-top: 1rem;
+		}
+
+		.almacen-card-modern {
+		    border-radius: 20px;
+		    background: linear-gradient(180deg, #fffdfb 0%, #fff8f3 100%);
+		    transition: transform 0.3s ease, box-shadow 0.3s ease;
+		    overflow: hidden;
+		}
+
+		.hover-elevate:hover {
+		    transform: translateY(-10px);
+		    box-shadow: 0 1rem 2.4rem rgba(0,0,0,.10) !important;
+		}
+
+		.almacen-avatar {
+		    width: 48px;
+		    height: 48px;
+		    background: linear-gradient(135deg, #7E0306 0%, #c98d73 100%);
+		    color: white;
+		    border-radius: 50%;
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    font-weight: 700;
+		    font-size: 0.95rem;
+		    flex-shrink: 0;
+		}
+
+		.bg-almacen-soft {
+		    background-color: rgba(126, 3, 6, 0.10);
+		}
+
+		.text-almacen {
+		    color: #7E0306;
+		}
+
+		.bg-success-subtle {
+		    background-color: rgba(25, 135, 84, 0.10);
+		}
+
+		.bg-secondary-subtle {
+		    background-color: rgba(108, 117, 125, 0.10);
+		}
+
+		.almacen-info-lista .bg-light {
+		    background-color: #faf7f4 !important;
+		    border: 1px solid #f1e5dc;
+		}
+
+		.almacen-empty-state {
+		    grid-column: 1 / -1;
+		    background: #fffdfb;
+		    border: 1px dashed #e5d3c7;
+		    border-radius: 20px;
+		    padding: 42px 24px;
+		    text-align: center;
+		    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+		}
+
+		.almacen-empty-icon {
+		    width: 68px;
+		    height: 68px;
+		    margin: 0 auto 16px;
+		    border-radius: 50%;
+		    background: linear-gradient(135deg, rgba(126, 3, 6, 0.10), rgba(201, 141, 115, 0.16));
+		    color: #7E0306;
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    font-size: 1.45rem;
+		}
+
+		@media (max-width: 576px) {
+		    .almacenes-grid {
+		        grid-template-columns: 1fr;
+		    }
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		.cantidad-salida-wrap {
+		    position: relative;
+		    overflow: visible;
+		}
+
+		.cantidad-alerta-container {
+		    position: absolute;
+		    left: 0;
+		    right: 0;
+		    bottom: calc(100% + 10px);
+		    z-index: 9999;
+		    pointer-events: none;
+		    overflow: visible;
+		}
+
+		.cantidad-alerta-tooltip {
+		    position: relative;
+		    font-size: 12px;
+		    line-height: 1.35;
+		    border-radius: 12px;
+		    padding: 10px 12px;
+		    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.16);
+		    border: 1px solid transparent;
+		    opacity: 0;
+		    transform: translateY(6px);
+		    transition: opacity 0.22s ease, transform 0.22s ease;
+		    white-space: normal;
+		}
+
+		.cantidad-alerta-tooltip.mostrar {
+		    opacity: 1;
+		    transform: translateY(0);
+		}
+
+		.cantidad-alerta-tooltip.ocultar {
+		    opacity: 0;
+		    transform: translateY(6px);
+		}
+
+		.cantidad-alerta-roja {
+		    background: #fff1f0;
+		    color: #b42318;
+		    border-color: #efb0aa;
+		}
+
+		.cantidad-alerta-amarilla {
+		    background: #fff8e6;
+		    color: #9a6700;
+		    border-color: #f0d27a;
+		}
+
+		.salida-input-alerta-roja {
+		    border-color: #dc3545 !important;
+		    animation: salidaPulseRoja 1.05s ease-in-out infinite;
+		}
+
+		.salida-input-alerta-amarilla {
+		    border-color: #ffc107 !important;
+		    animation: salidaPulseAmarilla 1.10s ease-in-out infinite;
+		}
+
+		@keyframes salidaPulseRoja {
+		    0% {
+		        box-shadow:
+		            0 0 0 0.14rem rgba(220, 53, 69, 0.18),
+		            0 0 0 0 rgba(220, 53, 69, 0.00);
+		    }
+		    50% {
+		        box-shadow:
+		            0 0 0 0.26rem rgba(220, 53, 69, 0.24),
+		            0 0 18px 2px rgba(220, 53, 69, 0.18);
+		    }
+		    100% {
+		        box-shadow:
+		            0 0 0 0.14rem rgba(220, 53, 69, 0.18),
+		            0 0 0 0 rgba(220, 53, 69, 0.00);
+		    }
+		}
+
+		@keyframes salidaPulseAmarilla {
+		    0% {
+		        box-shadow:
+		            0 0 0 0.14rem rgba(255, 193, 7, 0.16),
+		            0 0 0 0 rgba(255, 193, 7, 0.00);
+		    }
+		    50% {
+		        box-shadow:
+		            0 0 0 0.26rem rgba(255, 193, 7, 0.24),
+		            0 0 18px 2px rgba(255, 193, 7, 0.16);
+		    }
+		    100% {
+		        box-shadow:
+		            0 0 0 0.14rem rgba(255, 193, 7, 0.16),
+		            0 0 0 0 rgba(255, 193, 7, 0.00);
+		    }
+		}
+		
+		
+		.producto-agotado-item {
+		    opacity: 0.72;
+		    cursor: not-allowed !important;
+		    background: #fff8f8 !important;
+		}
+
+		.producto-agotado-item:hover {
+		    background: #fff8f8 !important;
+		}
+
+		.producto-agotado-texto {
+		    color: #b42318 !important;
+		    text-decoration: line-through;
+		    text-decoration-color: rgba(180, 35, 24, 0.65);
+		    text-decoration-thickness: 1.5px;
+		}
+		
+		#resultadosSalida .list-group-item:disabled {
+		    pointer-events: none;
+		    border-color: #f2d2cf;
+		}
+		
+		
+		#tablaSalida .cantidad-salida-wrap {
+		    position: relative;
+		    overflow: visible;
+		    
+		}
+
+		#tablaSalida tbody tr {
+		    position: relative;
+		    z-index: 1;
+		}
+
+		#tablaSalida tbody tr:hover,
+		#tablaSalida tbody tr:focus-within {
+		    z-index: 200;
+		}
+
+		#tablaSalida td {
+		    position: relative;
+		    overflow: visible !important;
+		}
+
+		#tablaSalida .cantidad-alerta-container {
+		    position: absolute;
+		    left: 0;
+		    right: 0;
+		    bottom: calc(100% + 10px);
+		    z-index: 99999;
+		    pointer-events: none;
+		    overflow: visible;
+		}
+
+		#tablaSalida .cantidad-alerta-tooltip {
+		    position: relative;
+		    z-index: 99999;
+		}
+		
+		#tablaSalida thead,
+		#tablaSalida thead tr,
+		#tablaSalida thead th {
+		    position: relative;
+		    z-index: 1;
+		}
+
+		#tablaSalida tbody {
+		    position: relative;
+		    z-index: 2;
 		}

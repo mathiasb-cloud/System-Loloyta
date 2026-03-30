@@ -91,56 +91,69 @@ function configurarBuscadorSalida() {
             return;
         }
 
-        filtrados.forEach(p => {
-            const stockActual = Number(p.stockActual || 0);
-            const stockMinimo = Number(p.stockMinimo || 0);
-            const claseStock = stockActual <= stockMinimo ? "text-danger" : "text-success";
+		filtrados.forEach(p => {
+		    const stockActual = Number(p.stockActual || 0);
+		    const stockMinimo = Number(p.stockMinimo || 0);
 
-            const item = document.createElement("button");
-            item.type = "button";
-            item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+		    const claseStock =
+		        stockActual === 0
+		            ? "text-danger"
+		            : stockActual <= stockMinimo
+		                ? "text-danger"
+		                : "text-success";
 
-            item.innerHTML = `
-                <div class="text-start">
-                    <div class="fw-medium">${escapeHtml(p.nombre)}</div>
-                    <small class="text-muted d-block">${escapeHtml(p.categoria?.nombre || "")}</small>
-                </div>
+		    const agotado = stockActual === 0;
 
-                <div class="d-flex align-items-center gap-3 bloque-derecha">
-                    <div class="precio-item">
-                        <span class="label-precio">Precio:</span>
-                        <span class="valor-precio">
-                            ${Number(p.precioActual || 0).toLocaleString('es-PE', {
-                                style: 'currency',
-                                currency: 'PEN'
-                            })}
-                        </span>
-                    </div>
+		    const item = document.createElement("button");
+		    item.type = "button";
+		    item.className = `list-group-item list-group-item-action d-flex justify-content-between align-items-center ${agotado ? "producto-agotado-item" : ""}`;
+		    item.disabled = agotado;
 
-                    <div class="text-end">
-                        <small class="text-muted d-block">${escapeHtml(p.unidadMedida || "")}</small>
-                        <small class="${claseStock} fw-semibold d-block">
-                            Stock: ${stockActual}
-                        </small>
-                    </div>
-                </div>
-            `;
+		    item.innerHTML = `
+		        <div class="text-start ${agotado ? "producto-agotado-texto" : ""}">
+		            <div class="fw-medium">${escapeHtml(p.nombre)}</div>
+		            <small class="text-muted d-block">${escapeHtml(p.categoria?.nombre || "")}</small>
+		        </div>
 
-            item.addEventListener("click", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+		        <div class="d-flex align-items-center gap-3 bloque-derecha">
+		            <div class="precio-item ${agotado ? "producto-agotado-texto" : ""}">
+		                <span class="label-precio">Precio:</span>
+		                <span class="valor-precio">
+		                    ${Number(p.precioActual || 0).toLocaleString('es-PE', {
+		                        style: 'currency',
+		                        currency: 'PEN'
+		                    })}
+		                </span>
+		            </div>
 
-                agregarProductoSalida(p);
+		            <div class="text-end">
+		                <small class="text-muted d-block ${agotado ? "producto-agotado-texto" : ""}">
+		                    ${escapeHtml(p.unidadMedida || "")}
+		                </small>
+		                <small class="${claseStock} fw-semibold d-block">
+		                    Stock: ${stockActual}
+		                </small>
+		            </div>
+		        </div>
+		    `;
 
-                input.value = "";
-                resultadosDiv.innerHTML = "";
-                input.blur();
+		    if (!agotado) {
+		        item.addEventListener("click", (e) => {
+		            e.preventDefault();
+		            e.stopPropagation();
 
-                actualizarResumenSalida();
-            });
+		            agregarProductoSalida(p);
 
-            resultadosDiv.appendChild(item);
-        });
+		            input.value = "";
+		            resultadosDiv.innerHTML = "";
+		            input.blur();
+
+		            actualizarResumenSalida();
+		        });
+		    }
+
+		    resultadosDiv.appendChild(item);
+		});
     });
 
     input.addEventListener("keydown", function (e) {
@@ -246,15 +259,27 @@ function agregarProductoSalida(producto) {
     const yaExiste = [...tbody.querySelectorAll("tr")].some(tr => String(tr.dataset.id) === String(producto.id));
     if (yaExiste) return;
 
+    const stockActual = Number(producto.stockActual || 0);
+    const stockMinimo = Number(producto.stockMinimo || 0);
+
     const fila = document.createElement("tr");
     fila.dataset.id = producto.id;
+    fila.dataset.stockActual = stockActual;
+    fila.dataset.stockMinimo = stockMinimo;
 
     fila.innerHTML = `
         <td>${escapeHtml(producto.categoria?.nombre || "-")}</td>
         <td>${escapeHtml(producto.nombre || "-")}</td>
         <td>${escapeHtml(producto.unidadMedida || "-")}</td>
         <td>
-            <input type="number" class="form-control cantidad-salida-item" value="1" min="1" step="1">
+            <div class="cantidad-salida-wrap">
+                <div class="cantidad-alerta-container"></div>
+                <input type="number"
+                       class="form-control cantidad-salida-item"
+                       value="1"
+                       min="0.01"
+                       step="0.01">
+            </div>
         </td>
         <td class="precio-item">${Number(producto.precioActual || 0).toFixed(2)}</td>
         <td class="subtotal-item fw-semibold text-center">S/ 0.00</td>
@@ -267,13 +292,200 @@ function agregarProductoSalida(producto) {
 
     tbody.appendChild(fila);
 
-    fila.querySelector(".cantidad-salida-item")?.addEventListener("input", () => {
+    const input = fila.querySelector(".cantidad-salida-item");
+
+    input?.addEventListener("input", () => {
         recalcularFilaSalida(fila);
+        actualizarEstadoCantidadSalida(fila, true);
         actualizarResumenSalida();
     });
 
+    input?.addEventListener("mouseenter", () => {
+        mostrarAlertaHoverCantidadSalida(fila);
+    });
+
+    input?.addEventListener("mouseleave", () => {
+        ocultarAlertaCantidadSalida(fila);
+    });
+
     recalcularFilaSalida(fila);
+    actualizarEstadoCantidadSalida(fila, true);
+    actualizarResumenSalida();
 }
+
+
+
+
+
+function evaluarEstadoCantidadSalida(fila) {
+    const input = fila.querySelector(".cantidad-salida-item");
+    const stockActual = Number(fila.dataset.stockActual || 0);
+    const stockMinimo = Number(fila.dataset.stockMinimo || 0);
+    const cantidad = Number(input?.value || 0);
+    const restante = stockActual - cantidad;
+
+    if (!Number.isFinite(cantidad) || cantidad <= 0) {
+        return {
+            tipo: "invalido",
+            valido: false,
+            restante,
+            mensaje: "Ingresa una cantidad válida mayor a cero."
+        };
+    }
+
+    if (restante < 0) {
+        return {
+            tipo: "negativo",
+            valido: false,
+            restante,
+            mensaje: `No puedes despachar ${formatearNumero(cantidad)}. El stock actual es ${formatearNumero(stockActual)}.`
+        };
+    }
+
+    if (restante < stockMinimo) {
+        const diferencia = stockMinimo - restante;
+        return {
+            tipo: "critico",
+            valido: true,
+            restante,
+            mensaje: `Atención: después del despacho quedarán ${formatearNumero(restante)} unidad(es), es decir ${formatearNumero(diferencia)} por debajo del stock mínimo (${formatearNumero(stockMinimo)}).`
+        };
+    }
+
+    if (restante === stockMinimo) {
+        return {
+            tipo: "limite",
+            valido: true,
+            restante,
+            mensaje: `Atención: después del despacho el stock quedará exactamente en el mínimo permitido (${formatearNumero(stockMinimo)}).`
+        };
+    }
+
+    if (restante === stockMinimo + 1) {
+        return {
+            tipo: "advertencia",
+            valido: true,
+            restante,
+            mensaje: `Atención: después del despacho quedará solo 1 unidad por encima del stock mínimo. Stock final: ${formatearNumero(restante)}.`
+        };
+    }
+
+    return {
+        tipo: "ok",
+        valido: true,
+        restante,
+        mensaje: ""
+    };
+}
+
+function actualizarEstadoCantidadSalida(fila, mostrarTemporal = false) {
+    const input = fila.querySelector(".cantidad-salida-item");
+    if (!input) return;
+
+    const estado = evaluarEstadoCantidadSalida(fila);
+
+    input.classList.remove(
+        "salida-input-alerta-roja",
+        "salida-input-alerta-amarilla",
+        "is-invalid"
+    );
+
+    if (estado.tipo === "negativo" || estado.tipo === "invalido") {
+        input.classList.add("salida-input-alerta-roja", "is-invalid");
+        if (mostrarTemporal) {
+            mostrarAlertaCantidadSalida(fila, estado.mensaje, "roja", true);
+        }
+        return;
+    }
+
+    if (estado.tipo === "critico") {
+        input.classList.add("salida-input-alerta-roja");
+        if (mostrarTemporal) {
+            mostrarAlertaCantidadSalida(fila, estado.mensaje, "roja", true);
+        }
+        return;
+    }
+
+    if (estado.tipo === "limite" || estado.tipo === "advertencia") {
+        input.classList.add("salida-input-alerta-amarilla");
+        if (mostrarTemporal) {
+            mostrarAlertaCantidadSalida(fila, estado.mensaje, "amarilla", true);
+        }
+        return;
+    }
+
+    ocultarAlertaCantidadSalida(fila);
+}
+
+function mostrarAlertaHoverCantidadSalida(fila) {
+    const estado = evaluarEstadoCantidadSalida(fila);
+
+    if (estado.tipo === "critico") {
+        mostrarAlertaCantidadSalida(fila, estado.mensaje, "roja", false);
+    } else if (estado.tipo === "limite" || estado.tipo === "advertencia") {
+        mostrarAlertaCantidadSalida(fila, estado.mensaje, "amarilla", false);
+    } else if (estado.tipo === "negativo" || estado.tipo === "invalido") {
+        mostrarAlertaCantidadSalida(fila, estado.mensaje, "roja", false);
+    }
+}
+
+function mostrarAlertaCantidadSalida(fila, mensaje, color = "roja", autoOcultar = true) {
+    const contenedor = fila.querySelector(".cantidad-alerta-container");
+    if (!contenedor) return;
+
+    contenedor.innerHTML = `
+        <div class="cantidad-alerta-tooltip ${color === "amarilla" ? "cantidad-alerta-amarilla" : "cantidad-alerta-roja"} mostrar">
+            ${escapeHtml(mensaje)}
+        </div>
+    `;
+
+    const alerta = contenedor.querySelector(".cantidad-alerta-tooltip");
+    if (!alerta) return;
+
+    if (autoOcultar) {
+        clearTimeout(contenedor._alertaTimeout);
+
+        contenedor._alertaTimeout = setTimeout(() => {
+            alerta.classList.remove("mostrar");
+            alerta.classList.add("ocultar");
+
+            setTimeout(() => {
+                if (contenedor.contains(alerta)) {
+                    contenedor.innerHTML = "";
+                }
+            }, 250);
+        }, 3000);
+    }
+}
+
+function ocultarAlertaCantidadSalida(fila) {
+    const contenedor = fila.querySelector(".cantidad-alerta-container");
+    if (!contenedor) return;
+
+    clearTimeout(contenedor._alertaTimeout);
+
+    const alerta = contenedor.querySelector(".cantidad-alerta-tooltip");
+    if (!alerta) return;
+
+    alerta.classList.remove("mostrar");
+    alerta.classList.add("ocultar");
+
+    setTimeout(() => {
+        if (contenedor.contains(alerta)) {
+            contenedor.innerHTML = "";
+        }
+    }, 220);
+}
+
+function validarCantidadFilaSalida(fila) {
+    const estado = evaluarEstadoCantidadSalida(fila);
+    return estado.valido;
+}
+
+
+
+
+
 function eliminarFilaSalida(btn) {
     btn.closest("tr").remove();
     actualizarResumenSalida();
@@ -298,26 +510,35 @@ function validarSalida() {
     const filas = document.querySelectorAll("#tablaSalida tbody tr");
 
     if (!almacenId) {
-        mostrarInfoSalida("Seleccione un almacén.");
+        mostrarInfoSalida("Selecciona un almacén.");
         return false;
     }
 
     if (!localId) {
-        mostrarInfoSalida("Seleccione un local destino.");
+        mostrarInfoSalida("No hay un local asociado al almacén seleccionado.");
         return false;
     }
 
     if (filas.length === 0) {
-        mostrarInfoSalida("Agregue al menos un producto a la salida.");
+        mostrarInfoSalida("Agrega al menos un producto a la salida.");
         return false;
     }
 
     for (const fila of filas) {
-        const nombre = fila.children[1]?.textContent?.trim() || "producto";
-        const cantidad = Number(fila.querySelector(".cantidad-salida-item")?.value || 0);
+        const productoNombre = fila.children[1]?.textContent?.trim() || "producto";
+        const estado = evaluarEstadoCantidadSalida(fila);
 
-        if (!Number.isFinite(cantidad) || cantidad <= 0) {
-            mostrarInfoSalida(`La cantidad de despacho para "${nombre}" debe ser mayor a cero.`);
+        if (!estado.valido) {
+            const input = fila.querySelector(".cantidad-salida-item");
+            input?.focus();
+            actualizarEstadoCantidadSalida(fila, true);
+
+            if (estado.tipo === "negativo") {
+                mostrarErrorSalida(`La cantidad de despacho para "${productoNombre}" supera el stock disponible.`);
+            } else {
+                mostrarInfoSalida(`Verifica la cantidad ingresada para "${productoNombre}".`);
+            }
+
             return false;
         }
     }
