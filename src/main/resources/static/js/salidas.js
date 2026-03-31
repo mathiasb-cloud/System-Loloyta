@@ -577,7 +577,7 @@ async function crearSalida() {
         body: JSON.stringify({
             almacenes: { id: Number(almacenId) },
             locales: { id: Number(localId) },
-            usuario: { id: 1 }
+            
         })
     });
 
@@ -639,7 +639,7 @@ async function guardarCambiosSalida() {
         body: JSON.stringify({
             almacenes: { id: Number(almacenId) },
             locales: { id: Number(localId) },
-            usuario: { id: 1 }
+            
         })
     });
 

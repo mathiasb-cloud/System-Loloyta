@@ -18,11 +18,15 @@ import com.loloyta.repository.DetalleOrdenCompraRepository;
 import com.loloyta.repository.MovimientoRepository;
 import com.loloyta.repository.OrdenCompraRepository;
 import com.loloyta.repository.StockRepository;
+import com.loloyta.service.AuthService;
 import com.loloyta.service.OrdenCompraService;
 import com.loloyta.repository.ProductoRepository;
 
 @Service
 public class OrdenCompraServiceImpl implements OrdenCompraService {
+	
+	@Autowired
+	private AuthService authService;
 
     @Autowired
     private OrdenCompraRepository ordenCompraRepository;
@@ -51,6 +55,7 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
 
     @Override
     public OrdenCompra crear(OrdenCompra orden) {
+    	orden.setUsuario(authService.obtenerUsuarioAutenticado());
         orden.setEstado("PENDIENTE");
         if (orden.getFecha() == null) {
             orden.setFecha(LocalDateTime.now());
@@ -152,6 +157,7 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
             stockRepository.save(stock);
 
             Movimiento mov = new Movimiento();
+            mov.setUsuario(authService.obtenerUsuarioAutenticado());
             mov.setTipo("INGRESO");
             mov.setOrdenCompra(orden);
             mov.setCantidad(d.getCantidad());

@@ -547,7 +547,7 @@ async function crearCabeceraMerma() {
             motivo: { id: Number(document.getElementById("motivoMerma").value) },
             observacion: document.getElementById("observacionMerma").value?.trim() || "",
             fecha: document.getElementById("fechaMerma").value,
-            usuario: { id: 1 }
+            
         })
     });
 
@@ -569,7 +569,7 @@ async function actualizarCabeceraMerma() {
             motivo: { id: Number(document.getElementById("motivoMerma").value) },
             observacion: document.getElementById("observacionMerma").value?.trim() || "",
             fecha: document.getElementById("fechaMerma").value,
-            usuario: { id: 1 }
+            
         })
     });
 

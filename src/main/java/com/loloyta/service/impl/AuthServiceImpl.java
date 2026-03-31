@@ -91,15 +91,35 @@ public class AuthServiceImpl implements AuthService {
         dto.setUsername(usuario.getUsername());
         dto.setRol(usuario.getRol() != null ? usuario.getRol().getNombre() : null);
 
-        List<String> permisos = usuario.getRol() != null && usuario.getRol().getPermisos() != null
+        var permisos = usuario.getRol() != null && usuario.getRol().getPermisos() != null
                 ? usuario.getRol().getPermisos().stream()
-                    .map(Permiso::getCodigo)
+                    .map(p -> p.getCodigo())
                     .sorted()
                     .toList()
-                : List.of();
+                : java.util.List.<String>of();
 
         dto.setPermisos(permisos);
 
         return dto;
+    }
+    
+    @Override
+    public Usuario obtenerUsuarioAutenticado() {
+        Object userId = httpSession.getAttribute(SESSION_USER_ID);
+
+        if (userId == null) {
+            throw new RuntimeException("No hay una sesión activa");
+        }
+
+        Long id = Long.valueOf(String.valueOf(userId));
+
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario de sesión no encontrado"));
+
+        if (usuario.getActivo() == null || !usuario.getActivo()) {
+            throw new RuntimeException("La cuenta se encuentra desactivada");
+        }
+
+        return usuario;
     }
 }

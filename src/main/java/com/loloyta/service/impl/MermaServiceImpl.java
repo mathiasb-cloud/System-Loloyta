@@ -5,7 +5,10 @@ import com.loloyta.repository.DetalleMermaRepository;
 import com.loloyta.repository.MermaRepository;
 import com.loloyta.repository.MovimientoRepository;
 import com.loloyta.repository.StockRepository;
+import com.loloyta.service.AuthService;
 import com.loloyta.service.MermaService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +34,9 @@ public class MermaServiceImpl implements MermaService {
         this.stockRepository = stockRepository;
         this.movimientoRepository = movimientoRepository;
     }
+    
+    @Autowired
+    private AuthService authService;
 
     @Override
     public List<Merma> listar() {
@@ -51,7 +57,8 @@ public class MermaServiceImpl implements MermaService {
         if (merma.getMotivo() == null || merma.getMotivo().getId() == null) {
             throw new RuntimeException("Debe seleccionar un motivo de merma");
         }
-
+        
+        merma.setUsuario(authService.obtenerUsuarioAutenticado());
         merma.setEstado("PENDIENTE");
 
         if (merma.getFecha() == null) {
@@ -77,6 +84,8 @@ public class MermaServiceImpl implements MermaService {
         if (mermaActualizada.getMotivo() == null || mermaActualizada.getMotivo().getId() == null) {
             throw new RuntimeException("Debe seleccionar un motivo de merma");
         }
+        
+        merma.setUsuario(authService.obtenerUsuarioAutenticado());
 
         merma.setAlmacen(mermaActualizada.getAlmacen());
         merma.setMotivo(mermaActualizada.getMotivo());
@@ -131,6 +140,7 @@ public class MermaServiceImpl implements MermaService {
             stockRepository.save(stock);
 
             Movimiento mov = new Movimiento();
+            mov.setUsuario(authService.obtenerUsuarioAutenticado());
             mov.setTipo("MERMA");
             mov.setMerma(merma);
             mov.setCantidad(d.getCantidad());

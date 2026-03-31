@@ -5,6 +5,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class VistaController {
+	
+	@GetMapping("/")
+    public String root() {
+        return "redirect:/login";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 
     @GetMapping("/ordenes")
     public String verOrdenes() {
@@ -58,6 +68,16 @@ public class VistaController {
     @GetMapping("/stock-auditoria")
     public String stockAuditoria() {
         return "stock-auditoria";
+    }
+    
+    @GetMapping("/usuarios")
+    public String usuarios() {
+        return "usuarios";
+    }
+
+    @GetMapping("/roles")
+    public String roles() {
+        return "roles";
     }
 
 

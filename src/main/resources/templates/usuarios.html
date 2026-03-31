@@ -1,0 +1,128 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="section-title">Usuarios</h2>
+        <p class="section-subtitle">Gestiona cuentas, roles y estados de acceso.</p>
+    </div>
+</div>
+
+<div class="toolbar">
+    <div>
+        <button onclick="abrirModalUsuario()" class="btn btn-success btn-icon" data-permiso="USUARIOS_EDITAR">
+            <i class="bi bi-plus-circle me-2"></i>
+            <span>Nuevo Usuario</span>
+        </button>
+    </div>
+
+    <div class="toolbar-group">
+        <label class="form-label mb-1">Buscar usuario</label>
+        <div class="search-input-group">
+            <span class="search-icon">
+                <i class="bi bi-search"></i>
+            </span>
+            <input
+                type="text"
+                id="buscadorUsuario"
+                class="form-control search-input-pro"
+                placeholder="Busca por nombre, apellido o usuario..."
+                autocomplete="off"
+            >
+        </div>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0" id="tablaUsuarios">
+            <thead>
+                <tr>
+                    <th>Nombre completo</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Correo</th>
+                    <th>DNI</th>
+                    <th>Teléfono</th>
+                    <th>Estado</th>
+                    <th style="width: 180px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalUsuario" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-0">Usuario</h5>
+                    <small class="text-muted">Configura datos y rol del usuario.</small>
+                </div>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="usuarioId">
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" id="usuarioNombre" class="form-control">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Apellido</label>
+                        <input type="text" id="usuarioApellido" class="form-control">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Usuario</label>
+                        <input type="text" id="usuarioUsername" class="form-control">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" id="usuarioPassword" class="form-control" placeholder="Solo al crear o cambiar">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Rol</label>
+                        <select id="usuarioRol" class="form-select"></select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Estado</label>
+                        <select id="usuarioActivo" class="form-select">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Correo</label>
+                        <input type="text" id="usuarioCorreo" class="form-control">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">DNI</label>
+                        <input type="text" id="usuarioDni" class="form-control">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" id="usuarioTelefono" class="form-control">
+                    </div>
+                </div>
+
+                <div id="usuarioAlert" class="alert alert-warning d-none mt-3 mb-0"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarUsuario()" data-permiso="USUARIOS_EDITAR">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

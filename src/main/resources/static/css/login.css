@@ -1,0 +1,111 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: #f7f1eb;
+}
+
+.split-layout {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.left {
+    flex: 1;
+    background: linear-gradient(180deg, #f8f0e8 0%, #f6eee6 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.left img {
+    max-width: 260px;
+    height: auto;
+}
+
+.right {
+    flex: 1;
+    position: relative;
+    background: url('/img/fondo-derecha.jpg') no-repeat center center;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 28px;
+    padding: 40px;
+    max-width: 410px;
+    width: 90%;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255,255,255,0.18);
+}
+
+.glass-card h3 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+.glass-card label {
+    color: #fff;
+    font-weight: 600;
+}
+
+.glass-card .form-control {
+    background-color: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff;
+    border-radius: 20px;
+    min-height: 46px;
+}
+
+.glass-card .form-control::placeholder {
+    color: #ececec;
+}
+
+.glass-card .form-control:focus {
+    color: #fff;
+    background-color: rgba(255,255,255,0.22);
+    border-color: rgba(255,255,255,0.35);
+    box-shadow: 0 0 0 0.18rem rgba(255,255,255,0.12);
+}
+
+.glass-card .btn {
+    background-color: rgba(255, 255, 255, 0.26);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: white;
+    font-weight: 700;
+    border-radius: 20px;
+    min-height: 46px;
+    transition: all 0.25s ease;
+}
+
+.glass-card .btn:hover {
+    background-color: rgba(255, 255, 255, 0.38);
+    transform: translateY(-1px);
+}
+
+.alert {
+    background-color: rgba(180, 35, 24, 0.18);
+    border: 1px solid rgba(180, 35, 24, 0.30);
+    color: #fff;
+    border-radius: 18px;
+}
+
+@media (max-width: 768px) {
+    .split-layout {
+        flex-direction: column;
+    }
+
+    .left, .right {
+        flex: none;
+        height: 50vh;
+    }
+}

@@ -1,7 +1,10 @@
 package com.loloyta.controller;
 
 import com.loloyta.model.Producto;
+import com.loloyta.service.AutorizacionService;
 import com.loloyta.service.ProductoService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
@@ -12,6 +15,9 @@ import java.util.List;
 public class ProductoController {
 
     private final ProductoService productoService;
+    
+    @Autowired
+    private AutorizacionService autorizacionService;
 
     public ProductoController(ProductoService productoService) {
         this.productoService = productoService;
@@ -19,6 +25,7 @@ public class ProductoController {
 
     @GetMapping
     public List<Producto> listar(){
+    	autorizacionService.validarPermiso("PRODUCTOS_VER");
         return productoService.listar();
     }
 
@@ -29,6 +36,7 @@ public class ProductoController {
 
     @PostMapping("/create")
     public Producto guardar(@Valid @RequestBody Producto producto){
+    	autorizacionService.validarPermiso("PRODUCTOS_EDITAR");
         return productoService.guardar(producto);
     }
 

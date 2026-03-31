@@ -529,7 +529,7 @@ async function actualizarCabeceraOrden() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             almacenes: { id: Number(almacenId) },
-            usuario: { id: 1 }
+            
         })
     });
 

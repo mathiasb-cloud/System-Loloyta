@@ -33,4 +33,23 @@ public class RolServiceImpl implements RolService {
         dto.setEsSistema(rol.getEsSistema());
         return dto;
     }
+    
+    
+    @Override
+    public RolResponse actualizarNombre(Long id, String nombre) {
+        Rol rol = rolRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+        if ("MASTER_ADMIN".equalsIgnoreCase(rol.getNombre())) {
+            throw new RuntimeException("El rol solicitado no está disponible");
+        }
+
+        if (nombre == null || nombre.isBlank()) {
+            throw new RuntimeException("El nombre del rol es obligatorio");
+        }
+
+        rol.setNombre(nombre.trim());
+
+        return toResponse(rolRepository.save(rol));
+    }
 }

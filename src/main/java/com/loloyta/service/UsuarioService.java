@@ -19,4 +19,8 @@ public interface UsuarioService {
                                            String username, String password);
 
     UsuarioResponse cambiarEstado(Long id, Boolean activo);
+    
+    UsuarioResponse crear(String nombre, String apellido, String correo, String dni,
+            String telefono, String username, String password,
+            Boolean activo, Long rolId);
 }

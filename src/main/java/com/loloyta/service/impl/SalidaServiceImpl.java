@@ -16,11 +16,15 @@ import com.loloyta.repository.DetalleSalidaRepository;
 import com.loloyta.repository.LocalesRepository;
 import com.loloyta.repository.MovimientoRepository;
 import com.loloyta.repository.SalidaRepository;
+import com.loloyta.service.AuthService;
 import com.loloyta.service.SalidaService;
 import com.loloyta.service.StockService;
 
 @Service
 public class SalidaServiceImpl implements SalidaService {
+	
+	@Autowired
+	private AuthService authService;
 
     @Autowired
     private SalidaRepository salidaRepository;
@@ -77,6 +81,7 @@ public class SalidaServiceImpl implements SalidaService {
 
     salida.setAlmacenes(almacen);
     salida.setLocales(local);
+    salida.setUsuario(authService.obtenerUsuarioAutenticado());
     salida.setEstado("PENDIENTE");
     salida.setFecha(LocalDateTime.now());
 
@@ -113,7 +118,7 @@ public class SalidaServiceImpl implements SalidaService {
 
     salida.setAlmacenes(almacen);
     salida.setLocales(local);
-    salida.setUsuario(salidaActualizada.getUsuario());
+    salida.setUsuario(authService.obtenerUsuarioAutenticado());
 
     return salidaRepository.save(salida);
 }

@@ -1,8 +1,29 @@
 let chartMovimientosTipo = null;
 let chartMermasCosto = null;
 
+const permisosPorRuta = {
+    "/productos": "PRODUCTOS_VER",
+    "/ordenes": "ORDENES_VER",
+    "/salidas": "SALIDAS_VER",
+    "/mermas": "MERMAS_VER",
+    "/stock": "STOCK_VER",
+    "/movimientos": "MOVIMIENTOS_VER",
+    "/almacenes": "ALMACENES_VER",
+    "/locales": "LOCALES_VER",
+    "/usuarios": "USUARIOS_VER",
+    "/roles": "ROLES_VER"
+};
 function cargar(event, url, element = null) {
 	
+	if (permisosPorRuta[url] && !tienePermiso(permisosPorRuta[url])) {
+	    Swal.fire({
+	        title: "Acceso restringido",
+	        text: "No tiene permisos para acceder a esta sección.",
+	        icon: "warning",
+	        confirmButtonText: "Entendido"
+	    });
+	    return;
+	}
 	contenido.className = "fade-in-soft";
     if (event?.preventDefault) event.preventDefault();
 
@@ -43,6 +64,10 @@ function cargar(event, url, element = null) {
                 if (url.includes("locales") && typeof initLocales === "function") initLocales();
                 if (url.includes("mermas") && typeof initMermas === "function") initMermas();
                 if (url.includes("proveedores") && typeof initProveedores === "function") initProveedores();
+				if (url.includes("roles") && typeof initRoles === "function") initRoles();
+				if (url.includes("usuarios") && typeof initUsuarios === "function") initUsuarios();
+				
+				aplicarPermisosEnVista();
 
                 
             }, 100);
@@ -213,6 +238,7 @@ function irResumen(event, element = null) {
     if (typeof initDashboardHome === "function") {
         initDashboardHome();
     }
+	aplicarPermisosEnVista();
 }
 window.irResumen = irResumen;
 
@@ -583,4 +609,49 @@ function escapeHtml(texto) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+}
+
+
+function obtenerSesionUsuario() {
+    try {
+        return JSON.parse(sessionStorage.getItem("sesionUsuario") || "null");
+    } catch {
+        return null;
+    }
+}
+
+function obtenerPermisosUsuario() {
+    const sesion = obtenerSesionUsuario();
+    return sesion?.permisos || [];
+}
+
+function tienePermiso(codigo) {
+    const sesion = obtenerSesionUsuario();
+    if (!sesion) return false;
+
+    const rol = String(sesion.rol || "").toUpperCase();
+
+    if (rol === "DUEÑO" || rol === "MASTER_ADMIN") {
+        return true;
+    }
+
+    return (sesion.permisos || []).includes(codigo);
+}
+
+
+
+
+function aplicarPermisosEnTopbar() {
+    document.querySelectorAll(".topbar-nav-link[data-permiso]").forEach(link => {
+        const permiso = link.dataset.permiso;
+        link.style.display = tienePermiso(permiso) ? "" : "none";
+    });
+}
+
+
+function aplicarPermisosEnVista() {
+    document.querySelectorAll("[data-permiso]").forEach(el => {
+        const permiso = el.dataset.permiso;
+        el.style.display = tienePermiso(permiso) ? "" : "none";
+    });
 }

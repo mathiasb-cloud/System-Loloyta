@@ -19,13 +19,30 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                    "/",
                     "/login",
+                    "/index",
+                    "/productos",
+                    "/ordenes",
+                    "/salidas",
+                    "/mermas",
+                    "/stock",
+                    "/movimientos",
+                    "/movimientos/detalle",
+                    "/almacenes",
+                    "/locales",
+                    "/proveedores",
+                    "/stock-auditoria",
+                    "/usuarios",
+                    "/roles",
                     "/css/**",
                     "/js/**",
+                    "/img/**",
                     "/images/**",
                     "/favicon.ico"
                 ).permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                .requestMatchers("/api/**").permitAll()
                 .anyRequest().permitAll()
             )
             .formLogin(form -> form.disable())

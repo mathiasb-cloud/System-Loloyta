@@ -1,0 +1,59 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="section-title">Roles y Permisos</h2>
+        <p class="section-subtitle">Configura accesos y restricciones del sistema.</p>
+    </div>
+</div>
+
+<div class="roles-layout">
+    <section class="roles-panel roles-panel-left fade-slide-in">
+        <div class="roles-panel-head">
+            <div>
+                <h5 class="mb-1">Roles</h5>
+                <p class="text-muted small mb-0">Selecciona un rol para configurarlo.</p>
+            </div>
+        </div>
+
+        <div id="listaRoles" class="roles-list"></div>
+    </section>
+
+    <section class="roles-panel roles-panel-right fade-slide-in">
+        <div class="roles-panel-head roles-panel-head--space">
+            <div>
+                <h5 class="mb-1">Configuración del rol</h5>
+                <p id="rolesSubtitulo" class="text-muted small mb-0">
+                    Selecciona un rol para ver sus permisos.
+                </p>
+            </div>
+
+            <button
+                class="btn btn-primary btn-sm px-3"
+                onclick="guardarPermisosRol()"
+                id="btnGuardarPermisosRol"
+                data-permiso="ROLES_EDITAR">
+                Guardar cambios
+            </button>
+        </div>
+
+        <div id="bloqueNombreRol" class="roles-nombre-box d-none">
+            <label class="form-label mb-1">Nombre del rol</label>
+            <div class="d-flex gap-2 flex-wrap">
+                <input type="text" id="nombreRolInput" class="form-control roles-nombre-input">
+                <button
+                    class="btn btn-outline-primary"
+                    onclick="guardarNombreRol()"
+                    id="btnGuardarNombreRol"
+                    data-permiso="ROLES_EDITAR">
+                    Guardar nombre
+                </button>
+            </div>
+            <small id="rolesNombreHint" class="text-muted"></small>
+        </div>
+
+       
+
+        <div id="contenedorPermisos" class="roles-permisos-grid">
+            <div class="dashboard-empty-row">Selecciona un rol para cargar permisos.</div>
+        </div>
+    </section>
+</div>

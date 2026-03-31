@@ -195,4 +195,45 @@ public class UsuarioServiceImpl implements UsuarioService {
         dto.setRolNombre(usuario.getRol() != null ? usuario.getRol().getNombre() : null);
         return dto;
     }
+    
+    
+    @Override
+    public UsuarioResponse crear(String nombre, String apellido, String correo, String dni,
+                                 String telefono, String username, String password,
+                                 Boolean activo, Long rolId) {
+
+        if (password == null || password.isBlank()) {
+            throw new RuntimeException("La contraseña es obligatoria");
+        }
+
+        if (rolId == null) {
+            throw new RuntimeException("Debe seleccionar un rol");
+        }
+
+        Rol rol = rolRepository.findById(rolId)
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+        if ("MASTER_ADMIN".equalsIgnoreCase(rol.getNombre())) {
+            throw new RuntimeException("No se puede crear un usuario con rol MASTER_ADMIN desde la interfaz");
+        }
+
+        validarUsernameUnico(username, -1L);
+        validarCorreoUnico(correo, -1L);
+        validarDniUnico(dni, -1L);
+
+        Usuario usuario = new Usuario();
+        usuario.setNombre(normalizar(nombre));
+        usuario.setApellido(normalizar(apellido));
+        usuario.setCorreo(normalizarNullable(correo));
+        usuario.setDni(normalizarNullable(dni));
+        usuario.setTelefono(normalizarNullable(telefono));
+        usuario.setUsername(normalizar(username));
+        usuario.setPassword(passwordEncoder.encode(password));
+        usuario.setActivo(activo != null ? activo : true);
+        usuario.setRol(rol);
+
+        return toResponse(usuarioRepository.save(usuario));
+    }
 }
+
+
