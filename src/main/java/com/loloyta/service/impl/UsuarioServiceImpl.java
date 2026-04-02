@@ -1,5 +1,6 @@
 package com.loloyta.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +8,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.loloyta.dto.UsuarioResponse;
+import com.loloyta.model.Almacenes;
 import com.loloyta.model.Rol;
 import com.loloyta.model.Usuario;
+import com.loloyta.repository.AlmacenesRepository;
 import com.loloyta.repository.RolRepository;
 import com.loloyta.repository.UsuarioRepository;
 import com.loloyta.service.UsuarioService;
@@ -18,6 +21,9 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+    
+    @Autowired
+    private AlmacenesRepository almacenesRepository;
 
     @Autowired
     private RolRepository rolRepository;
@@ -44,8 +50,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public UsuarioResponse actualizarComoAdministrador(Long id, Long rolId, String nombre, String apellido,
-                                               String correo, String dni, String telefono,
-                                               String username, Boolean activo) {
+                                                       String correo, String dni, String telefono,
+                                                       String username, Boolean activo,
+                                                       Boolean puedeSalidaEntreAlmacenes,
+                                                       List<Long> almacenIds) {
 
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -58,6 +66,8 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         Rol rol = rolRepository.findById(rolId)
                 .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        
+        List<Almacenes> almacenesAsignados = obtenerAlmacenesPermitidos(almacenIds);
 
         if ("MASTER_ADMIN".equalsIgnoreCase(rol.getNombre())) {
             throw new RuntimeException("No se puede asignar el rol MASTER_ADMIN desde la interfaz");
@@ -75,9 +85,13 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setUsername(normalizar(username));
         usuario.setActivo(activo != null ? activo : true);
         usuario.setRol(rol);
+        
+        usuario.setPuedeSalidaEntreAlmacenes(puedeSalidaEntreAlmacenes != null ? puedeSalidaEntreAlmacenes : true);
+        usuario.setAlmacenes(almacenesAsignados);
 
         return toResponse(usuarioRepository.save(usuario));
     }
+    
 
     @Override
     public UsuarioResponse actualizarPerfilPropio(Long id, String nombre, String apellido,
@@ -154,6 +168,20 @@ public class UsuarioServiceImpl implements UsuarioService {
             }
         }
     }
+    
+    private List<Almacenes> obtenerAlmacenesPermitidos(List<Long> almacenIds) {
+        if (almacenIds == null || almacenIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Almacenes> almacenes = almacenesRepository.findAllById(almacenIds);
+
+        if (almacenes.size() != almacenIds.size()) {
+            throw new RuntimeException("Uno o más almacenes no existen");
+        }
+
+        return almacenes;
+    }
 
     private void validarDniUnico(String dni, Long usuarioIdActual) {
         if (dni == null || dni.isBlank()) return;
@@ -193,6 +221,19 @@ public class UsuarioServiceImpl implements UsuarioService {
         dto.setUsername(usuario.getUsername());
         dto.setActivo(usuario.getActivo());
         dto.setRolNombre(usuario.getRol() != null ? usuario.getRol().getNombre() : null);
+        dto.setPuedeSalidaEntreAlmacenes(usuario.getPuedeSalidaEntreAlmacenes());
+
+        dto.setAlmacenIds(
+            usuario.getAlmacenes() != null
+                ? usuario.getAlmacenes().stream().map(Almacenes::getId).toList()
+                : java.util.List.of()
+        );
+
+        dto.setAlmacenesNombres(
+            usuario.getAlmacenes() != null
+                ? usuario.getAlmacenes().stream().map(Almacenes::getNombre).toList()
+                : java.util.List.of()
+        );
         return dto;
     }
     
@@ -200,7 +241,9 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public UsuarioResponse crear(String nombre, String apellido, String correo, String dni,
                                  String telefono, String username, String password,
-                                 Boolean activo, Long rolId) {
+                                 Boolean activo, Long rolId,
+                                 Boolean puedeSalidaEntreAlmacenes,
+                                 List<Long> almacenIds) {
 
         if (password == null || password.isBlank()) {
             throw new RuntimeException("La contraseña es obligatoria");
@@ -212,6 +255,8 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         Rol rol = rolRepository.findById(rolId)
                 .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        
+        List<Almacenes> almacenesAsignados = obtenerAlmacenesPermitidos(almacenIds);
 
         if ("MASTER_ADMIN".equalsIgnoreCase(rol.getNombre())) {
             throw new RuntimeException("No se puede crear un usuario con rol MASTER_ADMIN desde la interfaz");
@@ -231,6 +276,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setPassword(passwordEncoder.encode(password));
         usuario.setActivo(activo != null ? activo : true);
         usuario.setRol(rol);
+        usuario.setPuedeSalidaEntreAlmacenes(puedeSalidaEntreAlmacenes != null ? puedeSalidaEntreAlmacenes : true);
+        usuario.setAlmacenes(almacenesAsignados);
 
         return toResponse(usuarioRepository.save(usuario));
     }

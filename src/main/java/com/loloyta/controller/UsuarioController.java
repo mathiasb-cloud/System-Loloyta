@@ -38,17 +38,19 @@ public class UsuarioController {
     public UsuarioResponse actualizarComoDueno(@PathVariable Long id,
                                                @RequestBody UsuarioAdminUpdateRequest request) {
     	autorizacionService.validarPermiso("USUARIOS_EDITAR");
-        return usuarioService.actualizarComoAdministrador(
-                id,
-                request.getRolId(),
-                request.getNombre(),
-                request.getApellido(),
-                request.getCorreo(),
-                request.getDni(),
-                request.getTelefono(),
-                request.getUsername(),
-                request.getActivo()
-        );
+    	return usuarioService.actualizarComoAdministrador(
+    	        id,
+    	        request.getRolId(),
+    	        request.getNombre(),
+    	        request.getApellido(),
+    	        request.getCorreo(),
+    	        request.getDni(),
+    	        request.getTelefono(),
+    	        request.getUsername(),
+    	        request.getActivo(),
+    	        request.getPuedeSalidaEntreAlmacenes(),
+    	        request.getAlmacenIds()
+    	);
     }
 
     @PutMapping("/{id}/perfil")
@@ -77,16 +79,19 @@ public class UsuarioController {
     @PostMapping
     public UsuarioResponse crear(@RequestBody UsuarioCreateRequest request) {
     	autorizacionService.validarPermiso("USUARIOS_EDITAR");
-        return usuarioService.crear(
-                request.getNombre(),
-                request.getApellido(),
-                request.getCorreo(),
-                request.getDni(),
-                request.getTelefono(),
-                request.getUsername(),
-                request.getPassword(),
-                request.getActivo(),
-                request.getRolId()
-        );
+    	autorizacionService.validarPermiso("USUARIOS_EDITAR");
+    	return usuarioService.crear(
+    	        request.getNombre(),
+    	        request.getApellido(),
+    	        request.getCorreo(),
+    	        request.getDni(),
+    	        request.getTelefono(),
+    	        request.getUsername(),
+    	        request.getPassword(),
+    	        request.getActivo(),
+    	        request.getRolId(),
+    	        request.getPuedeSalidaEntreAlmacenes(),
+    	        request.getAlmacenIds()
+    	);
     }
 }

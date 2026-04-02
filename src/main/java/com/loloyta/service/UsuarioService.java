@@ -11,8 +11,10 @@ public interface UsuarioService {
     UsuarioResponse obtenerVisiblePorId(Long id);
 
     UsuarioResponse actualizarComoAdministrador(Long id, Long rolId, String nombre, String apellido,
-                                        String correo, String dni, String telefono,
-                                        String username, Boolean activo);
+            String correo, String dni, String telefono,
+            String username, Boolean activo,
+            Boolean puedeSalidaEntreAlmacenes,
+            java.util.List<Long> almacenIds);
 
     UsuarioResponse actualizarPerfilPropio(Long id, String nombre, String apellido,
                                            String correo, String dni, String telefono,
@@ -22,5 +24,7 @@ public interface UsuarioService {
     
     UsuarioResponse crear(String nombre, String apellido, String correo, String dni,
             String telefono, String username, String password,
-            Boolean activo, Long rolId);
+            Boolean activo, Long rolId,
+            Boolean puedeSalidaEntreAlmacenes,
+            java.util.List<Long> almacenIds);
 }

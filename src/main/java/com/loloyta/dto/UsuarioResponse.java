@@ -43,4 +43,28 @@ public class UsuarioResponse {
 
     public String getRolNombre() { return rolNombre; }
     public void setRolNombre(String rolNombre) { this.rolNombre = rolNombre; }
+    
+    public Boolean getPuedeSalidaEntreAlmacenes() {
+        return puedeSalidaEntreAlmacenes;
+    }
+
+    public void setPuedeSalidaEntreAlmacenes(Boolean puedeSalidaEntreAlmacenes) {
+        this.puedeSalidaEntreAlmacenes = puedeSalidaEntreAlmacenes;
+    }
+
+    public List<Long> getAlmacenIds() {
+        return almacenIds;
+    }
+
+    public void setAlmacenIds(List<Long> almacenIds) {
+        this.almacenIds = almacenIds;
+    }
+
+    public List<String> getAlmacenesNombres() {
+        return almacenesNombres;
+    }
+
+    public void setAlmacenesNombres(List<String> almacenesNombres) {
+        this.almacenesNombres = almacenesNombres;
+    }
 }

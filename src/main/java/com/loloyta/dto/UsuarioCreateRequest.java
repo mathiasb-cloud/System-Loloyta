@@ -1,5 +1,7 @@
 package com.loloyta.dto;
 
+import java.util.List;
+
 public class UsuarioCreateRequest {
 
     private String nombre;
@@ -11,6 +13,8 @@ public class UsuarioCreateRequest {
     private String password;
     private Boolean activo;
     private Long rolId;
+    private Boolean puedeSalidaEntreAlmacenes;
+    private List<Long> almacenIds;
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
@@ -38,4 +42,20 @@ public class UsuarioCreateRequest {
 
     public Long getRolId() { return rolId; }
     public void setRolId(Long rolId) { this.rolId = rolId; }
+    
+    public Boolean getPuedeSalidaEntreAlmacenes() {
+        return puedeSalidaEntreAlmacenes;
+    }
+
+    public void setPuedeSalidaEntreAlmacenes(Boolean puedeSalidaEntreAlmacenes) {
+        this.puedeSalidaEntreAlmacenes = puedeSalidaEntreAlmacenes;
+    }
+
+    public List<Long> getAlmacenIds() {
+        return almacenIds;
+    }
+
+    public void setAlmacenIds(List<Long> almacenIds) {
+        this.almacenIds = almacenIds;
+    }
 }

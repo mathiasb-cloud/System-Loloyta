@@ -16,6 +16,7 @@ import com.loloyta.repository.DetalleSalidaRepository;
 import com.loloyta.repository.LocalesRepository;
 import com.loloyta.repository.MovimientoRepository;
 import com.loloyta.repository.SalidaRepository;
+import com.loloyta.service.AccesoAlmacenService;
 import com.loloyta.service.AuthService;
 import com.loloyta.service.SalidaService;
 import com.loloyta.service.StockService;
@@ -34,6 +35,9 @@ public class SalidaServiceImpl implements SalidaService {
 
     @Autowired
     private StockService stockService;
+    
+    @Autowired
+    private AccesoAlmacenService accesoAlmacenService;
 
     @Autowired
     private MovimientoRepository movimientoRepository;
@@ -56,6 +60,8 @@ public class SalidaServiceImpl implements SalidaService {
 
     @Override
     public Salida crear(Salida salida) {
+    	
+    	accesoAlmacenService.validarAccesoAlmacen(salida.getAlmacenes().getId());
 
     if (salida.getAlmacenes() == null || salida.getAlmacenes().getId() == null) {
         throw new RuntimeException("Debe seleccionar un almacén");
@@ -160,6 +166,25 @@ public class SalidaServiceImpl implements SalidaService {
             	    salida.getAlmacenes().getId(),
             	    d.getCantidadDespacho()
             	);
+            
+            if ("ALMACEN".equalsIgnoreCase(salida.getTipoDestino()) && salida.getAlmacenDestino() != null) {
+                stockService.aumentarStock(
+                        d.getProducto().getId(),
+                        salida.getAlmacenDestino().getId(),
+                        d.getCantidadDespacho()
+                );
+
+                Movimiento ingresoDestino = new Movimiento();
+                ingresoDestino.setTipo("INGRESO");
+                ingresoDestino.setCantidad(cantidadDespacho);
+                ingresoDestino.setFecha(LocalDateTime.now());
+                ingresoDestino.setAlmacen(salida.getAlmacenDestino());
+                ingresoDestino.setUsuario(authService.obtenerUsuarioAutenticado());
+                ingresoDestino.setProducto(d.getProducto());
+                ingresoDestino.setSalida(salida);
+
+                movimientoRepository.save(ingresoDestino);
+            }
 
             
             Movimiento mov = new Movimiento();

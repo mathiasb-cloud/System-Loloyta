@@ -94,12 +94,21 @@ public class Salida {
 	}
 
 	public String getTipoDestino() {
-		return tipoDestino;
+	    return tipoDestino;
 	}
 
 	public void setTipoDestino(String tipoDestino) {
-		this.tipoDestino = tipoDestino;
+	    this.tipoDestino = tipoDestino;
 	}
+
+	public Almacenes getAlmacenDestino() {
+	    return almacenDestino;
+	}
+
+	public void setAlmacenDestino(Almacenes almacenDestino) {
+	    this.almacenDestino = almacenDestino;
+	}
+	
 	
 	
     
