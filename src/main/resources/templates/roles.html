@@ -3,6 +3,13 @@
         <h2 class="section-title">Roles y Permisos</h2>
         <p class="section-subtitle">Configura accesos y restricciones del sistema.</p>
     </div>
+
+    <button class="btn btn-success btn-icon"
+            onclick="abrirModalRol()"
+            data-permiso="ROLES_EDITAR">
+        <i class="bi bi-plus-circle me-2"></i>
+        <span>Nuevo Rol</span>
+    </button>
 </div>
 
 <div class="roles-layout">
@@ -56,4 +63,41 @@
             <div class="dashboard-empty-row">Selecciona un rol para cargar permisos.</div>
         </div>
     </section>
+</div>
+
+
+
+<div class="modal fade" id="modalRol" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-0">Nuevo Rol</h5>
+                    <small class="text-muted">Crea un nuevo rol operativo.</small>
+                </div>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nombre del rol</label>
+                    <input type="text" id="nuevoRolNombre" class="form-control" placeholder="Ej. Supervisor">
+                </div>
+
+                <div class="mb-0">
+                    <label class="form-label">Descripción</label>
+                    <textarea id="nuevoRolDescripcion" class="form-control" rows="3" placeholder="Descripción opcional"></textarea>
+                </div>
+
+                <div id="alertRol" class="alert alert-warning d-none mt-3 mb-0"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarNuevoRol()" data-permiso="ROLES_EDITAR">
+                    Crear rol
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
