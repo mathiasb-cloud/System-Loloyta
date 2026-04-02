@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.loloyta.dto.RolCreateRequest;
 import com.loloyta.dto.RolNombreUpdateRequest;
 import com.loloyta.dto.RolResponse;
 import com.loloyta.service.AutorizacionService;
@@ -33,5 +34,11 @@ public class RolController {
                                         @RequestBody RolNombreUpdateRequest request) {
     	autorizacionService.validarPermiso("ROLES_EDITAR");
         return rolService.actualizarNombre(id, request.getNombre());
+    }
+    
+    @PostMapping
+    public RolResponse crear(@RequestBody RolCreateRequest request) {
+        autorizacionService.validarPermiso("ROLES_EDITAR");
+        return rolService.crear(request.getNombre(), request.getDescripcion());
     }
 }

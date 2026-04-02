@@ -56,6 +56,10 @@ public class PermisoServiceImpl implements PermisoService {
                 .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
 
         validarRolVisible(rol);
+        
+        if ("ADMINISTRADOR".equalsIgnoreCase(rol.getNombre())) {
+            throw new RuntimeException("No se pueden modificar los permisos del rol ADMINISTRADOR");
+        }
 
         List<Permiso> permisosNuevos = new ArrayList<>();
 

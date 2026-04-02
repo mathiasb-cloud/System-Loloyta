@@ -43,7 +43,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UsuarioResponse actualizarComoDueno(Long id, Long rolId, String nombre, String apellido,
+    public UsuarioResponse actualizarComoAdministrador(Long id, Long rolId, String nombre, String apellido,
                                                String correo, String dni, String telefono,
                                                String username, Boolean activo) {
 

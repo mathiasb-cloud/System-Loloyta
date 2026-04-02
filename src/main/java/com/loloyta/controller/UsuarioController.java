@@ -38,7 +38,7 @@ public class UsuarioController {
     public UsuarioResponse actualizarComoDueno(@PathVariable Long id,
                                                @RequestBody UsuarioAdminUpdateRequest request) {
     	autorizacionService.validarPermiso("USUARIOS_EDITAR");
-        return usuarioService.actualizarComoDueno(
+        return usuarioService.actualizarComoAdministrador(
                 id,
                 request.getRolId(),
                 request.getNombre(),

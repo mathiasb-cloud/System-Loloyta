@@ -631,9 +631,9 @@ function tienePermiso(codigo) {
 
     const rol = String(sesion.rol || "").toUpperCase();
 
-    if (rol === "DUEÑO" || rol === "MASTER_ADMIN") {
-        return true;
-    }
+	if (rol === "MASTER_ADMIN" || rol === "ADMINISTRADOR") {
+	    return true;
+	}
 
     return (sesion.permisos || []).includes(codigo);
 }

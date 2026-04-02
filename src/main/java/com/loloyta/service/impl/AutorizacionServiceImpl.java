@@ -31,7 +31,7 @@ public class AutorizacionServiceImpl implements AutorizacionService {
 
         String rolNombre = usuario.getRol().getNombre().toUpperCase();
 
-        if ("DUEÑO".equals(rolNombre) || "MASTER_ADMIN".equals(rolNombre)) {
+        if ("MASTER_ADMIN".equals(rolNombre) || "ADMINISTRADOR".equals(rolNombre)) {
             return true;
         }
 

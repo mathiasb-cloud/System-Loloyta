@@ -52,4 +52,23 @@ public class RolServiceImpl implements RolService {
 
         return toResponse(rolRepository.save(rol));
     }
+    
+    @Override
+    public RolResponse crear(String nombre, String descripcion) {
+        if (nombre == null || nombre.isBlank()) {
+            throw new RuntimeException("El nombre del rol es obligatorio");
+        }
+
+        if (rolRepository.existsByNombre(nombre.trim())) {
+            throw new RuntimeException("Ya existe un rol con ese nombre");
+        }
+
+        Rol rol = new Rol();
+        rol.setNombre(nombre.trim());
+        rol.setDescripcion((descripcion == null || descripcion.isBlank()) ? null : descripcion.trim());
+        rol.setActivo(true);
+        rol.setEsSistema(false);
+
+        return toResponse(rolRepository.save(rol));
+    }
 }

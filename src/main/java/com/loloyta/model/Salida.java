@@ -15,6 +15,12 @@ public class Salida {
     private LocalDateTime fecha;
 
     private String estado;
+    
+    private String tipoDestino; // LOCAL o ALMACEN
+    
+    @ManyToOne
+    @JoinColumn(name = "almacen_destino_id")
+    private Almacenes almacenDestino;
 
     @ManyToOne
     @JoinColumn(name = "almacen_id")
@@ -30,12 +36,13 @@ public class Salida {
 
     public Salida() {}
 
-	public Salida(LocalDateTime fecha, String estado, Almacenes almacenes, Locales locales, Usuario usuario) {
+	public Salida(LocalDateTime fecha, String estado, Almacenes almacenes, Locales locales, Usuario usuario, String tipoDestino) {
 		this.fecha = fecha;
 		this.estado = estado;
 		this.almacenes = almacenes;
 		this.locales = locales;
 		this.usuario = usuario;
+		this.tipoDestino = tipoDestino;
 	}
 
 	public Long getId() {
@@ -85,6 +92,16 @@ public class Salida {
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
 	}
+
+	public String getTipoDestino() {
+		return tipoDestino;
+	}
+
+	public void setTipoDestino(String tipoDestino) {
+		this.tipoDestino = tipoDestino;
+	}
+	
+	
     
     
 }

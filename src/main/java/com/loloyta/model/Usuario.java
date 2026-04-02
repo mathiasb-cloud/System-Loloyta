@@ -14,6 +14,9 @@ public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Column(nullable = false)
+    private Boolean puedeSalidaEntreAlmacenes = true;
 
     @Column(nullable = false, length = 80)
     private String nombre;
@@ -44,6 +47,14 @@ public class Usuario {
     private LocalDateTime fechaCreacion;
 
     private LocalDateTime ultimoAcceso;
+    
+    @ManyToMany
+    @JoinTable(
+        name = "usuario_almacen",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "almacen_id")
+    )
+    private List<Almacenes> almacenes;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id", nullable = false)
@@ -60,6 +71,10 @@ public class Usuario {
         }
         if (activo == null) {
             activo = true;
+        }
+        
+        if (puedeSalidaEntreAlmacenes == null) {
+            puedeSalidaEntreAlmacenes = true;
         }
     }
 
@@ -95,6 +110,22 @@ public class Usuario {
 
     public LocalDateTime getUltimoAcceso() { return ultimoAcceso; }
     public void setUltimoAcceso(LocalDateTime ultimoAcceso) { this.ultimoAcceso = ultimoAcceso; }
+    
+    public Boolean getPuedeSalidaEntreAlmacenes() {
+        return puedeSalidaEntreAlmacenes;
+    }
+
+    public void setPuedeSalidaEntreAlmacenes(Boolean puedeSalidaEntreAlmacenes) {
+        this.puedeSalidaEntreAlmacenes = puedeSalidaEntreAlmacenes;
+    }
+
+    public List<Almacenes> getAlmacenes() {
+        return almacenes;
+    }
+
+    public void setAlmacenes(List<Almacenes> almacenes) {
+        this.almacenes = almacenes;
+    }
 
     public Rol getRol() { return rol; }
     public void setRol(Rol rol) { this.rol = rol; }

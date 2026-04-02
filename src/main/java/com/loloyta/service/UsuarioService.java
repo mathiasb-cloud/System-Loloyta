@@ -10,7 +10,7 @@ public interface UsuarioService {
 
     UsuarioResponse obtenerVisiblePorId(Long id);
 
-    UsuarioResponse actualizarComoDueno(Long id, Long rolId, String nombre, String apellido,
+    UsuarioResponse actualizarComoAdministrador(Long id, Long rolId, String nombre, String apellido,
                                         String correo, String dni, String telefono,
                                         String username, Boolean activo);
 

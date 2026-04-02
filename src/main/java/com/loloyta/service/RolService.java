@@ -9,4 +9,6 @@ public interface RolService {
     List<RolResponse> listarVisibles();
     
     RolResponse actualizarNombre(Long id, String nombre);
+    
+    RolResponse crear(String nombre, String descripcion);
 }

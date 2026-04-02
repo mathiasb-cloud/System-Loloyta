@@ -73,20 +73,20 @@
         if (bloqueNombre) bloqueNombre.classList.remove("d-none");
         if (nombreInput) nombreInput.value = rol.nombre || "";
 
-        const esRolProtegido = ["ADMINISTRADOR"].includes(String(rol.nombre || "").toUpperCase());
+		const esRolProtegido = ["ADMINISTRADOR"].includes(String(rol.nombre || "").toUpperCase());
 
-        if (hint) {
-            hint.textContent = esRolProtegido
-                ? "Este rol es del sistema. Puedes cambiar el nombre, pero no modificar sus permisos."
-                : "Puedes cambiar el nombre y configurar los permisos de este rol.";
-        }
+		if (hint) {
+		    hint.textContent = esRolProtegido
+		        ? "Este rol tiene acceso total del sistema. Puedes cambiar el nombre, pero no modificar sus permisos."
+		        : "Puedes cambiar el nombre y configurar los permisos de este rol.";
+		}
 
-        if (btnGuardarPermisos) {
-            btnGuardarPermisos.disabled = esRolProtegido;
-            btnGuardarPermisos.classList.toggle("disabled", esRolProtegido);
-        }
+		if (btnGuardarPermisos) {
+		    btnGuardarPermisos.disabled = esRolProtegido;
+		    btnGuardarPermisos.classList.toggle("disabled", esRolProtegido);
+		}
 
-        await cargarPermisosPorRol(rol.id, esRolProtegido);
+		await cargarPermisosPorRol(rol.id, esRolProtegido);
 
         if (typeof aplicarPermisosEnVista === "function") {
             aplicarPermisosEnVista();
@@ -168,11 +168,11 @@
             return;
         }
 
-        const esRolProtegido = ["ADMINISTRADOR"].includes(String(rolSeleccionado.nombre || "").toUpperCase());
-        if (esRolProtegido) {
-            alert("No se pueden modificar los permisos de este rol.");
-            return;
-        }
+		const esRolProtegido = ["ADMINISTRADOR"].includes(String(rolSeleccionado.nombre || "").toUpperCase());
+		if (esRolProtegido) {
+		    alert("No se pueden modificar los permisos de este rol.");
+		    return;
+		}
 
         const checks = document.querySelectorAll(".permiso-check:checked");
         const ids = [...checks].map(c => Number(c.value));

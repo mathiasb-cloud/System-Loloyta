@@ -1,5 +1,7 @@
 package com.loloyta.dto;
 
+import java.util.List;
+
 public class UsuarioResponse {
 
     private Long id;
@@ -11,6 +13,9 @@ public class UsuarioResponse {
     private String username;
     private Boolean activo;
     private String rolNombre;
+    private Boolean puedeSalidaEntreAlmacenes;
+    private List<Long> almacenIds;
+    private List<String> almacenesNombres;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
