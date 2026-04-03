@@ -1,6 +1,7 @@
 let modalUsuario = null;
 let usuariosGlobal = [];
 let rolesGlobal = [];
+window.almacenesGlobal = window.almacenesGlobal || [];
 
 async function initUsuarios() {
     modalUsuario = new bootstrap.Modal(document.getElementById("modalUsuario"));
@@ -19,6 +20,33 @@ async function cargarUsuarios() {
 
     usuariosGlobal = await res.json();
     renderTablaUsuarios(usuariosGlobal);
+}
+
+async function cargarAlmacenesParaUsuario() {
+    try {
+        const res = await fetch("/api/almacenes", {
+            credentials: "include"
+        });
+
+        if (!res.ok) throw new Error();
+
+        almacenesGlobal = await res.json();
+
+        const select = document.getElementById("usuarioAlmacenes");
+        if (!select) return;
+
+        select.innerHTML = "";
+
+        almacenesGlobal.forEach(a => {
+            const option = document.createElement("option");
+            option.value = a.id;
+            option.textContent = a.nombre;
+            select.appendChild(option);
+        });
+
+    } catch (e) {
+        console.error("Error cargando almacenes", e);
+    }
 }
 
 async function cargarRolesUsuarios() {
@@ -89,8 +117,19 @@ function renderTablaUsuarios(data) {
 }
 
 function abrirModalUsuario() {
+	
+	cargarAlmacenesParaUsuario();
+
+	document.getElementById("usuarioSalidaEntreAlmacenes").checked = true;
     limpiarFormularioUsuario();
     modalUsuario.show();
+}
+
+function obtenerAlmacenesSeleccionados() {
+    const select = document.getElementById("usuarioAlmacenes");
+    if (!select) return [];
+
+    return [...select.selectedOptions].map(o => Number(o.value));
 }
 
 function limpiarFormularioUsuario() {
@@ -104,10 +143,20 @@ function limpiarFormularioUsuario() {
     document.getElementById("usuarioTelefono").value = "";
     document.getElementById("usuarioRol").value = "";
     document.getElementById("usuarioActivo").value = "true";
+
+    const select = document.getElementById("usuarioAlmacenes");
+    if (select) {
+        [...select.options].forEach(opt => opt.selected = false);
+    }
+
+    document.getElementById("usuarioSalidaEntreAlmacenes").checked = true;
+
     ocultarAlertaUsuario();
 }
 
 async function editarUsuario(id) {
+    await cargarAlmacenesParaUsuario();
+
     const res = await fetch(`/api/usuarios/${id}`, { credentials: "include" });
     if (!res.ok) {
         alert("No se pudo cargar el usuario.");
@@ -129,23 +178,37 @@ async function editarUsuario(id) {
     const rol = rolesGlobal.find(r => r.nombre === u.rolNombre);
     document.getElementById("usuarioRol").value = rol ? rol.id : "";
 
+    const select = document.getElementById("usuarioAlmacenes");
+    if (select && u.almacenIds) {
+        [...select.options].forEach(opt => {
+            opt.selected = u.almacenIds.includes(Number(opt.value));
+        });
+    }
+
+    document.getElementById("usuarioSalidaEntreAlmacenes").checked =
+        u.puedeSalidaEntreAlmacenes ?? true;
+
     ocultarAlertaUsuario();
     modalUsuario.show();
 }
 
 async function guardarUsuario() {
     const id = document.getElementById("usuarioId").value;
-    const payload = {
-        nombre: document.getElementById("usuarioNombre").value.trim(),
-        apellido: document.getElementById("usuarioApellido").value.trim(),
-        username: document.getElementById("usuarioUsername").value.trim(),
-        password: document.getElementById("usuarioPassword").value,
-        correo: document.getElementById("usuarioCorreo").value.trim() || null,
-        dni: document.getElementById("usuarioDni").value.trim() || null,
-        telefono: document.getElementById("usuarioTelefono").value.trim() || null,
-        rolId: Number(document.getElementById("usuarioRol").value || 0),
-        activo: document.getElementById("usuarioActivo").value === "true"
-    };
+	const payload = {
+	    nombre: document.getElementById("usuarioNombre").value.trim(),
+	    apellido: document.getElementById("usuarioApellido").value.trim(),
+	    username: document.getElementById("usuarioUsername").value.trim(),
+	    password: document.getElementById("usuarioPassword").value,
+	    correo: document.getElementById("usuarioCorreo").value.trim() || null,
+	    dni: document.getElementById("usuarioDni").value.trim() || null,
+	    telefono: document.getElementById("usuarioTelefono").value.trim() || null,
+	    rolId: Number(document.getElementById("usuarioRol").value || 0),
+	    activo: document.getElementById("usuarioActivo").value === "true",
+
+	    
+	    puedeSalidaEntreAlmacenes: document.getElementById("usuarioSalidaEntreAlmacenes").checked,
+	    almacenIds: obtenerAlmacenesSeleccionados()
+	};
 
     try {
         let res;
@@ -233,3 +296,8 @@ function escapeHtml(texto) {
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
 }
+
+window.abrirModalUsuario = abrirModalUsuario;
+window.editarUsuario = editarUsuario;
+window.guardarUsuario = guardarUsuario;
+window.cambiarEstadoUsuario = cambiarEstadoUsuario;

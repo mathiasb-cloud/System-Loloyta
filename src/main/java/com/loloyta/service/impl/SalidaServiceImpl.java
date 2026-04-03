@@ -60,33 +60,68 @@ public class SalidaServiceImpl implements SalidaService {
 
     @Override
     public Salida crear(Salida salida) {
-    	
-    	accesoAlmacenService.validarAccesoAlmacen(salida.getAlmacenes().getId());
 
     if (salida.getAlmacenes() == null || salida.getAlmacenes().getId() == null) {
         throw new RuntimeException("Debe seleccionar un almacén");
     }
 
-    if (salida.getLocales() == null || salida.getLocales().getId() == null) {
-        throw new RuntimeException("Debe seleccionar un local destino");
-    }
+    accesoAlmacenService.validarAccesoAlmacen(salida.getAlmacenes().getId());
 
     var almacen = almacenesRepository.findById(salida.getAlmacenes().getId())
             .orElseThrow(() -> new RuntimeException("Almacén no encontrado"));
 
-    var local = localesRepository.findById(salida.getLocales().getId())
-            .orElseThrow(() -> new RuntimeException("Local no encontrado"));
-
-    if (local.getAlmacen() == null || local.getAlmacen().getId() == null) {
-        throw new RuntimeException("El local seleccionado no tiene un almacén asociado");
+    if (salida.getTipoDestino() == null || salida.getTipoDestino().isBlank()) {
+        throw new RuntimeException("Debe indicar el tipo de destino");
     }
 
-    if (!local.getAlmacen().getId().equals(almacen.getId())) {
-        throw new RuntimeException("La salida solo puede realizarse al local que pertenece a ese almacén");
+    if ("LOCAL".equalsIgnoreCase(salida.getTipoDestino())) {
+
+        if (salida.getLocales() == null || salida.getLocales().getId() == null) {
+            throw new RuntimeException("Debe seleccionar un local destino");
+        }
+
+        var local = localesRepository.findById(salida.getLocales().getId())
+                .orElseThrow(() -> new RuntimeException("Local no encontrado"));
+
+        if (local.getAlmacen() == null || local.getAlmacen().getId() == null) {
+            throw new RuntimeException("El local seleccionado no tiene un almacén asociado");
+        }
+
+        if (!local.getAlmacen().getId().equals(almacen.getId())) {
+            throw new RuntimeException("La salida al local solo puede realizarse al local que pertenece a ese almacén");
+        }
+
+        salida.setAlmacenes(almacen);
+        salida.setLocales(local);
+        salida.setAlmacenDestino(null);
     }
 
-    salida.setAlmacenes(almacen);
-    salida.setLocales(local);
+    else if ("ALMACEN".equalsIgnoreCase(salida.getTipoDestino())) {
+
+        if (!accesoAlmacenService.puedeSalidaEntreAlmacenes()) {
+            throw new RuntimeException("No tiene permiso para realizar salidas a otro almacén");
+        }
+
+        if (salida.getAlmacenDestino() == null || salida.getAlmacenDestino().getId() == null) {
+            throw new RuntimeException("Debe seleccionar un almacén destino");
+        }
+
+        var almacenDestino = almacenesRepository.findById(salida.getAlmacenDestino().getId())
+                .orElseThrow(() -> new RuntimeException("Almacén destino no encontrado"));
+
+        if (almacenDestino.getId().equals(almacen.getId())) {
+            throw new RuntimeException("El almacén destino debe ser distinto al almacén origen");
+        }
+
+        salida.setAlmacenes(almacen);
+        salida.setAlmacenDestino(almacenDestino);
+        salida.setLocales(null);
+    }
+
+    else {
+        throw new RuntimeException("Tipo de destino inválido");
+    }
+
     salida.setUsuario(authService.obtenerUsuarioAutenticado());
     salida.setEstado("PENDIENTE");
     salida.setFecha(LocalDateTime.now());
@@ -104,26 +139,65 @@ public class SalidaServiceImpl implements SalidaService {
         throw new RuntimeException("Debe seleccionar un almacén");
     }
 
-    if (salidaActualizada.getLocales() == null || salidaActualizada.getLocales().getId() == null) {
-        throw new RuntimeException("Debe seleccionar un local destino");
-    }
+    accesoAlmacenService.validarAccesoAlmacen(salidaActualizada.getAlmacenes().getId());
 
     var almacen = almacenesRepository.findById(salidaActualizada.getAlmacenes().getId())
             .orElseThrow(() -> new RuntimeException("Almacén no encontrado"));
 
-    var local = localesRepository.findById(salidaActualizada.getLocales().getId())
-            .orElseThrow(() -> new RuntimeException("Local no encontrado"));
-
-    if (local.getAlmacen() == null || local.getAlmacen().getId() == null) {
-        throw new RuntimeException("El local seleccionado no tiene un almacén asociado");
+    if (salidaActualizada.getTipoDestino() == null || salidaActualizada.getTipoDestino().isBlank()) {
+        throw new RuntimeException("Debe indicar el tipo de destino");
     }
 
-    if (!local.getAlmacen().getId().equals(almacen.getId())) {
-        throw new RuntimeException("La salida solo puede realizarse al local que pertenece a ese almacén");
+    if ("LOCAL".equalsIgnoreCase(salidaActualizada.getTipoDestino())) {
+
+        if (salidaActualizada.getLocales() == null || salidaActualizada.getLocales().getId() == null) {
+            throw new RuntimeException("Debe seleccionar un local destino");
+        }
+
+        var local = localesRepository.findById(salidaActualizada.getLocales().getId())
+                .orElseThrow(() -> new RuntimeException("Local no encontrado"));
+
+        if (local.getAlmacen() == null || local.getAlmacen().getId() == null) {
+            throw new RuntimeException("El local seleccionado no tiene un almacén asociado");
+        }
+
+        if (!local.getAlmacen().getId().equals(almacen.getId())) {
+            throw new RuntimeException("La salida al local solo puede realizarse al local que pertenece a ese almacén");
+        }
+
+        salida.setAlmacenes(almacen);
+        salida.setLocales(local);
+        salida.setAlmacenDestino(null);
+        salida.setTipoDestino("LOCAL");
     }
 
-    salida.setAlmacenes(almacen);
-    salida.setLocales(local);
+    else if ("ALMACEN".equalsIgnoreCase(salidaActualizada.getTipoDestino())) {
+
+        if (!accesoAlmacenService.puedeSalidaEntreAlmacenes()) {
+            throw new RuntimeException("No tiene permiso para realizar salidas a otro almacén");
+        }
+
+        if (salidaActualizada.getAlmacenDestino() == null || salidaActualizada.getAlmacenDestino().getId() == null) {
+            throw new RuntimeException("Debe seleccionar un almacén destino");
+        }
+
+        var almacenDestino = almacenesRepository.findById(salidaActualizada.getAlmacenDestino().getId())
+                .orElseThrow(() -> new RuntimeException("Almacén destino no encontrado"));
+
+        if (almacenDestino.getId().equals(almacen.getId())) {
+            throw new RuntimeException("El almacén destino debe ser distinto al almacén origen");
+        }
+
+        salida.setAlmacenes(almacen);
+        salida.setAlmacenDestino(almacenDestino);
+        salida.setLocales(null);
+        salida.setTipoDestino("ALMACEN");
+    }
+
+    else {
+        throw new RuntimeException("Tipo de destino inválido");
+    }
+
     salida.setUsuario(authService.obtenerUsuarioAutenticado());
 
     return salidaRepository.save(salida);
@@ -193,7 +267,7 @@ public class SalidaServiceImpl implements SalidaService {
             mov.setCantidad(cantidadDespacho);
             mov.setFecha(LocalDateTime.now());
             mov.setAlmacen(salida.getAlmacenes());
-            mov.setUsuario(salida.getUsuario());
+            mov.setUsuario(authService.obtenerUsuarioAutenticado());
             mov.setSalida(salida);
             mov.setProducto(d.getProducto());
 

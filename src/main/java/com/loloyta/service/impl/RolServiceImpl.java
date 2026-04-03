@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.loloyta.dto.RolResponse;
+import com.loloyta.model.Permiso;
 import com.loloyta.model.Rol;
+import com.loloyta.repository.PermisoRepository;
 import com.loloyta.repository.RolRepository;
 import com.loloyta.service.RolService;
 
@@ -15,6 +17,9 @@ public class RolServiceImpl implements RolService {
 
     @Autowired
     private RolRepository rolRepository;
+    
+    @Autowired
+    private PermisoRepository permisoRepository;
 
     @Override
     public List<RolResponse> listarVisibles() {
@@ -69,6 +74,34 @@ public class RolServiceImpl implements RolService {
         rol.setActivo(true);
         rol.setEsSistema(false);
 
-        return toResponse(rolRepository.save(rol));
+        Rol guardado = rolRepository.save(rol);
+
+        List<String> codigosPermitidos = List.of(
+            "DASHBOARD_VER",
+            "PRODUCTOS_VER",
+            "PRODUCTOS_EDITAR",
+            "ORDENES_VER",
+            "ORDENES_CREAR",
+            "ORDENES_CONFIRMAR",
+            "SALIDAS_VER",
+            "SALIDAS_CREAR",
+            "SALIDAS_CONFIRMAR",
+            "MERMAS_VER",
+            "MERMAS_CREAR",
+            "MERMAS_CONFIRMAR",
+            "STOCK_VER",
+            "STOCK_ASIGNAR",
+            "STOCK_AUDITAR",
+            "LOCALES_VER"
+        );
+
+        List<Permiso> permisosBase = permisoRepository.findAll().stream()
+                .filter(p -> codigosPermitidos.contains(p.getCodigo()))
+                .toList();
+
+        guardado.setPermisos(permisosBase);
+        guardado = rolRepository.save(guardado);
+
+        return toResponse(guardado);
     }
 }

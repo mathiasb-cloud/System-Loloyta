@@ -89,7 +89,18 @@
                         <label class="form-label">Rol</label>
                         <select id="usuarioRol" class="form-select"></select>
                     </div>
+					<div class="mb-3">
+					    <label class="form-label">Almacenes asignados</label>
+					    <select id="usuarioAlmacenes" class="form-select" multiple></select>
+					    <small class="text-muted">Selecciona uno o más almacenes que el usuario podrá gestionar.</small>
+					</div>
 
+					<div class="form-check form-switch mb-3">
+					    <input class="form-check-input" type="checkbox" id="usuarioSalidaEntreAlmacenes" checked>
+					    <label class="form-check-label">
+					        Permitir salida a otro almacén
+					    </label>
+					</div>
                     <div class="col-md-6">
                         <label class="form-label">Estado</label>
                         <select id="usuarioActivo" class="form-select">
