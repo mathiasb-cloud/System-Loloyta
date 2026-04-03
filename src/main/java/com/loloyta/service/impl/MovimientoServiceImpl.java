@@ -174,7 +174,18 @@ public class MovimientoServiceImpl implements MovimientoService {
         dto.setTipo(primero.getTipo());
         dto.setFecha(primero.getFecha());
         dto.setAlmacenNombre(primero.getAlmacen() != null ? primero.getAlmacen().getNombre() : null);
-        dto.setUsuarioNombre(primero.getUsuario() != null ? primero.getUsuario().getNombre() : null);
+        Usuario u = primero.getUsuario();
+
+        if (u != null) {
+            String nombreCompleto = java.util.stream.Stream
+                    .of(u.getNombre(), u.getApellido())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining(" "));
+
+            dto.setUsuarioNombre(nombreCompleto.isBlank() ? u.getUsername() : nombreCompleto);
+        } else {
+            dto.setUsuarioNombre(null);
+        }
         dto.setTotalItems(grupo.size());
 
         List<MovimientoDetalleItemDto> items = new ArrayList<>();

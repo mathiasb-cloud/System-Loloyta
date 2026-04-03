@@ -11,8 +11,8 @@ async function initStockAuditoria() {
 async function cargarCatalogosAuditoriaStock() {
     try {
         const [resAlmacenes, resProveedores] = await Promise.all([
-            fetch("/api/almacenes"),
-            fetch("/api/proveedores")
+            fetch("/api/almacenes/mis-almacenes", { credentials: "include" }),
+            fetch("/api/proveedores", { credentials: "include" })
         ]);
 
         almacenesAuditoriaGlobal = resAlmacenes.ok ? await resAlmacenes.json() : [];
@@ -56,7 +56,10 @@ async function cargarAuditoriaStockPorAlmacen(almacenId) {
     try {
         mostrarCargandoAuditoriaStock("Cargando auditoría del almacén...");
 
-        const res = await fetch(`/api/stock/auditoria/${almacenId}`);
+        const res = await fetch(`/api/stock/auditoria/${almacenId}`, {
+            credentials: "include"
+        });
+
         if (!res.ok) {
             const msg = await res.text();
             throw new Error(msg || "No se pudo cargar la auditoría.");
@@ -262,13 +265,14 @@ async function guardarAuditoriaStock() {
             }))
         };
 
-        const res = await fetch("/api/stock/auditoria/guardar", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-        });
+		const res = await fetch("/api/stock/auditoria/guardar", {
+		    method: "POST",
+		    headers: {
+		        "Content-Type": "application/json"
+		    },
+		    credentials: "include",
+		    body: JSON.stringify(payload)
+		});
 
         if (!res.ok) {
             const msg = await res.text();

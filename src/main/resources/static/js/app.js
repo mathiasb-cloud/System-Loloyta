@@ -271,6 +271,7 @@ async function cargarSesionActual() {
 document.addEventListener("DOMContentLoaded", async () => {
     await cargarSesionActual();
     aplicarPermisosEnTopbar();
+	aplicarDatosUsuarioEnUI();
 
     const vistaPendiente = sessionStorage.getItem("abrirVistaAlCargar");
 
@@ -292,7 +293,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function initDashboardHome() {
-	setText("dashboardNombreUsuario", "Mathias");
+	
     activarRevealOnScroll();
 
     try {
@@ -698,4 +699,55 @@ function aplicarPermisosEnVista() {
         const permiso = el.dataset.permiso;
         el.style.display = tienePermiso(permiso) ? "" : "none";
     });
+}
+
+function obtenerSesionUsuario() {
+    try {
+        return JSON.parse(sessionStorage.getItem("sesionUsuario") || "null");
+    } catch {
+        return null;
+    }
+}
+
+function obtenerNombreMostrableUsuario() {
+    const sesion = obtenerSesionUsuario();
+    if (!sesion) return "Usuario";
+
+    const nombre = String(sesion.nombre || "").trim();
+    const apellido = String(sesion.apellido || "").trim();
+
+    const nombreCompleto = [nombre, apellido].filter(Boolean).join(" ");
+    return nombreCompleto || sesion.username || "Usuario";
+}
+
+function obtenerInicialesUsuario() {
+    const sesion = obtenerSesionUsuario();
+    if (!sesion) return "U";
+
+    const nombre = String(sesion.nombre || "").trim();
+    const apellido = String(sesion.apellido || "").trim();
+
+    const iniciales = [nombre, apellido]
+        .filter(Boolean)
+        .map(x => x.charAt(0).toUpperCase())
+        .join("");
+
+    if (iniciales) return iniciales.slice(0, 2);
+
+    return String(sesion.username || "U").charAt(0).toUpperCase();
+}
+
+function aplicarDatosUsuarioEnUI() {
+    const nombreUsuario = obtenerNombreMostrableUsuario();
+    const iniciales = obtenerInicialesUsuario();
+
+    const bienvenida = document.getElementById("dashboardNombreUsuario");
+    if (bienvenida) {
+        bienvenida.textContent = nombreUsuario;
+    }
+
+    const avatar = document.getElementById("topbarUserInitials");
+    if (avatar) {
+        avatar.textContent = iniciales;
+    }
 }

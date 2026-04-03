@@ -5,6 +5,9 @@ let buscadorSalidaClickRegistrado = false;
 async function initSalidas() {
     await cargarAlmacenesSalida();
 
+    configurarTipoDestinoSalida();
+    await cargarAlmacenesDestinoSalida();
+
     document.getElementById("almacenSalida")?.addEventListener("change", async () => {
         await cargarProductosSalidaPorAlmacen();
         await cargarLocalAutomaticoPorAlmacenSalida();
@@ -27,6 +30,57 @@ async function initSalidas() {
     if (document.getElementById("almacenSalida")?.value) {
         await cargarProductosSalidaPorAlmacen();
         await cargarLocalAutomaticoPorAlmacenSalida();
+    }
+}
+function configurarTipoDestinoSalida() {
+    const selectTipo = document.getElementById("tipoDestinoSalida");
+    const bloqueLocal = document.getElementById("bloqueLocalSalida");
+    const bloqueAlmacen = document.getElementById("bloqueAlmacenDestinoSalida");
+
+    if (!selectTipo || !bloqueLocal || !bloqueAlmacen) return;
+
+    const actualizarVista = () => {
+        const tipo = selectTipo.value;
+        const localSelect = document.getElementById("localSalida");
+        const almacenDestinoSelect = document.getElementById("almacenDestinoSalida");
+
+        if (tipo === "ALMACEN") {
+            bloqueLocal.classList.add("d-none");
+            bloqueAlmacen.classList.remove("d-none");
+            if (localSelect) localSelect.value = "";
+        } else {
+            bloqueLocal.classList.remove("d-none");
+            bloqueAlmacen.classList.add("d-none");
+            if (almacenDestinoSelect) almacenDestinoSelect.value = "";
+        }
+
+        actualizarFlujoSalidaVisual();
+    };
+
+    selectTipo.removeEventListener?.("_dummy", () => {});
+    selectTipo.addEventListener("change", actualizarVista);
+    actualizarVista();
+}
+
+async function cargarAlmacenesDestinoSalida() {
+    const select = document.getElementById("almacenDestinoSalida");
+    if (!select) return;
+
+    try {
+        const res = await fetch("/api/almacenes", { credentials: "include" });
+        if (!res.ok) throw new Error("No se pudieron cargar los almacenes destino.");
+
+        const data = await res.json();
+
+        select.innerHTML = `<option value="">Seleccione almacén destino</option>`;
+
+        data
+            .filter(a => a.activo !== false)
+            .forEach(a => {
+                select.innerHTML += `<option value="${a.id}">${escapeHtml(a.nombre)}</option>`;
+            });
+    } catch (error) {
+        console.error(error);
     }
 }
 
@@ -506,7 +560,9 @@ function obtenerItemsSalida() {
 
 function validarSalida() {
     const almacenId = document.getElementById("almacenSalida")?.value;
+    const tipoDestino = document.getElementById("tipoDestinoSalida")?.value || "LOCAL";
     const localId = document.getElementById("localSalida")?.value;
+    const almacenDestinoId = document.getElementById("almacenDestinoSalida")?.value;
     const filas = document.querySelectorAll("#tablaSalida tbody tr");
 
     if (!almacenId) {
@@ -514,8 +570,18 @@ function validarSalida() {
         return false;
     }
 
-    if (!localId) {
-        mostrarInfoSalida("No hay un local asociado al almacén seleccionado.");
+    if (tipoDestino === "LOCAL" && !localId) {
+        mostrarInfoSalida("Selecciona un local destino.");
+        return false;
+    }
+
+    if (tipoDestino === "ALMACEN" && !almacenDestinoId) {
+        mostrarInfoSalida("Selecciona un almacén destino.");
+        return false;
+    }
+
+    if (tipoDestino === "ALMACEN" && String(almacenDestinoId) === String(almacenId)) {
+        mostrarInfoSalida("El almacén destino debe ser diferente al origen.");
         return false;
     }
 
@@ -568,17 +634,27 @@ async function guardarOSobrescribirSalida() {
 }
 
 async function crearSalida() {
-    const almacenId = document.getElementById("almacenSalida").value;
-    const localId = document.getElementById("localSalida").value;
+    const almacenId = document.getElementById("almacenSalida")?.value;
+    const localId = document.getElementById("localSalida")?.value;
+    const tipoDestino = document.getElementById("tipoDestinoSalida")?.value || "LOCAL";
+    const almacenDestinoId = document.getElementById("almacenDestinoSalida")?.value;
 
-    const res = await fetch('/api/salidas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            almacenes: { id: Number(almacenId) },
-            locales: { id: Number(localId) },
-            
-        })
+    const payload = {
+        almacenes: { id: Number(almacenId) },
+        tipoDestino
+    };
+
+    if (tipoDestino === "LOCAL") {
+        payload.locales = { id: Number(localId) };
+    } else {
+        payload.almacenDestino = { id: Number(almacenDestinoId) };
+    }
+
+    const res = await fetch("/api/salidas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload)
     });
 
     if (!res.ok) {
@@ -596,7 +672,10 @@ async function crearSalida() {
     try {
         await guardarDetalleSalida();
     } catch (error) {
-        await fetch(`/api/salidas/${salidaId}`, { method: 'DELETE' });
+        await fetch(`/api/salidas/${salidaId}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
         salidaId = null;
         throw error;
     }
@@ -630,17 +709,27 @@ async function guardarDetalleSalida() {
 }
 
 async function guardarCambiosSalida() {
-    const almacenId = document.getElementById("almacenSalida").value;
-    const localId = document.getElementById("localSalida").value;
+    const almacenId = document.getElementById("almacenSalida")?.value;
+    const localId = document.getElementById("localSalida")?.value;
+    const tipoDestino = document.getElementById("tipoDestinoSalida")?.value || "LOCAL";
+    const almacenDestinoId = document.getElementById("almacenDestinoSalida")?.value;
+
+    const payload = {
+        almacenes: { id: Number(almacenId) },
+        tipoDestino
+    };
+
+    if (tipoDestino === "LOCAL") {
+        payload.locales = { id: Number(localId) };
+    } else {
+        payload.almacenDestino = { id: Number(almacenDestinoId) };
+    }
 
     const resSalida = await fetch(`/api/salidas/${salidaId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            almacenes: { id: Number(almacenId) },
-            locales: { id: Number(localId) },
-            
-        })
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload)
     });
 
     if (!resSalida.ok) {
@@ -649,7 +738,8 @@ async function guardarCambiosSalida() {
     }
 
     const resBorrarDetalle = await fetch(`/api/detalle-salida/salida/${salidaId}`, {
-        method: 'DELETE'
+        method: "DELETE",
+        credentials: "include"
     });
 
     if (!resBorrarDetalle.ok) {
@@ -762,6 +852,17 @@ function limpiarFormularioSalida() {
         localSelect.value = "";
     }
 
+    const tipoDestinoSelect = document.getElementById("tipoDestinoSalida");
+    if (tipoDestinoSelect) {
+        tipoDestinoSelect.value = "LOCAL";
+    }
+
+    const almacenDestinoSelect = document.getElementById("almacenDestinoSalida");
+    if (almacenDestinoSelect) {
+        almacenDestinoSelect.value = "";
+    }
+
+    configurarTipoDestinoSalida();
     actualizarEstadoBotonesSalida();
     actualizarFlujoSalidaVisual();
     actualizarResumenSalida();
@@ -829,35 +930,46 @@ function actualizarResumenSalida() {
 function actualizarFlujoSalidaVisual() {
     const almacenSelect = document.getElementById("almacenSalida");
     const localSelect = document.getElementById("localSalida");
+    const tipoDestinoSelect = document.getElementById("tipoDestinoSalida");
+    const almacenDestinoSelect = document.getElementById("almacenDestinoSalida");
 
     const flujoAlmacenNombre = document.getElementById("flujoAlmacenNombre");
     const flujoLocalNombre = document.getElementById("flujoLocalNombre");
     const estadoSalidaBox = document.getElementById("estadoSalidaBox");
 
     const nombreAlmacen = almacenSelect?.selectedOptions?.[0]?.text?.trim() || "Seleccione almacén";
-    const nombreLocal = localSelect?.selectedOptions?.[0]?.text?.trim() || "Seleccione local";
+    const tipoDestino = tipoDestinoSelect?.value || "LOCAL";
+
+    const nombreDestino = tipoDestino === "LOCAL"
+        ? (localSelect?.selectedOptions?.[0]?.text?.trim() || "Seleccione local")
+        : (almacenDestinoSelect?.selectedOptions?.[0]?.text?.trim() || "Seleccione almacén destino");
 
     if (flujoAlmacenNombre) {
         flujoAlmacenNombre.textContent = nombreAlmacen;
     }
 
     if (flujoLocalNombre) {
-        flujoLocalNombre.textContent = nombreLocal;
+        flujoLocalNombre.textContent = nombreDestino;
     }
 
     if (estadoSalidaBox) {
         const almacenValido = almacenSelect?.value;
-        const localValido = localSelect?.value;
+        const destinoValido = tipoDestino === "LOCAL"
+            ? localSelect?.value
+            : almacenDestinoSelect?.value;
 
-        if (almacenValido && localValido) {
+        if (almacenValido && destinoValido) {
             estadoSalidaBox.innerHTML = `
                 <span class="badge text-bg-light border text-success">
                     <i class="bi bi-arrow-left-right me-1"></i>
                     Flujo configurado
                 </span>
-                <span class="ms-2">Se enviará desde <strong>${escapeHtml(nombreAlmacen)}</strong> hacia <strong>${escapeHtml(nombreLocal)}</strong>.</span>
+                <span class="ms-2">
+                    Se enviará desde <strong>${escapeHtml(nombreAlmacen)}</strong>
+                    hacia <strong>${escapeHtml(nombreDestino)}</strong>.
+                </span>
             `;
-        } else if (almacenValido || localValido) {
+        } else if (almacenValido || destinoValido) {
             estadoSalidaBox.innerHTML = `
                 <span class="badge text-bg-light border text-warning">
                     <i class="bi bi-exclamation-circle me-1"></i>
@@ -867,7 +979,7 @@ function actualizarFlujoSalidaVisual() {
             `;
         } else {
             estadoSalidaBox.innerHTML = `
-                <span class="text-muted">Selecciona el almacén de origen y el local de destino.</span>
+                <span class="text-muted">Selecciona el almacén de origen y el destino.</span>
             `;
         }
     }

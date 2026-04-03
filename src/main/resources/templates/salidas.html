@@ -11,11 +11,26 @@
             <label class="form-label">Almacén</label>
             <select id="almacenSalida" class="form-select"></select>
         </div>
+		
+		<div class="col-md-4">
+		    <label class="form-label">Tipo de destino</label>
+		    <select id="tipoDestinoSalida" class="form-select">
+		        <option value="LOCAL" selected>Local</option>
+		        <option value="ALMACEN">Almacén</option>
+		    </select>
+		</div>
 
-        <div class="col-md-6 col-lg-4">
-            <label class="form-label">Local destino</label>
-            <select id="localSalida" class="form-select" disabled></select>
-        </div>
+		<div class="col-md-4" id="bloqueLocalSalida">
+		    <label class="form-label">Local destino</label>
+		    <select id="localSalida" class="form-select"></select>
+		</div>
+		
+		<div class="col-md-4 d-none" id="bloqueAlmacenDestinoSalida">
+		    <label class="form-label">Almacén destino</label>
+		    <select id="almacenDestinoSalida" class="form-select">
+		        <option value="">Seleccione almacén destino</option>
+		    </select>
+		</div>
 
         <div class="col-lg-4">
             <div id="estadoSalidaBox" class="small text-muted estado-salida-box"></div>
