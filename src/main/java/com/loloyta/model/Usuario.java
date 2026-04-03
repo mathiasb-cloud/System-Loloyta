@@ -48,6 +48,7 @@ public class Usuario {
 
     private LocalDateTime ultimoAcceso;
     
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
         name = "usuario_almacen",
@@ -55,7 +56,9 @@ public class Usuario {
         inverseJoinColumns = @JoinColumn(name = "almacen_id")
     )
     private List<Almacenes> almacenes;
-
+    
+    
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id", nullable = false)
     private Rol rol;

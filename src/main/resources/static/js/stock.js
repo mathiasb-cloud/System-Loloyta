@@ -28,11 +28,11 @@ function inicializarModalesStock() {
 
 async function cargarCatalogosStock() {
     try {
-        const [resAlmacenes, resProductos, resProveedores] = await Promise.all([
-            fetch("/api/almacenes"),
-            fetch("/api/productos"),
-            fetch("/api/proveedores")
-        ]);
+		const [resAlmacenes, resProductos, resProveedores] = await Promise.all([
+		    fetch("/api/almacenes/mis-almacenes", { credentials: "include" }),
+		    fetch("/api/productos", { credentials: "include" }),
+		    fetch("/api/proveedores", { credentials: "include" })
+		]);
 
         almacenesStockGlobal = resAlmacenes.ok ? await resAlmacenes.json() : [];
         const productosJson = resProductos.ok ? await resProductos.json() : [];
@@ -51,7 +51,7 @@ async function cargarCatalogosStock() {
 
 async function cargarStock() {
     try {
-        const res = await fetch("/api/stock");
+        const res = await fetch("/api/stock", { credentials: "include" });
         if (!res.ok) throw new Error("No se pudo cargar el stock.");
 
         stockGlobal = await res.json();
@@ -259,9 +259,10 @@ async function guardarAsignacionStock() {
             params.append("proveedorId", proveedorId);
         }
 
-        const res = await fetch(`/api/stock/asignar?${params.toString()}`, {
-            method: "POST"
-        });
+		const res = await fetch(`/api/stock/asignar?${params.toString()}`, {
+		    method: "POST",
+		    credentials: "include"
+		});
 
         if (!res.ok) {
             const msg = await leerMensajeErrorStock(res);
@@ -303,9 +304,10 @@ async function guardarProveedorStock() {
             params.append("proveedorId", proveedorId);
         }
 
-        const res = await fetch(`/api/stock/proveedor?${params.toString()}`, {
-            method: "PATCH"
-        });
+		const res = await fetch(`/api/stock/proveedor?${params.toString()}`, {
+		    method: "PATCH",
+		    credentials: "include"
+		});
 
         if (!res.ok) {
             const msg = await leerMensajeErrorStock(res);

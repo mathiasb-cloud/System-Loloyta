@@ -30,7 +30,7 @@ async function cargarAlmacenesOrden() {
     try {
         console.log("Llamando API almacenes...");
 
-        let res = await fetch('/api/almacenes');
+        let res = await fetch("/api/almacenes/mis-almacenes", { credentials: "include" })
 
         console.log("Status:", res.status);
 
@@ -509,7 +509,7 @@ async function crearCabeceraOrden() {
         body: JSON.stringify({
             estado: "PENDIENTE",
             almacenes: { id: Number(almacenId) },
-            usuario: { id: 1 }
+            
         })
     });
 

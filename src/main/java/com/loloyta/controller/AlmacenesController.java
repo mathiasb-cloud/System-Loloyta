@@ -39,4 +39,9 @@ public class AlmacenesController {
     public void eliminar(@PathVariable Long id) {
         almacenesService.eliminarAlmacen(id);
     }
+    
+    @GetMapping("/mis-almacenes")
+    public List<Almacenes> listarMisAlmacenes() {
+        return almacenesService.listarSegunUsuario();
+    }
 }

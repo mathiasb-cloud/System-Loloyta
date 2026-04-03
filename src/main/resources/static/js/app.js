@@ -244,7 +244,34 @@ window.irResumen = irResumen;
 
 window.cargar = cargar;
 
-document.addEventListener("DOMContentLoaded", () => {
+async function cargarSesionActual() {
+    try {
+        const res = await fetch("/api/auth/me", {
+            credentials: "include"
+        });
+
+        if (!res.ok) {
+            sessionStorage.removeItem("sesionUsuario");
+            return null;
+        }
+
+        const data = await res.json();
+
+        sessionStorage.setItem("sesionUsuario", JSON.stringify(data));
+
+        return data;
+
+    } catch (error) {
+        console.error("Error obteniendo sesión:", error);
+        sessionStorage.removeItem("sesionUsuario");
+        return null;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await cargarSesionActual();
+    aplicarPermisosEnTopbar();
+
     const vistaPendiente = sessionStorage.getItem("abrirVistaAlCargar");
 
     if (vistaPendiente) {
@@ -256,6 +283,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cargar({ preventDefault() {} }, vistaPendiente, link || null);
         return;
     }
+	
+	aplicarPermisosEnVista();
 
     if (typeof initDashboardHome === "function") {
         initDashboardHome();
@@ -540,6 +569,18 @@ function renderChartMermasCosto(mermas) {
     });
 }
 
+function aplicarPermisosEnTopbar() {
+    document.querySelectorAll(".topbar-nav-link[data-permiso]").forEach(link => {
+        const permiso = link.dataset.permiso;
+        link.style.display = tienePermiso(permiso) ? "" : "none";
+    });
+
+    const topbarMenu = document.getElementById("topbarMenu");
+    if (topbarMenu) {
+        topbarMenu.style.visibility = "visible";
+    }
+}
+
 function chartOptionsMinimal() {
     return {
         responsive: true,
@@ -646,6 +687,9 @@ function aplicarPermisosEnTopbar() {
         const permiso = link.dataset.permiso;
         link.style.display = tienePermiso(permiso) ? "" : "none";
     });
+
+    const menu = document.getElementById("topbarMenu");
+    if (menu) menu.style.visibility = "visible";
 }
 
 

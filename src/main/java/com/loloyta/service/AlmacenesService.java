@@ -16,5 +16,7 @@ public interface AlmacenesService {
     Almacenes actualizarAlmacen(Long id, Almacenes almacen);
 
     void eliminarAlmacen(Long id);
+    
+    List<Almacenes> listarSegunUsuario();
 
 }

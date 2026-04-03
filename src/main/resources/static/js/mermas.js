@@ -71,7 +71,7 @@ function setFechaActualMerma() {
 
 async function cargarAlmacenesMerma() {
     try {
-        const res = await fetch("/api/almacenes");
+        const res = await fetch("/api/almacenes/mis-almacenes", { credentials: "include" })
         console.log("Respuesta almacenes:", res.status);
 
         const data = await res.json();

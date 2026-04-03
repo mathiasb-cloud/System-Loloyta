@@ -162,7 +162,7 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
             mov.setOrdenCompra(orden);
             mov.setCantidad(d.getCantidad());
             mov.setFecha(LocalDateTime.now());
-            mov.setUsuario(orden.getUsuario());
+            mov.setUsuario(authService.obtenerUsuarioAutenticado());
             mov.setAlmacen(orden.getAlmacenes());
             mov.setProducto(d.getProducto());
 

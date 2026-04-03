@@ -468,6 +468,13 @@
     color: #45342d;
 }
 
+topbar-nav-link[data-permiso] {
+    display: none;
+}
+#topbarMenu {
+    visibility: hidden;
+}
+
 .topbar-nav-link {
     text-decoration: none;
     color: #7c6d63;

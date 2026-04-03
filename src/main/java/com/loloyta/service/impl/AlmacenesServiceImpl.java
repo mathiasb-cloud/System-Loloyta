@@ -8,14 +8,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.loloyta.model.Almacenes;
+import com.loloyta.model.Usuario;
 import com.loloyta.repository.AlmacenesRepository;
 import com.loloyta.service.AlmacenesService;
+import com.loloyta.service.AuthService;
 
 @Service
 public class AlmacenesServiceImpl implements AlmacenesService {
 
     @Autowired
     private AlmacenesRepository almacenesRepository;
+    
+    @Autowired
+    private AuthService authService;
 
     @Override
     public List<Almacenes> listarAlmacenes() {
@@ -57,5 +62,20 @@ public class AlmacenesServiceImpl implements AlmacenesService {
     @Override
     public void eliminarAlmacen(Long id) {
         almacenesRepository.deleteById(id);
+    }
+    
+    @Override
+    public List<Almacenes> listarSegunUsuario() {
+        Usuario usuario = authService.obtenerUsuarioAutenticado();
+
+        if (usuario.getRol() != null && usuario.getRol().getNombre() != null) {
+            String rol = usuario.getRol().getNombre().toUpperCase();
+
+            if ("MASTER_ADMIN".equals(rol) || "ADMINISTRADOR".equals(rol)) {
+                return almacenesRepository.findAll();
+            }
+        }
+
+        return usuario.getAlmacenes() != null ? usuario.getAlmacenes() : List.of();
     }
 }

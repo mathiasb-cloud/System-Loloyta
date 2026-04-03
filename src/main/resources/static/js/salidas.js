@@ -197,7 +197,7 @@ function recalcularFilaSalida(fila) {
 }
 
 async function cargarAlmacenesSalida() {
-    const res = await fetch('/api/almacenes');
+    const res = await fetch("/api/almacenes/mis-almacenes", { credentials: "include" })
     const data = await res.json();
 
     const select = document.getElementById("almacenSalida");
