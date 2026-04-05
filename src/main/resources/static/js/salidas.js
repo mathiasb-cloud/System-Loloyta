@@ -81,6 +81,8 @@ function configurarTipoDestinoSalida() {
 
 async function cargarAlmacenesDestinoSalida() {
     const select = document.getElementById("almacenDestinoSalida");
+    const almacenOrigenId = document.getElementById("almacenSalida")?.value;
+
     if (!select) return;
 
     try {
@@ -89,13 +91,20 @@ async function cargarAlmacenesDestinoSalida() {
 
         const data = await res.json();
 
+        const valorActual = select.value;
+
         select.innerHTML = `<option value="">Seleccione almacén destino</option>`;
 
         data
             .filter(a => a.activo !== false)
+            .filter(a => String(a.id) !== String(almacenOrigenId || ""))
             .forEach(a => {
                 select.innerHTML += `<option value="${a.id}">${escapeHtml(a.nombre)}</option>`;
             });
+
+        const existeValorActual = [...select.options].some(o => String(o.value) === String(valorActual));
+        select.value = existeValorActual ? valorActual : "";
+
     } catch (error) {
         console.error(error);
     }
