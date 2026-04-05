@@ -4,13 +4,14 @@ let buscadorSalidaClickRegistrado = false;
 
 async function initSalidas() {
     await cargarAlmacenesSalida();
-
-    configurarTipoDestinoSalida();
+    await cargarLocalAutomaticoPorAlmacenSalida();
     await cargarAlmacenesDestinoSalida();
 
+    await configurarTipoDestinoSalida();
+
     document.getElementById("almacenSalida")?.addEventListener("change", async () => {
-        await cargarAlmacenesDestinoSalida();
         await cargarLocalAutomaticoPorAlmacenSalida();
+        await cargarAlmacenesDestinoSalida();
         await cargarProductosSalidaPorAlmacen();
 
         actualizarFlujoSalidaVisual();
@@ -32,48 +33,50 @@ async function initSalidas() {
         actualizarFlujoSalidaVisual();
     });
 
-    document.getElementById("tipoDestinoSalida")?.addEventListener("change", async () => {
-        await cargarAlmacenesDestinoSalida();
-        await cargarProductosSalidaPorAlmacen();
-        actualizarFlujoSalidaVisual();
-    });
-
     configurarBuscadorSalida();
     actualizarEstadoBotonesSalida();
     actualizarFlujoSalidaVisual();
     actualizarResumenSalida();
 
     if (document.getElementById("almacenSalida")?.value) {
-        await cargarLocalAutomaticoPorAlmacenSalida();
         await cargarProductosSalidaPorAlmacen();
-        await cargarAlmacenesDestinoSalida();
     }
 }
 function configurarTipoDestinoSalida() {
     const selectTipo = document.getElementById("tipoDestinoSalida");
     const bloqueLocal = document.getElementById("bloqueLocalSalida");
     const bloqueAlmacen = document.getElementById("bloqueAlmacenDestinoSalida");
+    const localSelect = document.getElementById("localSalida");
+    const almacenDestinoSelect = document.getElementById("almacenDestinoSalida");
 
     if (!selectTipo || !bloqueLocal || !bloqueAlmacen) return;
 
-    const actualizarVista = () => {
+    const actualizarVista = async () => {
         const tipo = selectTipo.value;
-        const localSelect = document.getElementById("localSalida");
-        const almacenDestinoSelect = document.getElementById("almacenDestinoSalida");
 
         if (tipo === "ALMACEN") {
             bloqueLocal.classList.add("d-none");
             bloqueAlmacen.classList.remove("d-none");
-            if (localSelect) localSelect.value = "";
+
+            if (localSelect) {
+                localSelect.value = "";
+            }
+
+            await cargarAlmacenesDestinoSalida();
         } else {
             bloqueLocal.classList.remove("d-none");
             bloqueAlmacen.classList.add("d-none");
-            if (almacenDestinoSelect) almacenDestinoSelect.value = "";
+
+            if (almacenDestinoSelect) {
+                almacenDestinoSelect.value = "";
+            }
         }
 
+        await cargarProductosSalidaPorAlmacen();
         actualizarFlujoSalidaVisual();
     };
 
+    selectTipo.onchange = actualizarVista;
     actualizarVista();
 }
 
