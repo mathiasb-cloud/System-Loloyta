@@ -29,6 +29,9 @@ public class MovimientoDetalleDto {
     private String motivoMermaNombre;
     private String motivoMermaDescripcion;
     private String mermaObservacion;
+    
+    private String almacenDestinoNombre;
+    private List<MovimientoDetalleItemDto> detallesTraspaso;
 
     private Integer totalItems;
     private BigDecimal importeTotalCalculado;
@@ -212,6 +215,22 @@ public class MovimientoDetalleDto {
 
     public void setImporteTotalCalculado(BigDecimal importeTotalCalculado) {
         this.importeTotalCalculado = importeTotalCalculado;
+    }
+    
+    public String getAlmacenDestinoNombre() {
+        return almacenDestinoNombre;
+    }
+
+    public void setAlmacenDestinoNombre(String almacenDestinoNombre) {
+        this.almacenDestinoNombre = almacenDestinoNombre;
+    }
+
+    public List<MovimientoDetalleItemDto> getDetallesTraspaso() {
+        return detallesTraspaso;
+    }
+
+    public void setDetallesTraspaso(List<MovimientoDetalleItemDto> detallesTraspaso) {
+        this.detallesTraspaso = detallesTraspaso;
     }
 
     public List<MovimientoDetalleItemDto> getProductos() {

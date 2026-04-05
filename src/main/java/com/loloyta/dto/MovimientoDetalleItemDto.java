@@ -15,6 +15,10 @@ public class MovimientoDetalleItemDto {
     private BigDecimal cantidad;
     private BigDecimal importe;
     private String metodoPago;
+    private BigDecimal stockAntesOrigen;
+    private BigDecimal stockDespuesOrigen;
+    private BigDecimal stockAntesDestino;
+    private BigDecimal stockDespuesDestino;
 
     public MovimientoDetalleItemDto() {
     }
@@ -121,5 +125,37 @@ public class MovimientoDetalleItemDto {
 
     public void setMetodoPago(String metodoPago) {
         this.metodoPago = metodoPago;
+    }
+    
+    public BigDecimal getStockAntesOrigen() {
+        return stockAntesOrigen;
+    }
+
+    public void setStockAntesOrigen(BigDecimal stockAntesOrigen) {
+        this.stockAntesOrigen = stockAntesOrigen;
+    }
+
+    public BigDecimal getStockDespuesOrigen() {
+        return stockDespuesOrigen;
+    }
+
+    public void setStockDespuesOrigen(BigDecimal stockDespuesOrigen) {
+        this.stockDespuesOrigen = stockDespuesOrigen;
+    }
+
+    public BigDecimal getStockAntesDestino() {
+        return stockAntesDestino;
+    }
+
+    public void setStockAntesDestino(BigDecimal stockAntesDestino) {
+        this.stockAntesDestino = stockAntesDestino;
+    }
+
+    public BigDecimal getStockDespuesDestino() {
+        return stockDespuesDestino;
+    }
+
+    public void setStockDespuesDestino(BigDecimal stockDespuesDestino) {
+        this.stockDespuesDestino = stockDespuesDestino;
     }
 }

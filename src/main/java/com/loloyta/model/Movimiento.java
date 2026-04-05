@@ -35,6 +35,10 @@ public class Movimiento {
     @ManyToOne
     @JoinColumn(name = "salida_id")
     private Salida salida;
+    
+    @ManyToOne
+    @JoinColumn(name = "almacen_destino_id")
+    private Almacenes almacenDestino;
 
     private LocalDateTime fecha;
 
@@ -122,6 +126,14 @@ public class Movimiento {
 
 	public void setMerma(Merma merma) {
 		this.merma = merma;
+	}
+	
+	public Almacenes getAlmacenDestino() {
+	    return almacenDestino;
+	}
+
+	public void setAlmacenDestino(Almacenes almacenDestino) {
+	    this.almacenDestino = almacenDestino;
 	}
 	
 	

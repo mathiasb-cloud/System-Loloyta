@@ -33,7 +33,8 @@ function renderDetalleMovimiento(m) {
 
     let totalCalculadoJs = 0;
     const esIngreso = m.tipo === "INGRESO";
-	const esMerma = m.tipo === "MERMA";
+    const esMerma = m.tipo === "MERMA";
+    const esTraspaso = m.tipo === "TRASPASO";
 
     const filasProductos = productos.map((item, index) => {
         const cantidad = Number(item.cantidad || 0);
@@ -63,6 +64,7 @@ function renderDetalleMovimiento(m) {
 
     const fecha = formatearFechaHora(m.fecha);
     const badgeTipo = obtenerBadgeTipo(m.tipo);
+    const tablaTraspasoHtml = esTraspaso ? renderTablaTraspaso(m) : "";
 
     contenedor.innerHTML = `
         <div class="card border-0 shadow-sm mb-4">
@@ -107,42 +109,114 @@ function renderDetalleMovimiento(m) {
 
         ${renderDocumentoRelacionado(m)}
 
+        ${esTraspaso ? tablaTraspasoHtml : `
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-box-seam me-2"></i>Detalle de Productos</span>
+                    <span class="text-muted small">${productos.length} producto(s)</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Producto</th>
+                                <th>Categoría</th>
+                                <th style="width: 110px;">Unidad</th>
+                                <th style="width: 120px;">Cantidad</th>
+                                <th style="width: 140px;">Precio</th>
+                                ${esIngreso ? `<th style="width: 160px;">Método de Pago</th>` : ""}
+                                <th style="width: 150px;">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filasProductos || `
+                                <tr>
+                                    <td colspan="${esIngreso ? 8 : 7}" class="text-center py-4 text-muted">
+                                        No hay productos asociados a este movimiento.
+                                    </td>
+                                </tr>
+                            `}
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="${esIngreso ? 7 : 6}" class="text-end">Importe Total</th>
+                                <th class="text-end fs-6">${formatearMoneda(totalCalculadoJs)}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        `}
+    `;
+}
+
+function renderTablaTraspaso(m) {
+    const items = Array.isArray(m.detallesTraspaso) && m.detallesTraspaso.length
+        ? m.detallesTraspaso
+        : (Array.isArray(m.productos) ? m.productos : []);
+
+    return `
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-box-seam me-2"></i>Detalle de Productos</span>
-                <span class="text-muted small">${productos.length} producto(s)</span>
+                <span><i class="bi bi-arrow-left-right me-2"></i>Detalle de Traspaso</span>
+                <span class="text-muted small">${items.length} producto(s)</span>
             </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-center">
-                        <tr>
-                            <th style="width: 60px;">#</th>
-                            <th>Producto</th>
-                            <th>Categoría</th>
-                            <th style="width: 110px;">Unidad</th>
-                            <th style="width: 120px;">Cantidad</th>
-                            <th style="width: 140px;">Precio</th>
-                            ${esIngreso ? `<th style="width: 160px;">Método de Pago</th>` : ""}
-                            <th style="width: 150px;">Importe</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filasProductos || `
-                            <tr>
-                                <td colspan="${esIngreso ? 8 : 7}" class="text-center py-4 text-muted">
-                                    No hay productos asociados a este movimiento.
-                                </td>
-                            </tr>
-                        `}
-                    </tbody>
-                    <tfoot class="table-light">
-                        <tr>
-                            <th colspan="${esIngreso ? 7 : 6}" class="text-end">Importe Total</th>
-                            <th class="text-end fs-6">${formatearMoneda(totalCalculadoJs)}</th>
-                        </tr>
-                    </tfoot>
-                </table>
+            <div class="p-3">
+                <div class="traspaso-header mb-3">
+                    <div class="traspaso-header-box text-center">
+                        <small class="text-muted d-block">Almacén origen</small>
+                        <strong>${m.almacenNombre ?? "-"}</strong>
+                    </div>
+
+                    <div class="traspaso-header-arrow text-center">
+                        <i class="bi bi-arrow-right fs-4"></i>
+                    </div>
+
+                    <div class="traspaso-header-box text-center">
+                        <small class="text-muted d-block">Almacén destino</small>
+                        <strong>${m.almacenDestinoNombre ?? "-"}</strong>
+                    </div>
+                </div>
+
+                <div class="traspaso-body">
+                    ${items.map(item => `
+                        <div class="traspaso-row">
+                            <div class="traspaso-col">
+                                <div class="fw-semibold">${item.productoNombre ?? "-"}</div>
+                                <small class="text-muted d-block">${item.descripcion ?? "Sin descripción"}</small>
+                                <div class="mt-2">
+                                    <span class="text-muted">Antes:</span>
+                                    <strong>${formatearNumero(item.stockAntesOrigen)}</strong>
+                                    <span class="mx-2">→</span>
+                                    <span class="text-muted">Después:</span>
+                                    <strong>${formatearNumero(item.stockDespuesOrigen)}</strong>
+                                </div>
+                            </div>
+
+                            <div class="traspaso-centro text-center">
+                                <div class="traspaso-cantidad-chip">
+                                    +${formatearNumero(item.cantidad)}
+                                </div>
+                                <small class="text-muted d-block mt-1">${item.unidadMedida ?? "-"}</small>
+                            </div>
+
+                            <div class="traspaso-col">
+                                <div class="fw-semibold">${item.productoNombre ?? "-"}</div>
+                                <small class="text-muted d-block">${item.descripcion ?? "Sin descripción"}</small>
+                                <div class="mt-2">
+                                    <span class="text-muted">Antes:</span>
+                                    <strong>${formatearNumero(item.stockAntesDestino)}</strong>
+                                    <span class="mx-2">→</span>
+                                    <span class="text-muted">Después:</span>
+                                    <strong>${formatearNumero(item.stockDespuesDestino)}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    `).join("")}
+                </div>
             </div>
         </div>
     `;
