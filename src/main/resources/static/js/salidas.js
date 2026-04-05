@@ -9,8 +9,9 @@ async function initSalidas() {
     await cargarAlmacenesDestinoSalida();
 
     document.getElementById("almacenSalida")?.addEventListener("change", async () => {
-        await cargarProductosSalidaPorAlmacen();
+        await cargarAlmacenesDestinoSalida();
         await cargarLocalAutomaticoPorAlmacenSalida();
+        await cargarProductosSalidaPorAlmacen();
 
         actualizarFlujoSalidaVisual();
         actualizarResumenSalida();
@@ -22,14 +23,30 @@ async function initSalidas() {
         if (input) input.value = "";
     });
 
+    document.getElementById("localSalida")?.addEventListener("change", () => {
+        actualizarFlujoSalidaVisual();
+    });
+
+    document.getElementById("almacenDestinoSalida")?.addEventListener("change", async () => {
+        await cargarProductosSalidaPorAlmacen();
+        actualizarFlujoSalidaVisual();
+    });
+
+    document.getElementById("tipoDestinoSalida")?.addEventListener("change", async () => {
+        await cargarAlmacenesDestinoSalida();
+        await cargarProductosSalidaPorAlmacen();
+        actualizarFlujoSalidaVisual();
+    });
+
     configurarBuscadorSalida();
     actualizarEstadoBotonesSalida();
     actualizarFlujoSalidaVisual();
     actualizarResumenSalida();
 
     if (document.getElementById("almacenSalida")?.value) {
-        await cargarProductosSalidaPorAlmacen();
         await cargarLocalAutomaticoPorAlmacenSalida();
+        await cargarProductosSalidaPorAlmacen();
+        await cargarAlmacenesDestinoSalida();
     }
 }
 function configurarTipoDestinoSalida() {
