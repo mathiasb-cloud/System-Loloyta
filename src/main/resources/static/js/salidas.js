@@ -1010,36 +1010,36 @@ function actualizarFlujoSalidaVisual() {
         flujoLocalNombre.textContent = nombreDestino;
     }
 
-    if (estadoSalidaBox) {
-        const almacenValido = almacenSelect?.value;
-        const destinoValido = tipoDestino === "LOCAL"
-            ? localSelect?.value
-            : almacenDestinoSelect?.value;
+    if (!estadoSalidaBox) return;
 
-        if (almacenValido && destinoValido) {
-            estadoSalidaBox.innerHTML = `
-                <span class="badge text-bg-light border text-success">
-                    <i class="bi bi-arrow-left-right me-1"></i>
-                    Flujo configurado
-                </span>
-                <span class="ms-2">
-                    Se enviará desde <strong>${escapeHtml(nombreAlmacen)}</strong>
-                    hacia <strong>${escapeHtml(nombreDestino)}</strong>.
-                </span>
-            `;
-        } else if (almacenValido || destinoValido) {
-            estadoSalidaBox.innerHTML = `
-                <span class="badge text-bg-light border text-warning">
-                    <i class="bi bi-exclamation-circle me-1"></i>
-                    Flujo incompleto
-                </span>
-                <span class="ms-2">Completa origen y destino para continuar.</span>
-            `;
-        } else {
-            estadoSalidaBox.innerHTML = `
-                <span class="text-muted">Selecciona el almacén de origen y el destino.</span>
-            `;
-        }
+    const almacenValido = !!almacenSelect?.value;
+    const destinoValido = tipoDestino === "LOCAL"
+        ? !!localSelect?.value
+        : !!almacenDestinoSelect?.value;
+
+    if (almacenValido && destinoValido) {
+        estadoSalidaBox.innerHTML = `
+            <span class="badge text-bg-light border text-success">
+                <i class="bi bi-arrow-left-right me-1"></i>
+                Flujo configurado
+            </span>
+            <span class="ms-2">
+                Se enviará desde <strong>${escapeHtml(nombreAlmacen)}</strong>
+                hacia <strong>${escapeHtml(nombreDestino)}</strong>.
+            </span>
+        `;
+    } else if (almacenValido || destinoValido) {
+        estadoSalidaBox.innerHTML = `
+            <span class="badge text-bg-light border text-warning">
+                <i class="bi bi-exclamation-circle me-1"></i>
+                Flujo incompleto
+            </span>
+            <span class="ms-2">Completa origen y destino para continuar.</span>
+        `;
+    } else {
+        estadoSalidaBox.innerHTML = `
+            <span class="text-muted">Selecciona el almacén de origen y el destino.</span>
+        `;
     }
 }
 
