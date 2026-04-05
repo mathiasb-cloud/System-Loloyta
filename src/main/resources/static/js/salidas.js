@@ -306,27 +306,59 @@ async function cargarLocalesSalida() {
 
 
 async function cargarProductosSalidaPorAlmacen() {
-    const almacenId = document.getElementById("almacenSalida")?.value;
+    const almacenOrigenId = document.getElementById("almacenSalida")?.value;
+    const tipoDestino = document.getElementById("tipoDestinoSalida")?.value || "LOCAL";
+    const almacenDestinoId = document.getElementById("almacenDestinoSalida")?.value;
 
     productosSalidaGlobal = [];
 
-    if (!almacenId) return;
+    if (!almacenOrigenId) return;
 
     try {
-        const res = await fetch(`/api/stock/almacen/${almacenId}`);
-        if (!res.ok) {
+        const resOrigen = await fetch(`/api/stock/almacen/${almacenOrigenId}`, {
+            credentials: "include"
+        });
+
+        if (!resOrigen.ok) {
             throw new Error("No se pudieron cargar los productos del almacén.");
         }
 
-        const data = await res.json();
+        const dataOrigen = await resOrigen.json();
 
-        productosSalidaGlobal = data
+        let dataFiltrada = dataOrigen;
+
+        if (tipoDestino === "ALMACEN" && almacenDestinoId) {
+            const resDestino = await fetch(`/api/stock/almacen/${almacenDestinoId}`, {
+                credentials: "include"
+            });
+
+            if (!resDestino.ok) {
+                throw new Error("No se pudieron cargar los productos del almacén destino.");
+            }
+
+            const dataDestino = await resDestino.json();
+
+            const idsDestino = new Set(
+                (dataDestino || [])
+                    .filter(s => s.producto && s.producto.activo !== false)
+                    .map(s => String(s.producto.id))
+            );
+
+            dataFiltrada = (dataOrigen || []).filter(s =>
+                s.producto &&
+                s.producto.activo !== false &&
+                idsDestino.has(String(s.producto.id))
+            );
+        }
+
+        productosSalidaGlobal = dataFiltrada
             .filter(s => s.producto && s.producto.activo !== false)
             .map(s => ({
                 ...s.producto,
                 proveedor: s.proveedor || null,
                 stockActual: Number(s.cantidad || 0)
             }));
+
     } catch (error) {
         console.error(error);
         mostrarErrorSalida(error.message || "No se pudieron cargar los productos del almacén.");
