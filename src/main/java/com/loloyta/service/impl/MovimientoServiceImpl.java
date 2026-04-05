@@ -274,9 +274,10 @@ public class MovimientoServiceImpl implements MovimientoService {
         
         
         else if ("TRASPASO".equalsIgnoreCase(primero.getTipo())) {
-
             List<DetalleMovimiento> detallesTraspaso =
                     detalleMovimientoRepository.findByMovimientoId(primero.getId());
+
+            List<MovimientoDetalleItemDto> itemsTraspaso = new ArrayList<>();
 
             for (DetalleMovimiento d : detallesTraspaso) {
                 Producto p = d.getProducto();
@@ -291,17 +292,31 @@ public class MovimientoServiceImpl implements MovimientoService {
 
                 item.setCantidad(d.getCantidad());
 
-                
                 item.setStockAntesOrigen(d.getStockAntesOrigen());
                 item.setStockDespuesOrigen(d.getStockDespuesOrigen());
                 item.setStockAntesDestino(d.getStockAntesDestino());
                 item.setStockDespuesDestino(d.getStockDespuesDestino());
 
+                BigDecimal precio = p.getPrecioActual() != null
+                        ? BigDecimal.valueOf(p.getPrecioActual())
+                        : BigDecimal.ZERO;
+
+                BigDecimal importe = d.getCantidad() != null
+                        ? d.getCantidad().multiply(precio)
+                        : BigDecimal.ZERO;
+
+                item.setPrecioActual(p.getPrecioActual());
+                item.setImporte(importe);
+
                 items.add(item);
+                itemsTraspaso.add(item);
+                total = total.add(importe);
             }
 
-            dto.setDetallesTraspaso(items);
+            dto.setProductos(itemsTraspaso);
+            dto.setDetallesTraspaso(itemsTraspaso);
         }
+        
         
         
         else if (primero.getMerma() != null) {
