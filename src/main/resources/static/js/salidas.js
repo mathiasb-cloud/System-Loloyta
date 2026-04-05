@@ -74,8 +74,6 @@ function configurarTipoDestinoSalida() {
         actualizarFlujoSalidaVisual();
     };
 
-    selectTipo.removeEventListener?.("_dummy", () => {});
-    selectTipo.addEventListener("change", actualizarVista);
     actualizarVista();
 }
 
