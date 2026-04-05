@@ -274,48 +274,51 @@ public class MovimientoServiceImpl implements MovimientoService {
         
         
         else if ("TRASPASO".equalsIgnoreCase(primero.getTipo())) {
-            List<DetalleMovimiento> detallesTraspaso =
-                    detalleMovimientoRepository.findByMovimientoId(primero.getId());
 
-            List<MovimientoDetalleItemDto> itemsTraspaso = new ArrayList<>();
+         List<MovimientoDetalleItemDto> itemsTraspaso = new ArrayList<>();
 
-            for (DetalleMovimiento d : detallesTraspaso) {
-                Producto p = d.getProducto();
+        for (Movimiento movimientoTraspaso : grupo) {
+        List<DetalleMovimiento> detallesTraspaso =
+                detalleMovimientoRepository.findByMovimientoId(movimientoTraspaso.getId());
 
-                MovimientoDetalleItemDto item = new MovimientoDetalleItemDto();
+        for (DetalleMovimiento d : detallesTraspaso) {
+            Producto p = d.getProducto();
 
-                item.setProductoId(p.getId());
-                item.setProductoNombre(p.getNombre());
-                item.setDescripcion(p.getDescripcion());
-                item.setCategoria(p.getCategoria() != null ? p.getCategoria().getNombre() : null);
-                item.setUnidadMedida(p.getUnidadMedida());
+            MovimientoDetalleItemDto item = new MovimientoDetalleItemDto();
 
-                item.setCantidad(d.getCantidad());
+            item.setProductoId(p.getId());
+            item.setProductoNombre(p.getNombre());
+            item.setDescripcion(p.getDescripcion());
+            item.setCategoria(p.getCategoria() != null ? p.getCategoria().getNombre() : null);
+            item.setUnidadMedida(p.getUnidadMedida());
 
-                item.setStockAntesOrigen(d.getStockAntesOrigen());
-                item.setStockDespuesOrigen(d.getStockDespuesOrigen());
-                item.setStockAntesDestino(d.getStockAntesDestino());
-                item.setStockDespuesDestino(d.getStockDespuesDestino());
+            item.setCantidad(d.getCantidad());
 
-                BigDecimal precio = p.getPrecioActual() != null
-                        ? BigDecimal.valueOf(p.getPrecioActual())
-                        : BigDecimal.ZERO;
+            item.setStockAntesOrigen(d.getStockAntesOrigen());
+            item.setStockDespuesOrigen(d.getStockDespuesOrigen());
+            item.setStockAntesDestino(d.getStockAntesDestino());
+            item.setStockDespuesDestino(d.getStockDespuesDestino());
 
-                BigDecimal importe = d.getCantidad() != null
-                        ? d.getCantidad().multiply(precio)
-                        : BigDecimal.ZERO;
+            BigDecimal precio = p.getPrecioActual() != null
+                    ? BigDecimal.valueOf(p.getPrecioActual())
+                    : BigDecimal.ZERO;
 
-                item.setPrecioActual(p.getPrecioActual());
-                item.setImporte(importe);
+            BigDecimal importe = d.getCantidad() != null
+                    ? d.getCantidad().multiply(precio)
+                    : BigDecimal.ZERO;
 
-                items.add(item);
-                itemsTraspaso.add(item);
-                total = total.add(importe);
-            }
+            item.setPrecioActual(p.getPrecioActual());
+            item.setImporte(importe);
 
-            dto.setProductos(itemsTraspaso);
-            dto.setDetallesTraspaso(itemsTraspaso);
+            items.add(item);
+            itemsTraspaso.add(item);
+            total = total.add(importe);
         }
+    }
+
+    dto.setProductos(itemsTraspaso);
+    dto.setDetallesTraspaso(itemsTraspaso);
+}
         
         
         
