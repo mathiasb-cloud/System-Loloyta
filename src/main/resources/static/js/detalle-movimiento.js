@@ -107,7 +107,7 @@ function renderDetalleMovimiento(m) {
             </div>
         </div>
 
-        ${renderDocumentoRelacionado(m)}
+        ${esTraspaso ? "" : renderDocumentoRelacionado(m)}
 
         ${esTraspaso ? tablaTraspasoHtml : `
             <div class="card border-0 shadow-sm">

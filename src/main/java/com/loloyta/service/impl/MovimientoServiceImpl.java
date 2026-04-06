@@ -99,13 +99,27 @@ public class MovimientoServiceImpl implements MovimientoService {
 
                 importeTotal = importeTotal.add(cantidad.multiply(precio));
             }
+            
+            String usuarioNombre = "-";
+
+            if (primero.getUsuario() != null) {
+                Usuario u = primero.getUsuario();
+
+                String nombreCompleto = java.util.stream.Stream
+                        .of(u.getNombre(), u.getApellido())
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.joining(" "));
+
+                usuarioNombre = nombreCompleto.isBlank() ? u.getUsername() : nombreCompleto;
+            }
 
             resumen.add(new MovimientoResumenDto(
                     primero.getTipo(),
                     primero.getFecha(),
                     entry.getKey(),
                     lista.size(),
-                    importeTotal
+                    importeTotal,
+                    usuarioNombre
             ));
         }
 

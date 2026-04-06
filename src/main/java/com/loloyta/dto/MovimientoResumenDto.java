@@ -10,16 +10,18 @@ public class MovimientoResumenDto {
     private String referencia;
     private Integer totalItems;
     private BigDecimal importeTotal;
+    private String usuarioNombre;
 
     public MovimientoResumenDto() {
     }
 
-    public MovimientoResumenDto(String tipo, LocalDateTime fecha, String referencia, Integer totalItems, BigDecimal importeTotal) {
+    public MovimientoResumenDto(String tipo, LocalDateTime fecha, String referencia, Integer totalItems, BigDecimal importeTotal, String usuarioNombre) {
         this.tipo = tipo;
         this.fecha = fecha;
         this.referencia = referencia;
         this.totalItems = totalItems;
         this.importeTotal = importeTotal;
+        this.usuarioNombre = usuarioNombre;
         
     }
 
@@ -63,5 +65,12 @@ public class MovimientoResumenDto {
 		this.importeTotal = importeTotal;
 	}
     
+	public String getUsuarioNombre() {
+	    return usuarioNombre;
+	}
+
+	public void setUsuarioNombre(String usuarioNombre) {
+	    this.usuarioNombre = usuarioNombre;
+	}
     
 }
