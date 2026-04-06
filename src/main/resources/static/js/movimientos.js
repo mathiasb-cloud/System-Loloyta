@@ -58,13 +58,7 @@ async function cargarMovimientos() {
 			    })}
 			</td>
 			
-			<td>
-						    ${
-						        m.usuario
-						            ? `${m.usuario.nombre || ''} ${m.usuario.apellido || ''}`.trim()
-						            : '-'
-						    }
-						</td>
+			<td>${m.usuarioNombre || '-'}</td>
 
             <td>
                 <button 
