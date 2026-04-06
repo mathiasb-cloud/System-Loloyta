@@ -68,6 +68,7 @@ function cargar(event, url, element = null) {
 				if (url.includes("usuarios") && typeof initUsuarios === "function") initUsuarios();
 				
 				aplicarPermisosEnVista();
+				aplicarDatosUsuarioEnUI();
 
                 
             }, 100);
@@ -294,6 +295,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function initDashboardHome() {
 	
+	aplicarDatosUsuarioEnUI();
     activarRevealOnScroll();
 
     try {
