@@ -1175,28 +1175,29 @@ async function cargarLocalAutomaticoPorAlmacenSalida() {
     const select = document.getElementById("localSalida");
 
     if (!select) return;
-
     select.innerHTML = `<option value="">Seleccione local</option>`;
-
     if (!almacenId) return;
 
     try {
         const res = await fetch(`/api/locales/almacen/${almacenId}`);
         if (!res.ok) {
-            throw new Error("No se pudo cargar el local del almacén.");
+            throw new Error("No se pudieron cargar los locales del almacén.");
         }
 
         const data = await res.json();
-
         const localesActivos = (data || []).filter(l => l.activo !== false);
+        localesActivos.forEach(local => {
+            select.innerHTML += `
+                <option value="${local.id}">
+                    ${escapeHtml(local.nombre)}
+                </option>
+            `;
+        });
 
-        if (localesActivos.length > 0) {
-            const local = localesActivos[0];
-            select.innerHTML = `<option value="${local.id}">${local.nombre}</option>`;
-            select.value = String(local.id);
-        } else {
-            select.innerHTML = `<option value="">Sin local asociado</option>`;
+        if (localesActivos.length === 1) {
+            select.value = String(localesActivos[0].id);
         }
+
     } catch (error) {
         console.error(error);
         select.innerHTML = `<option value="">No disponible</option>`;
