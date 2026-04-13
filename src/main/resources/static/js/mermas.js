@@ -188,20 +188,29 @@ function configurarBuscadorMerma() {
         filtrados.forEach(p => {
             const stockActual = Number(p.stockActual || 0);
             const stockMinimo = Number(p.stockMinimo || 0);
-            const claseStock = stockActual <= stockMinimo ? "text-danger" : "text-success";
+
+            const agotado = stockActual === 0;
+
+            const claseStock =
+                stockActual === 0
+                    ? "text-danger"
+                    : stockActual <= stockMinimo
+                        ? "text-danger"
+                        : "text-success";
 
             const item = document.createElement("button");
             item.type = "button";
-            item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+            item.className = `list-group-item list-group-item-action d-flex justify-content-between align-items-center ${agotado ? "producto-agotado-item" : ""}`;
+            item.disabled = agotado;
 
             item.innerHTML = `
-                <div class="text-start">
+                <div class="text-start ${agotado ? "producto-agotado-texto" : ""}">
                     <div class="fw-medium">${escapeHtml(p.nombre)}</div>
                     <small class="text-muted d-block">${escapeHtml(p.categoria?.nombre || "")}</small>
                 </div>
 
                 <div class="d-flex align-items-center gap-3 bloque-derecha">
-                    <div class="precio-item">
+                    <div class="precio-item ${agotado ? "producto-agotado-texto" : ""}">
                         <span class="label-precio">Precio:</span>
                         <span class="valor-precio">
                             ${Number(p.precioActual || 0).toLocaleString('es-PE', {
@@ -212,7 +221,9 @@ function configurarBuscadorMerma() {
                     </div>
 
                     <div class="text-end">
-                        <small class="text-muted d-block">${escapeHtml(p.unidadMedida || "")}</small>
+                        <small class="text-muted d-block ${agotado ? "producto-agotado-texto" : ""}">
+                            ${escapeHtml(p.unidadMedida || "")}
+                        </small>
                         <small class="${claseStock} fw-semibold d-block">
                             Stock: ${stockActual}
                         </small>
@@ -220,15 +231,20 @@ function configurarBuscadorMerma() {
                 </div>
             `;
 
-			item.onclick = async () => {
-			    await agregarProductoTablaMerma(p);
+            if (!agotado) {
+                item.addEventListener("click", async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
 
-			    input.value = "";
-			    resultadosDiv.innerHTML = "";
-			    input.blur();
+                    await agregarProductoTablaMerma(p);
 
-			    actualizarResumenMerma();
-			};
+                    input.value = "";
+                    resultadosDiv.innerHTML = "";
+                    input.blur();
+
+                    actualizarResumenMerma();
+                });
+            }
 
             resultadosDiv.appendChild(item);
         });
@@ -241,8 +257,13 @@ function configurarBuscadorMerma() {
     });
 
     document.addEventListener("click", function (e) {
-        if (!resultadosDiv.contains(e.target) && e.target !== input) {
-            resultadosDiv.innerHTML = "";
+        const inputActual = document.getElementById("buscadorMerma");
+        const resultadosActual = document.getElementById("resultadosMerma");
+
+        if (!inputActual || !resultadosActual) return;
+
+        if (!resultadosActual.contains(e.target) && e.target !== inputActual) {
+            resultadosActual.innerHTML = "";
         }
     });
 }
