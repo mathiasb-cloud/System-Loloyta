@@ -146,7 +146,6 @@ public class MermaServiceImpl implements MermaService {
             mov.setCantidad(d.getCantidad());
             mov.setFecha(LocalDateTime.now());
             mov.setAlmacen(merma.getAlmacen());
-            mov.setUsuario(merma.getUsuario());
             mov.setProducto(d.getProducto());
 
             movimientoRepository.save(mov);
