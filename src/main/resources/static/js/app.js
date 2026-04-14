@@ -299,25 +299,27 @@ async function initDashboardHome() {
     activarRevealOnScroll();
 
     try {
-        const [
-            resProductos,
-            resStock,
-            resMermas,
-            resMovimientos,
-            resAlmacenes,
-            resLocales,
-            resOrdenes,
-            resSalidas
-        ] = await Promise.all([
-            fetch("/api/productos"),
-            fetch("/api/stock"),
-            fetch("/api/mermas"),
-            fetch("/api/movimientos"),
-            fetch("/api/almacenes"),
-            fetch("/api/locales"),
-            fetch("/api/ordenes"),
-            fetch("/api/salidas")
-        ]);
+		const [
+		    resProductos,
+		    resStock,
+		    resMermas,
+		    resMovimientos,
+		    resAlmacenes,
+		    resLocales,
+		    resOrdenes,
+		    resSalidas,
+		    resResumenMermas
+		] = await Promise.all([
+		    fetch("/api/productos"),
+		    fetch("/api/stock"),
+		    fetch("/api/mermas"),
+		    fetch("/api/movimientos"),
+		    fetch("/api/almacenes"),
+		    fetch("/api/locales"),
+		    fetch("/api/ordenes"),
+		    fetch("/api/salidas"),
+		    fetch("/api/mermas/resumen-dashboard")
+		]);
 
         const productosRaw = resProductos.ok ? await resProductos.json() : [];
         const productos = productosRaw.content || productosRaw || [];
@@ -328,6 +330,7 @@ async function initDashboardHome() {
         const locales = resLocales.ok ? await resLocales.json() : [];
         const ordenes = resOrdenes.ok ? await resOrdenes.json() : [];
         const salidas = resSalidas.ok ? await resSalidas.json() : [];
+		const resumenMermas = resResumenMermas.ok ? await resResumenMermas.json() : {};
 
         const data = {
             productos,
@@ -337,7 +340,8 @@ async function initDashboardHome() {
             almacenes,
             locales,
             ordenes,
-            salidas
+            salidas,
+			resumenMermas
         };
 
         renderDashboardHero(data);
@@ -369,9 +373,7 @@ function renderDashboardResumenGeneral(data) {
     const productosActivos = data.productos.filter(p => p.activo !== false).length;
     const almacenesActivos = data.almacenes.filter(a => a.activo !== false).length;
     const localesActivos = data.locales.filter(l => l.activo !== false).length;
-    const costoMerma = data.mermas
-        .filter(m => m.estado === "CONFIRMADA")
-        .reduce((acc, m) => acc + Number(m.costoTotal || 0), 0);
+    const costoMerma = Number(data.resumenMermas?.costoTotalMerma || 0);
 
     const filas = [
         {
@@ -502,20 +504,30 @@ function renderDashboardInfraestructura(almacenes, locales) {
 
 function renderDashboardCharts(data) {
     renderChartMovimientosTipo(data.movimientos);
-    renderChartMermasCosto(data.mermas);
+    renderChartMermasCosto(data.mermas, data.resumenMermas);
 }
-
 function renderChartMovimientosTipo(movimientos) {
     const canvas = document.getElementById("chartMovimientosTipo");
     if (!canvas || typeof Chart === "undefined") return;
 
-    const total = movimientos.length;
-    const ingresos = movimientos.filter(m => (m.tipo || "").toUpperCase() === "INGRESO").length;
-    const salidas = movimientos.filter(m => (m.tipo || "").toUpperCase() === "SALIDA").length;
-    const mermas = movimientos.filter(m => (m.tipo || "").toUpperCase() === "MERMA").length;
+    const total = Array.isArray(movimientos) ? movimientos.length : 0;
+    const ingresos = (movimientos || []).filter(m => (m.tipo || "").toUpperCase() === "INGRESO").length;
+    const salidas = (movimientos || []).filter(m => (m.tipo || "").toUpperCase() === "SALIDA").length;
+    const mermas = (movimientos || []).filter(m => (m.tipo || "").toUpperCase() === "MERMA").length;
 
-    setText("totalMovimientosMetric", String(total));
-    setText("totalMovimientosMeta", `${ingresos} ingresos · ${salidas} salidas · ${mermas} mermas`);
+    const card = canvas.closest(".dashboard-analytics-card");
+    if (card) {
+        const metricEl = card.querySelector(".dashboard-analytics-card__metric");
+        const metaEl = card.querySelector(".dashboard-analytics-card__meta");
+
+        if (metricEl) {
+            metricEl.textContent = String(total);
+        }
+
+        if (metaEl) {
+            metaEl.textContent = `${ingresos} ingresos · ${salidas} salidas · ${mermas} mermas`;
+        }
+    }
 
     if (chartMovimientosTipo) chartMovimientosTipo.destroy();
 
@@ -537,20 +549,28 @@ function renderChartMovimientosTipo(movimientos) {
     });
 }
 
-function renderChartMermasCosto(mermas) {
+function renderChartMermasCosto(mermas, resumenMermas) {
     const canvas = document.getElementById("chartMermasCosto");
     if (!canvas || typeof Chart === "undefined") return;
 
     const data = [...mermas]
-        .filter(m => m.estado === "CONFIRMADA")
+        .filter(m => (m.estado || "").toUpperCase() === "CONFIRMADA")
         .slice(-6);
 
+    const total = Number(resumenMermas?.costoTotalMerma || 0);
+    const cantidad = data.length;
     const labels = data.map((_, i) => `M${i + 1}`);
-    const valores = data.map(m => Number(m.costoTotal || 0));
-    const total = valores.reduce((a, b) => a + b, 0);
+    const valores = cantidad > 0
+        ? data.map(() => total / cantidad)
+        : [0, 0, 0];
 
     setText("costoMermaMetric", formatearMonedaDash(total));
-    setText("costoMermaMeta", data.length ? `${data.length} mermas confirmadas analizadas` : "Sin impacto registrado");
+    setText(
+        "costoMermaMeta",
+        cantidad > 0
+            ? `${cantidad} mermas confirmadas analizadas`
+            : "Sin impacto registrado"
+    );
 
     if (chartMermasCosto) chartMermasCosto.destroy();
 
@@ -559,7 +579,7 @@ function renderChartMermasCosto(mermas) {
         data: {
             labels: labels.length ? labels : ["M1", "M2", "M3"],
             datasets: [{
-                data: valores.length ? valores : [0, 0, 0],
+                data: valores,
                 borderColor: "#c96b47",
                 backgroundColor: "rgba(201, 107, 71, 0.08)",
                 fill: true,

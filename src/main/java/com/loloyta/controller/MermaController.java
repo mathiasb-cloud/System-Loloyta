@@ -5,6 +5,7 @@ import com.loloyta.service.MermaService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/mermas")
@@ -45,5 +46,10 @@ public class MermaController {
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Long id) {
         mermaService.eliminar(id);
+    }
+    
+    @GetMapping("/resumen-dashboard")
+    public Map<String, Object> resumenDashboard() {
+        return mermaService.obtenerResumenDashboard();
     }
 }

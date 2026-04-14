@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -153,6 +155,45 @@ public class MermaServiceImpl implements MermaService {
 
         merma.setEstado("CONFIRMADA");
         return mermaRepository.save(merma);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> obtenerResumenDashboard() {
+        List<Merma> mermas = mermaRepository.findAll();
+
+        int totalMermasConfirmadas = 0;
+        BigDecimal costoTotalMerma = BigDecimal.ZERO;
+
+        for (Merma merma : mermas) {
+            if (!"CONFIRMADA".equalsIgnoreCase(merma.getEstado())) {
+                continue;
+            }
+
+            totalMermasConfirmadas++;
+
+            List<DetalleMerma> detalles = detalleMermaRepository.findByMermaId(merma.getId());
+
+            for (DetalleMerma detalle : detalles) {
+                BigDecimal cantidad = detalle.getCantidad() != null
+                        ? detalle.getCantidad()
+                        : BigDecimal.ZERO;
+
+                Double precioProducto = detalle.getProducto() != null
+                        ? detalle.getProducto().getPrecioActual()
+                        : 0.0;
+
+                BigDecimal precio = BigDecimal.valueOf(precioProducto != null ? precioProducto : 0.0);
+
+                costoTotalMerma = costoTotalMerma.add(cantidad.multiply(precio));
+            }
+        }
+
+        Map<String, Object> resumen = new HashMap<>();
+        resumen.put("totalMermasConfirmadas", totalMermasConfirmadas);
+        resumen.put("costoTotalMerma", costoTotalMerma);
+
+        return resumen;
     }
 
     @Override

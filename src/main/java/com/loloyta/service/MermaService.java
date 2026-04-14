@@ -3,6 +3,7 @@ package com.loloyta.service;
 import com.loloyta.model.Merma;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface MermaService {
@@ -18,4 +19,6 @@ public interface MermaService {
     Merma confirmar(Long id);
 
     void eliminar(Long id);
+    
+    Map<String, Object> obtenerResumenDashboard();
 }

@@ -1,72 +1,156 @@
 let dashboardCharts = {};
 
 async function initDashboard() {
+    debugger;
     try {
+        console.log('=== INIT DASHBOARD ===');
+        
+
         const [
             productosRes,
             almacenesRes,
             stockRes,
             movimientosRes,
             mermasRes,
-            motivosMermaRes
+            resumenMermasRes
         ] = await Promise.all([
             fetch('/api/productos'),
             fetch('/api/almacenes'),
             fetch('/api/stock'),
             fetch('/api/movimientos/resumen'),
             fetch('/api/mermas'),
-            fetch('/api/motivos-merma').catch(() => null)
+            fetch('/api/mermas/resumen-dashboard')
         ]);
+
+        console.log('Respuestas fetch:', {
+            productos: productosRes.status,
+            almacenes: almacenesRes.status,
+            stock: stockRes.status,
+            movimientos: movimientosRes.status,
+            mermas: mermasRes.status,
+            resumenMermas: resumenMermasRes.status
+        });
 
         const productosJson = productosRes.ok ? await productosRes.json() : [];
         const almacenes = almacenesRes.ok ? await almacenesRes.json() : [];
         const stock = stockRes.ok ? await stockRes.json() : [];
         const movimientos = movimientosRes.ok ? await movimientosRes.json() : [];
         const mermas = mermasRes.ok ? await mermasRes.json() : [];
-        const motivosMerma = motivosMermaRes && motivosMermaRes.ok ? await motivosMermaRes.json() : [];
+        const resumenMermas = resumenMermasRes.ok ? await resumenMermasRes.json() : {};
+		alert('resumenMermas init = ' + JSON.stringify(resumenMermas));
+		document.getElementById('costoMermaMetric').textContent =
+		    formatearMonedaDashboard(Number(resumenMermas?.costoTotalMerma || 0));
+
+        console.log('Datos cargados:', {
+            productosJson,
+            almacenes,
+            stock,
+            movimientos,
+            mermas,
+            resumenMermas
+        });
 
         const productos = productosJson.content || productosJson || [];
 
-        renderKPIs({ productos, almacenes, stock, movimientos, mermas });
+        console.log('Elemento costoMermaMetric ANTES de renderKPIs:', document.getElementById('costoMermaMetric'));
+
+        renderKPIs({ productos, almacenes, stock, movimientos, mermas, resumenMermas });
+
+        console.log('Elemento costoMermaMetric DESPUÉS de renderKPIs:', document.getElementById('costoMermaMetric'));
+        console.log('Texto final costoMermaMetric:', document.getElementById('costoMermaMetric')?.textContent);
+
         renderAlertas({ stock, productos, movimientos });
         renderActividadReciente(movimientos);
-        renderCharts({ stock, movimientos, mermas, motivosMerma });
+        renderCharts({ stock, movimientos, mermas });
+		
+		document.getElementById('costoMermaMetric').textContent =
+		    formatearMonedaDashboard(Number(resumenMermas?.costoTotalMerma || 0));
+
+		document.getElementById('costoMermaMeta').textContent =
+		    `${resumenMermas?.totalMermasConfirmadas || 0} mermas confirmadas analizadas`;
     } catch (error) {
         console.error('Error cargando dashboard:', error);
         renderDashboardError();
     }
 }
 
-function renderKPIs({ productos, almacenes, stock, movimientos, mermas }) {
-    const productosActivos = productos.filter(p => p.activo !== false).length;
-    const almacenesActivos = almacenes.filter(a => a.activo !== false).length;
+function renderKPIs({ productos, almacenes, stock, movimientos, mermas, resumenMermas }) {
+    const productosActivos = (productos || []).filter(p => p.activo !== false).length;
+    const almacenesActivos = (almacenes || []).filter(a => a.activo !== false).length;
 
     let criticos = 0;
-    let costoMerma = 0;
 
-    stock.forEach(s => {
+    (stock || []).forEach(s => {
         const cantidad = Number(s.cantidad || 0);
         const minimo = Number(s.producto?.stockMinimo || 0);
-        const precio = Number(s.producto?.precioActual || 0);
 
         if (cantidad < minimo) {
             criticos++;
-            costoMerma += (minimo - cantidad) * precio;
         }
     });
 
-    const totalMermasConfirmadas = mermas.filter(m => m.estado === 'CONFIRMADA').length;
+    const totalMermasConfirmadas = Number(resumenMermas?.totalMermasConfirmadas || 0);
+    const costoMerma = Number(resumenMermas?.costoTotalMerma || 0);
 
-    setText('kpiProductos', formatearNumeroDashboard(productosActivos));
-    setText('kpiAlmacenes', formatearNumeroDashboard(almacenesActivos));
-    setText('kpiStockCritico', formatearNumeroDashboard(criticos));
-    setText('kpiCostoMerma', formatearMonedaDashboard(costoMerma));
-
-    setText('heroPerdidaMerma', formatearMonedaDashboard(costoMerma));
+    setText('importantStockCritico', `${formatearNumeroDashboard(criticos)} productos en alerta`);
+    setText('importantMermas', `${formatearNumeroDashboard(totalMermasConfirmadas)} registradas`);
+    setText('costoMermaMetric', formatearMonedaDashboard(costoMerma));
     setText(
-        'heroPerdidaMermaMeta',
-        `${totalMermasConfirmadas} mermas confirmadas · ${movimientos.length} movimientos consolidados`
+        'costoMermaMeta',
+        totalMermasConfirmadas > 0
+            ? `${formatearNumeroDashboard(totalMermasConfirmadas)} mermas confirmadas analizadas`
+            : 'Sin impacto registrado'
     );
+
+    const resumen = document.getElementById('dashboardResumenGeneral');
+    if (resumen) {
+        resumen.innerHTML = `
+            <div class="dashboard-summary-row">
+                <span>Productos activos</span>
+                <span>${formatearNumeroDashboard(productosActivos)}</span>
+                <span>Catálogo habilitado para operación</span>
+            </div>
+            <div class="dashboard-summary-row">
+                <span>Almacenes operativos</span>
+                <span>${formatearNumeroDashboard(almacenesActivos)}</span>
+                <span>Puntos disponibles para inventario</span>
+            </div>
+            <div class="dashboard-summary-row">
+                <span>Stock crítico</span>
+                <span>${formatearNumeroDashboard(criticos)}</span>
+                <span>Productos por debajo del stock mínimo</span>
+            </div>
+            <div class="dashboard-summary-row">
+                <span>Mermas confirmadas</span>
+                <span>${formatearNumeroDashboard(totalMermasConfirmadas)}</span>
+                <span>Registros confirmados en el sistema</span>
+            </div>
+            <div class="dashboard-summary-row">
+                <span>Costo estimado de merma</span>
+                <span>${formatearMonedaDashboard(costoMerma)}</span>
+                <span>Suma del costo de los productos registrados en mermas confirmadas</span>
+            </div>
+            <div class="dashboard-summary-row">
+                <span>Movimientos consolidados</span>
+                <span>${formatearNumeroDashboard((movimientos || []).length)}</span>
+                <span>Ingresos, salidas y mermas procesadas</span>
+            </div>
+        `;
+    }
+
+    const infraestructura = document.getElementById('dashboardInfraestructuraMini');
+    if (infraestructura) {
+        infraestructura.innerHTML = `
+            <div class="mini-stat-item">
+                <span class="mini-stat-label">Almacenes</span>
+                <span class="mini-stat-value">${formatearNumeroDashboard(almacenesActivos)}</span>
+            </div>
+            <div class="mini-stat-item">
+                <span class="mini-stat-label">Productos activos</span>
+                <span class="mini-stat-value">${formatearNumeroDashboard(productosActivos)}</span>
+            </div>
+        `;
+    }
 }
 
 function renderAlertas({ stock, productos, movimientos }) {
@@ -574,7 +658,18 @@ function obtenerClaseTimeline(tipo) {
 
 function setText(id, valor) {
     const el = document.getElementById(id);
-    if (el) el.textContent = valor;
+
+    console.log(`[setText] id=${id}`, {
+        encontrado: !!el,
+        valor
+    });
+
+    if (el) {
+        el.textContent = valor;
+        console.log(`[setText] actualizado -> #${id}:`, el.textContent);
+    } else {
+        console.warn(`[setText] NO EXISTE el elemento con id #${id}`);
+    }
 }
 
 function escapeHtmlDashboard(texto) {
