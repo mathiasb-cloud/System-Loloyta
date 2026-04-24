@@ -5,6 +5,7 @@ async function initAlmacenes() {
     inicializarModalAlmacen();
     configurarBuscadorAlmacen();
     await cargarAlmacenes();
+	
 }
 
 function inicializarModalAlmacen() {

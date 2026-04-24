@@ -6,6 +6,7 @@ const permisosPorRuta = {
     "/ordenes": "ORDENES_VER",
     "/salidas": "SALIDAS_VER",
     "/mermas": "MERMAS_VER",
+	"/proveedores": "PROVEEDORES_VER",
     "/stock": "STOCK_VER",
     "/movimientos": "MOVIMIENTOS_VER",
     "/almacenes": "ALMACENES_VER",
@@ -66,6 +67,7 @@ function cargar(event, url, element = null) {
                 if (url.includes("proveedores") && typeof initProveedores === "function") initProveedores();
 				if (url.includes("roles") && typeof initRoles === "function") initRoles();
 				if (url.includes("usuarios") && typeof initUsuarios === "function") initUsuarios();
+				if (url.includes("stock-auditoria") && typeof initStockAuditoria === "function") initStockAuditoria();
 				
 				aplicarPermisosEnVista();
 				aplicarDatosUsuarioEnUI();
