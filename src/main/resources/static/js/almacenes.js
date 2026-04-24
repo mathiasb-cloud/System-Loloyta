@@ -26,6 +26,7 @@ async function cargarAlmacenes() {
     }
 }
 
+
 function renderTablaAlmacenes(data) {
     const contenedor = document.getElementById("contenedorAlmacenesCards");
     if (!contenedor) return;
@@ -99,6 +100,15 @@ function renderTablaAlmacenes(data) {
                                 </span>
                                 <span class="badge rounded-pill ${activo ? 'bg-success' : 'bg-secondary'}">
                                     ${activo ? "Disponible" : "Pausado"}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-3">
+                                <span class="small fw-bold">
+                                    <i class="bi bi-cash-stack text-success me-2"></i>
+                                    Valor total
+                                </span>
+                                <span class="text-muted fw-semibold">
+                                    ${formatValorTotalAlmacen(a.valorTotal)}
                                 </span>
                             </div>
                         </div>
@@ -313,6 +323,13 @@ function formatearFechaAlmacen(valor) {
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit"
+    });
+}
+
+function formatValorTotalAlmacen(valor) {
+    return Number(valor || 0).toLocaleString('es-PE', {
+        style: 'currency',
+        currency: 'PEN'
     });
 }
 

@@ -23,6 +23,8 @@ public interface StockService {
 
     Stock disminuirStock(Long productoId, Long almacenId, BigDecimal cantidad);
     
+        BigDecimal calcularValorTotalPorAlmacen(Long almacenId);
+    
     List<StockAuditoriaProductoDto> listarAuditoriaPorAlmacen(Long almacenId);
 
     void guardarAuditoriaAsignacion(StockAuditoriaRequestDto request);

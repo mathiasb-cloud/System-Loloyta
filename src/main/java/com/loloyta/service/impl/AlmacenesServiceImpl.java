@@ -11,6 +11,7 @@ import com.loloyta.model.Almacenes;
 import com.loloyta.model.Usuario;
 import com.loloyta.repository.AlmacenesRepository;
 import com.loloyta.service.AlmacenesService;
+import com.loloyta.service.StockService;
 import com.loloyta.service.AuthService;
 
 @Service
@@ -20,11 +21,16 @@ public class AlmacenesServiceImpl implements AlmacenesService {
     private AlmacenesRepository almacenesRepository;
     
     @Autowired
+    private StockService stockService;
+    
+    @Autowired
     private AuthService authService;
 
     @Override
     public List<Almacenes> listarAlmacenes() {
-        return almacenesRepository.findAll();
+        List<Almacenes> almacenes = almacenesRepository.findAll();
+        almacenes.forEach(a -> a.setValorTotal(stockService.calcularValorTotalPorAlmacen(a.getId())));
+        return almacenes;
     }
 
     @Override
@@ -72,10 +78,14 @@ public class AlmacenesServiceImpl implements AlmacenesService {
             String rol = usuario.getRol().getNombre().toUpperCase();
 
             if ("MASTER_ADMIN".equals(rol) || "ADMINISTRADOR".equals(rol)) {
-                return almacenesRepository.findAll();
+                List<Almacenes> all = almacenesRepository.findAll();
+                all.forEach(a -> a.setValorTotal(stockService.calcularValorTotalPorAlmacen(a.getId())));
+                return all;
             }
         }
 
-        return usuario.getAlmacenes() != null ? usuario.getAlmacenes() : List.of();
+        List<Almacenes> almacenes = usuario.getAlmacenes() != null ? usuario.getAlmacenes() : List.of();
+        almacenes.forEach(a -> a.setValorTotal(stockService.calcularValorTotalPorAlmacen(a.getId())));
+        return almacenes;
     }
 }
