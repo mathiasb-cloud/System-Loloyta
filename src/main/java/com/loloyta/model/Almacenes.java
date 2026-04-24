@@ -2,7 +2,7 @@ package com.loloyta.model;
 
 import jakarta.persistence.*;
 
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,7 +23,7 @@ public class Almacenes {
     private LocalDateTime fechaCreacion;
 
     @Transient
-    private java.math.BigDecimal valorTotal;
+    private BigDecimal valorTotal;
 
     public Almacenes() {
 		
@@ -68,11 +68,11 @@ public class Almacenes {
         this.fechaCreacion = fechaCreacion;
     }
 
-    public java.math.BigDecimal getValorTotal() {
+    public BigDecimal getValorTotal() {
         return valorTotal;
     }
 
-    public void setValorTotal(java.math.BigDecimal valorTotal) {
+    public void setValorTotal(BigDecimal valorTotal) {
         this.valorTotal = valorTotal;
     }
 
