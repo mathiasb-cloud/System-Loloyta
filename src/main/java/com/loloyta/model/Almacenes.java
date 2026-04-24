@@ -22,6 +22,9 @@ public class Almacenes {
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
 
+    @Transient
+    private java.math.BigDecimal valorTotal;
+
     public Almacenes() {
 		
 	}
@@ -63,6 +66,14 @@ public class Almacenes {
 
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
+    }
+
+    public java.math.BigDecimal getValorTotal() {
+        return valorTotal;
+    }
+
+    public void setValorTotal(java.math.BigDecimal valorTotal) {
+        this.valorTotal = valorTotal;
     }
 
     public Long getId() {

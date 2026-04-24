@@ -46,6 +46,11 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
+    public BigDecimal calcularValorTotalPorAlmacen(Long almacenId) {
+        return stockRepository.calcularValorTotalPorAlmacen(almacenId);
+    }
+
+    @Override
     public Stock obtenerPorProductoYAlmacen(Long productoId, Long almacenId) {
         return stockRepository
                 .findByAlmacenesIdAndProductoId(almacenId, productoId)
