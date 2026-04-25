@@ -231,4 +231,28 @@ public class StockServiceImpl implements StockService {
             }
         }
     }
+
+    @Override
+    public List<Stock> listarStockBajo() {
+        List<Stock> todos = stockRepository.findAll();
+        return todos.stream()
+            .filter(s -> s.getProducto() != null 
+                && Boolean.TRUE.equals(s.getProducto().getActivo())
+                && s.getCantidad() != null 
+                && s.getProducto().getStockMinimo() != null
+                && s.getCantidad().doubleValue() <= s.getProducto().getStockMinimo())
+            .toList();
+    }
+
+    @Override
+    public List<Stock> listarStockBajoPorAlmacen(Long almacenId) {
+        List<Stock> todos = stockRepository.findByAlmacenesId(almacenId);
+        return todos.stream()
+            .filter(s -> s.getProducto() != null 
+                && Boolean.TRUE.equals(s.getProducto().getActivo())
+                && s.getCantidad() != null 
+                && s.getProducto().getStockMinimo() != null
+                && s.getCantidad().doubleValue() <= s.getProducto().getStockMinimo())
+            .toList();
+    }
 }

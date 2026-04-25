@@ -14,6 +14,135 @@ const permisosPorRuta = {
     "/usuarios": "USUARIOS_VER",
     "/roles": "ROLES_VER"
 };
+
+async function mostrarNotificacionesStock() {
+    try {
+        const response = await fetch('/api/stock/stock-bajo');
+        if (!response.ok) throw new Error('Error al obtener stock bajo');
+
+        const stocks = await response.json();
+
+        if (!stocks || stocks.length === 0) {
+            Swal.fire({
+                title: 'Sin alertas',
+                text: 'No hay productos con stock bajo.',
+                icon: 'info',
+                confirmButtonText: 'Aceptar'
+            });
+            return;
+        }
+
+        let contenidoHtml = '<div style="max-height: 350px; overflow-y: auto;">';
+
+        stocks.forEach(stock => {
+            const producto = stock.producto || {};
+            const almacen = stock.almacenes || {};
+            const cantidad = stock.cantidad || 0;
+            const stockMinimo = producto.stockMinimo || 0;
+            const productoId = producto.id || '';
+            const almacenId = almacen.id || '';
+
+            contenidoHtml += `
+                <div class="stock-card" 
+                     data-producto-id="${productoId}" 
+                     data-almacen-id="${almacenId}"
+                     style="
+                        border: 1px solid #fee2e2;
+                        background: #fef2f2;
+                        padding: 12px;
+                        margin-bottom: 10px;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        transition: transform 0.15s, box-shadow 0.15s;
+                     "
+                     onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)'"
+                     onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'"
+                >
+                    <div style="font-weight: 600; font-size: 14px; color: #991b1b;">
+                        ${escapeHtml(producto.nombre || 'N/A')}
+                    </div>
+
+                    <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
+                        📦 ${escapeHtml(almacen.nombre || 'N/A')}
+                    </div>
+
+                    <div style="margin-top: 6px; display: flex; justify-content: space-between; font-size: 13px;">
+                        <span style="color: #dc2626; font-weight: bold;">
+                            Stock: ${cantidad}
+                        </span>
+                        <span style="color: #374151;">
+                            Mín: ${stockMinimo}
+                        </span>
+                    </div>
+                </div>
+            `;
+        });
+
+        contenidoHtml += '</div>';
+        contenidoHtml += `
+            <div style="margin-top: 10px; font-size: 0.8rem; color: #6b7280; text-align: center;">
+                Haz clic en una notificación para registrar ingreso
+            </div>
+        `;
+
+        Swal.fire({
+            title: `⚠️ Stock Bajo (${stocks.length})`,
+            html: contenidoHtml,
+            icon: 'warning',
+            width: '420px',
+            confirmButtonText: 'Cerrar',
+            didOpen: () => {
+                document.querySelectorAll('.stock-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const productoId = card.getAttribute('data-producto-id');
+                        if (productoId) {
+                            sessionStorage.setItem('productoParaIngreso', productoId);
+                            Swal.close();
+                            cargar({ preventDefault() {} }, '/ordenes');
+                        }
+                    });
+                });
+            }
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error',
+            text: 'No se pudieron cargar las alertas de stock.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+    }
+}
+
+// Funcion para actualizar el badge de notificaciones
+async function actualizarBadgeNotificaciones() {
+    try {
+        const response = await fetch('/api/stock/stock-bajo');
+        if (!response.ok) {
+            console.warn('Badge: respuesta no ok', response.status);
+            return;
+        }
+
+        const stocks = await response.json();
+        const badge = document.getElementById('notificationBadge');
+
+        if (badge) {
+            if (stocks && stocks.length > 0) {
+                badge.textContent = stocks.length > 99 ? '99+' : stocks.length;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Error actualizando badge:', error);
+        const badge = document.getElementById('notificationBadge');
+        if (badge) badge.style.display = 'none';
+    }
+}
+
 function cargar(event, url, element = null) {
 	
 	if (permisosPorRuta[url] && !tienePermiso(permisosPorRuta[url])) {
@@ -275,6 +404,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await cargarSesionActual();
     aplicarPermisosEnTopbar();
 	aplicarDatosUsuarioEnUI();
+    actualizarBadgeNotificaciones();
 
     const vistaPendiente = sessionStorage.getItem("abrirVistaAlCargar");
 
@@ -773,5 +903,80 @@ function aplicarDatosUsuarioEnUI() {
     const avatar = document.getElementById("topbarUserInitials");
     if (avatar) {
         avatar.textContent = iniciales;
+    }
+}
+
+async function cargarNotificacionesPanel() {
+    try {
+        const response = await fetch('/api/stock/stock-bajo');
+        if (!response.ok) throw new Error('Error');
+
+        const stocks = await response.json();
+        const panel = document.getElementById("panelNotificaciones");
+
+        if (!stocks || stocks.length === 0) {
+            panel.innerHTML = `
+                <div style="text-align:center; padding: 12px; color:#6b7280;">
+                    Sin notificaciones
+                </div>
+            `;
+            return;
+        }
+
+        let html = "";
+
+        stocks.forEach(stock => {
+            const producto = stock.producto || {};
+            const almacen = stock.almacenes || {};
+            const cantidad = stock.cantidad || 0;
+            const min = producto.stockMinimo || 0;
+            const id = producto.id || '';
+
+            html += `
+                <div class="notif-item"
+                     data-id="${id}"
+                     style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;"
+                     onmouseover="this.style.background='#f3f4f6'"
+                     onmouseout="this.style.background='white'"
+                >
+                    <div style="font-weight:600; font-size:13px;">
+                        ${escapeHtml(producto.nombre)}
+                    </div>
+                    <div style="font-size:11px; color:#6b7280;">
+                        ${escapeHtml(almacen.nombre)}
+                    </div>
+                    <div style="font-size:12px; color:#dc2626;">
+                        Stock: ${cantidad} / Min: ${min}
+                    </div>
+                </div>
+            `;
+        });
+
+        panel.innerHTML = html;
+
+        document.querySelectorAll(".notif-item").forEach(item => {
+            item.addEventListener("click", () => {
+                const id = item.getAttribute("data-id");
+
+                sessionStorage.setItem("productoParaIngreso", id);
+                document.getElementById("panelNotificaciones").style.display = "none";
+
+                cargar({ preventDefault() {} }, "/ordenes");
+            });
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+function toggleNotificaciones() {
+    const panel = document.getElementById("panelNotificaciones");
+
+    if (panel.style.display === "none" || panel.style.display === "") {
+        cargarNotificacionesPanel(); 
+        panel.style.display = "block";
+    } else {
+        panel.style.display = "none";
     }
 }

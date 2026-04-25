@@ -28,4 +28,8 @@ public interface StockService {
     List<StockAuditoriaProductoDto> listarAuditoriaPorAlmacen(Long almacenId);
 
     void guardarAuditoriaAsignacion(StockAuditoriaRequestDto request);
+
+    List<Stock> listarStockBajo();
+
+    List<Stock> listarStockBajoPorAlmacen(Long almacenId);
 }

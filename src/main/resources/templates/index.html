@@ -39,9 +39,19 @@
     </div>
 
     <div class="topbar-modern__right">
-        <button class="topbar-icon-btn" type="button" title="Notificaciones">
-            <i class="bi bi-bell"></i>
-        </button>
+        <div style="position: relative;">
+
+    <button class="topbar-icon-btn" type="button" title="Notificaciones" onclick="toggleNotificaciones()">
+        <i class="bi bi-bell"></i>
+        <span id="notificationBadge" class="notification-badge" style="display:none;">0</span>
+    </button>
+
+    <div id="panelNotificaciones" style=" display: none; position: absolute; top: 45px;
+	    right: 0; width: 320px; max-height: 400px; overflow-y: auto; background: white;
+        border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);z-index: 9999;padding: 8px;">
+    </div>
+
+    </div>
         <button class="topbar-icon-btn" type="button" title="Ajustes">
             <i class="bi bi-gear"></i>
         </button>

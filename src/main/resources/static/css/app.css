@@ -10,6 +10,26 @@
     --card-bg: rgba(255, 253, 249, 0.82);
 }
 
+/* Badge de notificación en la campanita */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc2626;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    border: 2px solid white;
+}
+
+.topbar-icon-btn {
+    position: relative;
+}
+
 
 
 body {

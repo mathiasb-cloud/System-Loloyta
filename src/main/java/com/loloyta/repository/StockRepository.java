@@ -1,6 +1,7 @@
 package com.loloyta.repository;
 
 import java.util.List;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,10 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
 
     @Query("SELECT COALESCE(SUM(s.cantidad * COALESCE(s.producto.precioActual, 0)), 0) FROM Stock s WHERE s.almacenes.id = :almacenId")
     java.math.BigDecimal calcularValorTotalPorAlmacen(@Param("almacenId") Long almacenId);
+
+    @Query("SELECT s FROM Stock s WHERE s.cantidad IS NOT NULL AND s.producto.stockMinimo IS NOT NULL AND s.producto.activo = true AND s.cantidad < s.producto.stockMinimo")
+    List<Stock> findByStockBajo();
+
+    @Query("SELECT s FROM Stock s WHERE s.cantidad IS NOT NULL AND s.producto.stockMinimo IS NOT NULL AND s.producto.activo = true AND s.cantidad < s.producto.stockMinimo AND s.almacenes.id = :almacenId")
+    List<Stock> findByStockBajoPorAlmacen(@Param("almacenId") Long almacenId);
 }

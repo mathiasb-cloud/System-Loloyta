@@ -78,4 +78,14 @@ public class StockController {
     public void guardarAuditoria(@RequestBody StockAuditoriaRequestDto request) {
         stockService.guardarAuditoriaAsignacion(request);
     }
+
+    @GetMapping("/stock-bajo")
+    public List<Stock> listarStockBajo() {
+        return stockService.listarStockBajo();
+    }
+
+    @GetMapping("/stock-bajo/almacen/{almacenId}")
+    public List<Stock> listarStockBajoPorAlmacen(@PathVariable Long almacenId) {
+        return stockService.listarStockBajoPorAlmacen(almacenId);
+    }
 }

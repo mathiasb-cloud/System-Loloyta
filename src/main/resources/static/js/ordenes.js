@@ -22,6 +22,30 @@ async function initOrdenes() {
     if (document.getElementById("almacenSelect")?.value) {
         await cargarProductosPorAlmacenOrden();
     }
+    
+    // Verificar si hay un producto seleccionado para ingreso rápido desde notificaciones
+    const productoIdParaIngreso = sessionStorage.getItem("productoParaIngreso");
+    if (productoIdParaIngreso) {
+        sessionStorage.removeItem("productoParaIngreso");
+        // Seleccionar el producto automáticamente después de cargar
+        setTimeout(() => {
+        const producto = productosGlobal.find(p => p.id === parseInt(productoIdParaIngreso));
+            if (producto) {
+                const input = document.getElementById("buscador");
+                if (input) {
+                    input.value = producto.nombre;
+                    input.dispatchEvent(new Event('input'));
+                    // Mostrar resultados y seleccionar el primero
+                    setTimeout(() => {
+                        const primerResultado = document.querySelector('#resultados .list-group-item');
+                        if (primerResultado) {
+                            primerResultado.click();
+                        }
+                    }, 100);
+                }
+            }
+        }, 500);
+    }
 }
 
 
