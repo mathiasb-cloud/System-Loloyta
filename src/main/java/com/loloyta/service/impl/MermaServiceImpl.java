@@ -7,6 +7,7 @@ import com.loloyta.repository.MovimientoRepository;
 import com.loloyta.repository.StockRepository;
 import com.loloyta.service.AuthService;
 import com.loloyta.service.MermaService;
+import com.loloyta.service.StockLoteService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,9 @@ public class MermaServiceImpl implements MermaService {
     
     @Autowired
     private AuthService authService;
+    
+    @Autowired
+    private StockLoteService stockLoteService;
 
     @Override
     public List<Merma> listar() {
@@ -140,6 +144,12 @@ public class MermaServiceImpl implements MermaService {
             stock.setCantidad(stock.getCantidad().subtract(d.getCantidad()));
             stock.setUltimaActualizacion(LocalDateTime.now());
             stockRepository.save(stock);
+            
+            stockLoteService.descontarFIFO(
+            	    d.getProducto().getId(),
+            	    merma.getAlmacen().getId(),
+            	    d.getCantidad().doubleValue()
+            	);
 
             Movimiento mov = new Movimiento();
             mov.setUsuario(authService.obtenerUsuarioAutenticado());

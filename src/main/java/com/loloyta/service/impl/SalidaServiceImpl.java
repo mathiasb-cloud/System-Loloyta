@@ -22,6 +22,7 @@ import com.loloyta.repository.SalidaRepository;
 import com.loloyta.service.AccesoAlmacenService;
 import com.loloyta.service.AuthService;
 import com.loloyta.service.SalidaService;
+import com.loloyta.service.StockLoteService;
 import com.loloyta.service.StockService;
 
 @Service
@@ -53,6 +54,9 @@ public class SalidaServiceImpl implements SalidaService {
     
     @Autowired
     private DetalleMovimientoRepository detalleMovimientoRepository;
+    
+    @Autowired
+    private StockLoteService stockLoteService;
 
     @Override
     public List<Salida> listar() {
@@ -270,6 +274,12 @@ public class SalidaServiceImpl implements SalidaService {
                 salida.getAlmacenes().getId(),
                 cantidadDespacho
         );
+        
+        stockLoteService.descontarFIFO(
+        	    d.getProducto().getId(),
+        	    salida.getAlmacenes().getId(),
+        	    cantidadDespacho.doubleValue()
+        	);
 
         if ("ALMACEN".equalsIgnoreCase(salida.getTipoDestino()) && salida.getAlmacenDestino() != null) {
             stockService.aumentarStock(
@@ -278,6 +288,12 @@ public class SalidaServiceImpl implements SalidaService {
                     cantidadDespacho
             );
         }
+        
+        stockService.disminuirStock(
+                d.getProducto().getId(),
+                salida.getAlmacenes().getId(),
+                cantidadDespacho
+        );
 
         Movimiento mov = new Movimiento();
 
