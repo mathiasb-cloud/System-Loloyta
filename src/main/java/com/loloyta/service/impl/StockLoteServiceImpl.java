@@ -1,9 +1,11 @@
 package com.loloyta.service.impl;
 
 import com.loloyta.model.Almacenes;
+import com.loloyta.model.ConsumoLote;
 import com.loloyta.model.Producto;
 import com.loloyta.model.StockLote;
 import com.loloyta.repository.AlmacenesRepository;
+import com.loloyta.repository.ConsumoLoteRepository;
 import com.loloyta.repository.ProductoRepository;
 import com.loloyta.repository.StockLoteRepository;
 import com.loloyta.service.StockLoteService;
@@ -16,19 +18,22 @@ import java.util.List;
 @Service
 public class StockLoteServiceImpl implements StockLoteService {
 
-    private final StockLoteRepository stockLoteRepository;
-    private final ProductoRepository productoRepository;
-    private final AlmacenesRepository almacenesRepository;
+	private final StockLoteRepository stockLoteRepository;
+	private final ProductoRepository productoRepository;
+	private final AlmacenesRepository almacenesRepository;
+	private final ConsumoLoteRepository consumoLoteRepository;
 
-    public StockLoteServiceImpl(
-            StockLoteRepository stockLoteRepository,
-            ProductoRepository productoRepository,
-            AlmacenesRepository almacenesRepository
-    ) {
-        this.stockLoteRepository = stockLoteRepository;
-        this.productoRepository = productoRepository;
-        this.almacenesRepository = almacenesRepository;
-    }
+	public StockLoteServiceImpl(
+	        StockLoteRepository stockLoteRepository,
+	        ProductoRepository productoRepository,
+	        AlmacenesRepository almacenesRepository,
+	        ConsumoLoteRepository consumoLoteRepository
+	) {
+	    this.stockLoteRepository = stockLoteRepository;
+	    this.productoRepository = productoRepository;
+	    this.almacenesRepository = almacenesRepository;
+	    this.consumoLoteRepository = consumoLoteRepository;
+	}
 
     @Override
     @Transactional
@@ -53,7 +58,7 @@ public class StockLoteServiceImpl implements StockLoteService {
 
     @Override
     @Transactional
-    public void descontarFIFO(Long productoId, Long almacenId, Double cantidad) {
+    public void descontarFIFO(Long productoId, Long almacenId, Double cantidad, String tipoMovimiento, Long referenciaId) {
         List<StockLote> lotes = stockLoteRepository
                 .findByProductoIdAndAlmacenIdAndCantidadDisponibleGreaterThanOrderByFechaIngresoAsc(
                         productoId,
@@ -67,17 +72,32 @@ public class StockLoteServiceImpl implements StockLoteService {
             if (restante <= 0) break;
 
             double disponible = lote.getCantidadDisponible();
+            double cantidadConsumida;
 
             if (disponible <= restante) {
+                cantidadConsumida = disponible;
                 restante -= disponible;
                 lote.setCantidadDisponible(0.0);
                 lote.setActivo(false);
             } else {
+                cantidadConsumida = restante;
                 lote.setCantidadDisponible(disponible - restante);
                 restante = 0;
             }
 
             stockLoteRepository.save(lote);
+
+            ConsumoLote consumo = new ConsumoLote();
+            consumo.setLote(lote);
+            consumo.setProducto(lote.getProducto());
+            consumo.setAlmacen(lote.getAlmacen());
+            consumo.setTipoMovimiento(tipoMovimiento);
+            consumo.setReferenciaId(referenciaId);
+            consumo.setCantidad(cantidadConsumida);
+            consumo.setCostoUnitario(lote.getCostoUnitario());
+            consumo.setFecha(LocalDateTime.now());
+
+            consumoLoteRepository.save(consumo);
         }
 
         if (restante > 0) {

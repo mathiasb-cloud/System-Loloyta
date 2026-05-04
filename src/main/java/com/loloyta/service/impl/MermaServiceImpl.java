@@ -148,7 +148,9 @@ public class MermaServiceImpl implements MermaService {
             stockLoteService.descontarFIFO(
             	    d.getProducto().getId(),
             	    merma.getAlmacen().getId(),
-            	    d.getCantidad().doubleValue()
+            	    d.getCantidad().doubleValue(),
+            	    "MERMA",
+            	    merma.getId()
             	);
 
             Movimiento mov = new Movimiento();

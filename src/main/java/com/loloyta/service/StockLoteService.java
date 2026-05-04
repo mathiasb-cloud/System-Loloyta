@@ -4,5 +4,5 @@ public interface StockLoteService {
 
     void crearLote(Long productoId, Long almacenId, Double cantidad, Double costoUnitario);
 
-    void descontarFIFO(Long productoId, Long almacenId, Double cantidad);
+    void descontarFIFO(Long productoId, Long almacenId, Double cantidad, String tipoMovimiento, Long referenciaId);
 }

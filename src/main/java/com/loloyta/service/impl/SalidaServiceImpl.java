@@ -278,7 +278,9 @@ public class SalidaServiceImpl implements SalidaService {
         stockLoteService.descontarFIFO(
         	    d.getProducto().getId(),
         	    salida.getAlmacenes().getId(),
-        	    cantidadDespacho.doubleValue()
+        	    cantidadDespacho.doubleValue(),
+        	    "SALIDA",
+        	    salida.getId()
         	);
 
         if ("ALMACEN".equalsIgnoreCase(salida.getTipoDestino()) && salida.getAlmacenDestino() != null) {
