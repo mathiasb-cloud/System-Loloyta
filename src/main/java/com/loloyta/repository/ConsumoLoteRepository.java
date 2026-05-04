@@ -8,4 +8,6 @@ import java.util.List;
 public interface ConsumoLoteRepository extends JpaRepository<ConsumoLote, Long> {
 
     List<ConsumoLote> findByTipoMovimientoAndReferenciaId(String tipoMovimiento, Long referenciaId);
+
+    List<ConsumoLote> findByTipoMovimiento(String tipoMovimiento);
 }
