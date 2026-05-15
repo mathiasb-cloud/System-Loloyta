@@ -166,35 +166,35 @@ public class MermaServiceImpl implements MermaService {
     }
     
     @Override
-@Transactional(readOnly = true)
-public Map<String, Object> obtenerResumenDashboard() {
-    List<Merma> mermas = mermaRepository.findAll();
+    @Transactional(readOnly = true)
+    public Map<String, Object> obtenerResumenDashboard() {
+        List<Merma> mermas = mermaRepository.findAll();
 
-    int totalMermasConfirmadas = 0;
+        int totalMermasConfirmadas = 0;
+        BigDecimal costoTotalMerma = BigDecimal.ZERO;
 
-    for (Merma merma : mermas) {
-        if ("CONFIRMADA".equalsIgnoreCase(merma.getEstado())) {
-            totalMermasConfirmadas++;
+        for (Merma merma : mermas) {
+            if ("CONFIRMADA".equalsIgnoreCase(merma.getEstado())) {
+                totalMermasConfirmadas++;
+
+                List<DetalleMerma> detalles = detalleMermaRepository.findByMermaId(merma.getId());
+
+                for (DetalleMerma detalle : detalles) {
+                    BigDecimal cantidad = detalle.getCantidad() != null ? detalle.getCantidad() : BigDecimal.ZERO;
+                    Double precio = detalle.getProducto() != null ? detalle.getProducto().getPrecioActual() : 0.0;
+                    BigDecimal precioDecimal = BigDecimal.valueOf(precio != null ? precio : 0.0);
+
+                    costoTotalMerma = costoTotalMerma.add(cantidad.multiply(precioDecimal));
+                }
+            }
         }
+
+        Map<String, Object> resumen = new HashMap<>();
+        resumen.put("totalMermasConfirmadas", totalMermasConfirmadas);
+        resumen.put("costoTotalMerma", costoTotalMerma);
+
+        return resumen;
     }
-
-    BigDecimal costoTotalMerma = BigDecimal.ZERO;
-
-    List<ConsumoLote> consumosMerma = consumoLoteRepository.findByTipoMovimiento("MERMA");
-
-    for (ConsumoLote consumo : consumosMerma) {
-        BigDecimal cantidad = BigDecimal.valueOf(consumo.getCantidad() != null ? consumo.getCantidad() : 0.0);
-        BigDecimal costoUnitario = BigDecimal.valueOf(consumo.getCostoUnitario() != null ? consumo.getCostoUnitario() : 0.0);
-
-        costoTotalMerma = costoTotalMerma.add(cantidad.multiply(costoUnitario));
-    }
-
-    Map<String, Object> resumen = new HashMap<>();
-    resumen.put("totalMermasConfirmadas", totalMermasConfirmadas);
-    resumen.put("costoTotalMerma", costoTotalMerma);
-
-    return resumen;
-}
 
     @Override
     @Transactional

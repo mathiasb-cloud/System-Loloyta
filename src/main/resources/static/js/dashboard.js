@@ -37,9 +37,6 @@ async function initDashboard() {
         const movimientos = movimientosRes.ok ? await movimientosRes.json() : [];
         const mermas = mermasRes.ok ? await mermasRes.json() : [];
         const resumenMermas = resumenMermasRes.ok ? await resumenMermasRes.json() : {};
-		alert('resumenMermas init = ' + JSON.stringify(resumenMermas));
-		document.getElementById('costoMermaMetric').textContent =
-		    formatearMonedaDashboard(Number(resumenMermas?.costoTotalMerma || 0));
 
         console.log('Datos cargados:', {
             productosJson,
@@ -52,22 +49,10 @@ async function initDashboard() {
 
         const productos = productosJson.content || productosJson || [];
 
-        console.log('Elemento costoMermaMetric ANTES de renderKPIs:', document.getElementById('costoMermaMetric'));
-
         renderKPIs({ productos, almacenes, stock, movimientos, mermas, resumenMermas });
-
-        console.log('Elemento costoMermaMetric DESPUÉS de renderKPIs:', document.getElementById('costoMermaMetric'));
-        console.log('Texto final costoMermaMetric:', document.getElementById('costoMermaMetric')?.textContent);
-
         renderAlertas({ stock, productos, movimientos });
         renderActividadReciente(movimientos);
         renderCharts({ stock, movimientos, mermas });
-		
-		document.getElementById('costoMermaMetric').textContent =
-		    formatearMonedaDashboard(Number(resumenMermas?.costoTotalMerma || 0));
-
-		document.getElementById('costoMermaMeta').textContent =
-		    `${resumenMermas?.totalMermasConfirmadas || 0} mermas confirmadas analizadas`;
     } catch (error) {
         console.error('Error cargando dashboard:', error);
         renderDashboardError();
