@@ -33,7 +33,7 @@ public class Merma {
     }
 
     public Merma(Almacenes almacen, MotivoMerma motivo, String observacion,
-                 LocalDateTime fecha, String estado, Usuario usuario) {
+                LocalDateTime fecha, String estado, Usuario usuario) {
         this.almacen = almacen;
         this.motivo = motivo;
         this.observacion = observacion;

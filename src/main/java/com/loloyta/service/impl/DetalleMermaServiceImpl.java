@@ -38,6 +38,10 @@ public class DetalleMermaServiceImpl implements DetalleMermaService {
             throw new RuntimeException("Debe indicar el producto");
         }
 
+        if (detalle.getMotivo() == null || detalle.getMotivo().getId() == null) {
+            throw new RuntimeException("Debe seleccionar un motivo de merma");
+        }
+
         validarCantidad(detalle.getCantidad());
         return repository.save(detalle);
     }
@@ -51,9 +55,14 @@ public class DetalleMermaServiceImpl implements DetalleMermaService {
             throw new RuntimeException("Debe indicar el producto");
         }
 
+        if (detalleActualizado.getMotivo() == null || detalleActualizado.getMotivo().getId() == null) {
+            throw new RuntimeException("Debe seleccionar un motivo de merma");
+        }
+
         validarCantidad(detalleActualizado.getCantidad());
 
         detalle.setProducto(detalleActualizado.getProducto());
+        detalle.setMotivo(detalleActualizado.getMotivo());
         detalle.setCantidad(detalleActualizado.getCantidad());
 
         return repository.save(detalle);

@@ -164,22 +164,46 @@ public class MovimientoServiceImpl implements MovimientoService {
     
     @Override
     public MovimientoDetalleDto obtenerDetallePorReferencia(String referencia) {
+        if (referencia == null || referencia.isBlank()) {
+            throw new RuntimeException("Referencia inválida");
+        }
 
-        List<Movimiento> movimientos = repository.findAll();
+        List<Movimiento> grupo = new ArrayList<>();
 
-        List<Movimiento> grupo = movimientos.stream()
-                .filter(m -> {
-                    if (m.getOrdenCompra() != null) {
-                        return referencia.equals("OC-" + m.getOrdenCompra().getId());
-                    } else if (m.getSalida() != null) {
-                        return referencia.equals("SAL-" + m.getSalida().getId());
-                    } else if (m.getMerma() != null) {
-                        return referencia.equals("MER-" + m.getMerma().getId());
-                    } else {
-                        return referencia.equals("OTRO-" + m.getId());
-                    }
-                })
-                .collect(Collectors.toList());
+        if (referencia.startsWith("OC-")) {
+            try {
+                Long ordenId = Long.parseLong(referencia.substring(3));
+                grupo = repository.findByOrdenCompraId(ordenId);
+            } catch (NumberFormatException ignored) {
+            }
+        } else if (referencia.startsWith("SAL-")) {
+            try {
+                Long salidaId = Long.parseLong(referencia.substring(4));
+                grupo = repository.findBySalidaId(salidaId);
+            } catch (NumberFormatException ignored) {
+            }
+        } else if (referencia.startsWith("MER-")) {
+            try {
+                Long mermaId = Long.parseLong(referencia.substring(4));
+                grupo = repository.findByMermaId(mermaId);
+            } catch (NumberFormatException ignored) {
+            }
+        } else {
+            List<Movimiento> movimientos = repository.findAll();
+            grupo = movimientos.stream()
+                    .filter(m -> {
+                        if (m.getOrdenCompra() != null) {
+                            return referencia.equals("OC-" + m.getOrdenCompra().getId());
+                        } else if (m.getSalida() != null) {
+                            return referencia.equals("SAL-" + m.getSalida().getId());
+                        } else if (m.getMerma() != null) {
+                            return referencia.equals("MER-" + m.getMerma().getId());
+                        } else {
+                            return referencia.equals("OTRO-" + m.getId());
+                        }
+                    })
+                    .collect(Collectors.toList());
+        }
 
         if (grupo.isEmpty()) {
             throw new RuntimeException("No se encontró el movimiento con referencia: " + referencia);
@@ -372,6 +396,11 @@ public class MovimientoServiceImpl implements MovimientoService {
                 item.setCantidad(cantidad);
                 item.setImporte(importe);
                 item.setMetodoPago(null);
+
+                if (d.getMotivo() != null) {
+                    item.setMotivoMermaNombre(d.getMotivo().getNombre());
+                    item.setMotivoMermaDescripcion(d.getMotivo().getDescripcion());
+                }
 
                 items.add(item);
                 total = total.add(importe);

@@ -56,10 +56,6 @@ public class MermaServiceImpl implements MermaService {
             throw new RuntimeException("Debe seleccionar un almacén");
         }
 
-        if (merma.getMotivo() == null || merma.getMotivo().getId() == null) {
-            throw new RuntimeException("Debe seleccionar un motivo de merma");
-        }
-        
         merma.setUsuario(authService.obtenerUsuarioAutenticado());
         merma.setEstado("PENDIENTE");
 
@@ -83,10 +79,6 @@ public class MermaServiceImpl implements MermaService {
             throw new RuntimeException("Debe seleccionar un almacén");
         }
 
-        if (mermaActualizada.getMotivo() == null || mermaActualizada.getMotivo().getId() == null) {
-            throw new RuntimeException("Debe seleccionar un motivo de merma");
-        }
-        
         merma.setUsuario(authService.obtenerUsuarioAutenticado());
 
         merma.setAlmacen(mermaActualizada.getAlmacen());

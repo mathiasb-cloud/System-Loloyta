@@ -19,6 +19,10 @@ public class DetalleMerma {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
+    @ManyToOne
+    @JoinColumn(name = "motivo_merma_id")
+    private MotivoMerma motivo;
+
     private BigDecimal cantidad;
 
     public DetalleMerma() {
@@ -60,5 +64,13 @@ public class DetalleMerma {
 
     public void setProducto(Producto producto) {
         this.producto = producto;
+    }
+
+    public MotivoMerma getMotivo() {
+        return motivo;
+    }
+
+    public void setMotivo(MotivoMerma motivo) {
+        this.motivo = motivo;
     }
 }

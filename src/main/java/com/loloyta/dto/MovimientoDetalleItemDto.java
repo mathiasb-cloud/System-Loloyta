@@ -15,6 +15,8 @@ public class MovimientoDetalleItemDto {
     private BigDecimal cantidad;
     private BigDecimal importe;
     private String metodoPago;
+    private String motivoMermaNombre;
+    private String motivoMermaDescripcion;
     private BigDecimal stockAntesOrigen;
     private BigDecimal stockDespuesOrigen;
     private BigDecimal stockAntesDestino;
@@ -126,7 +128,23 @@ public class MovimientoDetalleItemDto {
     public void setMetodoPago(String metodoPago) {
         this.metodoPago = metodoPago;
     }
-    
+
+    public String getMotivoMermaNombre() {
+        return motivoMermaNombre;
+    }
+
+    public void setMotivoMermaNombre(String motivoMermaNombre) {
+        this.motivoMermaNombre = motivoMermaNombre;
+    }
+
+    public String getMotivoMermaDescripcion() {
+        return motivoMermaDescripcion;
+    }
+
+    public void setMotivoMermaDescripcion(String motivoMermaDescripcion) {
+        this.motivoMermaDescripcion = motivoMermaDescripcion;
+    }
+
     public BigDecimal getStockAntesOrigen() {
         return stockAntesOrigen;
     }

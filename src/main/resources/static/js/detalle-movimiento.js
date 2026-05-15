@@ -32,9 +32,10 @@ function renderDetalleMovimiento(m) {
     const productos = Array.isArray(m.productos) ? m.productos : [];
 
     let totalCalculadoJs = 0;
-    const esIngreso = m.tipo === "INGRESO";
-    const esMerma = m.tipo === "MERMA";
-    const esTraspaso = m.tipo === "TRASPASO";
+    const tipoUpper = String(m.tipo || "").toUpperCase();
+    const esIngreso = tipoUpper === "INGRESO";
+    const esMerma = tipoUpper === "MERMA";
+    const esTraspaso = tipoUpper === "TRASPASO";
 
     const filasProductos = productos.map((item, index) => {
         const cantidad = Number(item.cantidad || 0);
@@ -55,6 +56,7 @@ function renderDetalleMovimiento(m) {
                 <td>${item.categoria ?? "-"}</td>
                 <td class="text-center">${item.unidadMedida ?? "-"}</td>
                 <td class="text-center">${formatearNumero(cantidad)}</td>
+                ${esMerma ? `<td class="text-start"><strong>${item.motivoMermaNombre ?? "-"}</strong><br><small class="text-muted">${item.motivoMermaDescripcion ?? ""}</small></td>` : ""}
                 <td class="text-end">${formatearMoneda(precio)}</td>
                 ${esIngreso ? `<td class="text-center">${item.metodoPago ?? "-"}</td>` : ""}
                 <td class="text-end fw-semibold">${formatearMoneda(importe)}</td>
@@ -125,6 +127,7 @@ function renderDetalleMovimiento(m) {
                                 <th>Categoría</th>
                                 <th style="width: 110px;">Unidad</th>
                                 <th style="width: 120px;">Cantidad</th>
+                                ${esMerma ? `<th style="width: 220px;">Motivo</th>` : ""}
                                 <th style="width: 140px;">Precio</th>
                                 ${esIngreso ? `<th style="width: 160px;">Método de Pago</th>` : ""}
                                 <th style="width: 150px;">Importe</th>
@@ -133,7 +136,7 @@ function renderDetalleMovimiento(m) {
                         <tbody>
                             ${filasProductos || `
                                 <tr>
-                                    <td colspan="${esIngreso ? 8 : 7}" class="text-center py-4 text-muted">
+                                    <td colspan="${esMerma ? (esIngreso ? 9 : 8) : (esIngreso ? 8 : 7)}" class="text-center py-4 text-muted">
                                         No hay productos asociados a este movimiento.
                                     </td>
                                 </tr>
@@ -141,7 +144,7 @@ function renderDetalleMovimiento(m) {
                         </tbody>
                         <tfoot class="table-light">
                             <tr>
-                                <th colspan="${esIngreso ? 7 : 6}" class="text-end">Importe Total</th>
+                                <th colspan="${esMerma ? (esIngreso ? 8 : 7) : (esIngreso ? 7 : 6)}" class="text-end">Importe Total</th>
                                 <th class="text-end fs-6">${formatearMoneda(totalCalculadoJs)}</th>
                             </tr>
                         </tfoot>
@@ -302,14 +305,6 @@ function renderDocumentoRelacionado(m) {
                         <div class="col-md-3">
                             <small class="text-muted d-block">Estado</small>
                             <strong>${m.mermaEstado ?? "-"}</strong>
-                        </div>
-                        <div class="col-md-3">
-                            <small class="text-muted d-block">Motivo</small>
-                            <strong>${m.motivoMermaNombre ?? "-"}</strong>
-                        </div>
-                        <div class="col-md-12">
-                            <small class="text-muted d-block">Descripción del motivo</small>
-                            <strong>${m.motivoMermaDescripcion ?? "-"}</strong>
                         </div>
                         <div class="col-md-12">
                             <small class="text-muted d-block">Observación</small>

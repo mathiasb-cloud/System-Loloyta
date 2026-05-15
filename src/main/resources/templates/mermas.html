@@ -15,8 +15,12 @@
         </div>
 
         <div class="col-md-6 col-lg-3">
-            <label class="form-label">Motivo de merma</label>
-            <select id="motivoMerma" class="form-select"></select>
+            <label class="form-label">Motivo de merma (predeterminado para cada fila)</label>
+            <select id="motivoMerma" class="form-select">
+                <option value="">Seleccione motivo</option>
+                <option value="add-new">Agregar nuevo motivo...</option>
+            </select>
+            <input type="text" id="nuevoMotivoMerma" class="form-control mt-2" placeholder="Nombre del nuevo motivo" style="display: none;">
         </div>
 
         <div class="col-md-6 col-lg-3">
@@ -127,6 +131,7 @@
                         <th>Producto</th>
                         <th>Categoría</th>
                         <th>Unidad</th>
+                        <th>Motivo</th>
                         <th>Stock Actual</th>
                         <th style="width: 160px;">Cantidad Merma</th>
                         <th style="width: 140px;">Costo Unit.</th>

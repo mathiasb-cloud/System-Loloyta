@@ -1,4 +1,5 @@
 let productosMermaGlobal = [];
+let motivosMermaGlobal = [];
 let mermaId = null;
 
 const MERMA_STORAGE_KEY = "loloyta_merma_borrador";
@@ -41,10 +42,7 @@ function enlazarEventosMerma() {
         actualizarResumenMerma();
     });
 
-    document.getElementById("motivoMerma")?.addEventListener("change", () => {
-        guardarBorradorMermaLocal();
-        actualizarFlujoMermaVisual();
-    });
+    document.getElementById("motivoMerma")?.addEventListener("change", manejarCambioMotivoMerma);
 
     document.getElementById("fechaMerma")?.addEventListener("change", () => {
         guardarBorradorMermaLocal();
@@ -53,6 +51,112 @@ function enlazarEventosMerma() {
     document.getElementById("observacionMerma")?.addEventListener("input", () => {
         guardarBorradorMermaLocal();
     });
+
+    // Evento para el input de nuevo motivo
+    document.getElementById("nuevoMotivoMerma")?.addEventListener("keydown", async (e) => {
+        if (e.key === "Enter") {
+            await guardarNuevoMotivoMerma();
+        }
+    });
+
+    document.getElementById("nuevoMotivoMerma")?.addEventListener("blur", async () => {
+        await guardarNuevoMotivoMerma();
+    });
+}
+
+function manejarCambioMotivoMerma() {
+    const select = document.getElementById("motivoMerma");
+    const input = document.getElementById("nuevoMotivoMerma");
+
+    if (select.value === "add-new") {
+        input.style.display = "block";
+        input.focus();
+    } else {
+        input.style.display = "none";
+        input.value = "";
+        guardarBorradorMermaLocal();
+        actualizarFlujoMermaVisual();
+    }
+}
+
+async function guardarNuevoMotivoMerma() {
+    const input = document.getElementById("nuevoMotivoMerma");
+    const nombre = input.value.trim();
+
+    if (!nombre) {
+        input.style.display = "none";
+        document.getElementById("motivoMerma").value = "";
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/motivos-merma", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre: nombre, descripcion: "" })
+        });
+
+        if (!res.ok) throw new Error("Error al guardar el motivo");
+
+        const nuevoMotivo = await res.json();
+
+        // Recargar motivos
+        await cargarMotivosMerma();
+
+        // Seleccionar el nuevo motivo
+        document.getElementById("motivoMerma").value = nuevoMotivo.id;
+
+        // Ocultar input
+        input.style.display = "none";
+        input.value = "";
+
+        guardarBorradorMermaLocal();
+        actualizarFlujoMermaVisual();
+    } catch (error) {
+        console.error("Error guardando nuevo motivo:", error);
+        mostrarErrorMerma("Error al guardar el nuevo motivo");
+        input.focus();
+    }
+}
+
+async function guardarNuevoMotivoMerma() {
+    const input = document.getElementById("nuevoMotivoMerma");
+    const nombre = input.value.trim();
+
+    if (!nombre) {
+        input.style.display = "none";
+        document.getElementById("motivoMerma").value = "";
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/motivos-merma", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre: nombre, descripcion: "" })
+        });
+
+        if (!res.ok) throw new Error("Error al guardar el motivo");
+
+        const nuevoMotivo = await res.json();
+
+        // Recargar motivos
+        await cargarMotivosMerma();
+
+        // Seleccionar el nuevo motivo
+        document.getElementById("motivoMerma").value = nuevoMotivo.id;
+
+        // Ocultar input
+        input.style.display = "none";
+        input.value = "";
+
+        guardarBorradorMermaLocal();
+        actualizarFlujoMermaVisual();
+    } catch (error) {
+        console.error("Error guardando nuevo motivo:", error);
+        mostrarErrorMerma("Error al guardar el nuevo motivo");
+        input.focus();
+    }
 }
 
 function setFechaActualMerma() {
@@ -103,15 +207,37 @@ async function cargarMotivosMerma() {
         const res = await fetch("/api/motivos-merma");
         const data = await res.json();
 
-        select.innerHTML = `<option value="">Seleccione motivo</option>`;
+        motivosMermaGlobal = data || [];
 
-        (data || []).forEach(m => {
+        select.innerHTML = `<option value="" disabled selected>Seleccione motivo</option>`;
+
+        motivosMermaGlobal.forEach(m => {
             select.innerHTML += `<option value="${m.id}">${escapeHtml(m.nombre)}</option>`;
         });
+
+        select.innerHTML += `<option value="add-new">Agregar nuevo motivo...</option>`;
+        
+        actualizarOpcionesMotivosFila();
     } catch (error) {
         console.error(error);
+        motivosMermaGlobal = [];
         select.innerHTML = `<option value="">No se pudieron cargar los motivos</option>`;
     }
+}
+
+function construirOptionsMotivosMerma(selectedId = "") {
+    let html = `<option value="" disabled${selectedId ? "" : " selected"}>Seleccione motivo</option>`;
+    motivosMermaGlobal.forEach(m => {
+        html += `<option value="${m.id}"${String(m.id) === String(selectedId) ? " selected" : ""}>${escapeHtml(m.nombre)}</option>`;
+    });
+    return html;
+}
+
+function actualizarOpcionesMotivosFila() {
+    document.querySelectorAll(".motivo-merma-item").forEach(select => {
+        const selectedId = select.value;
+        select.innerHTML = construirOptionsMotivosMerma(selectedId);
+    });
 }
 
 
@@ -282,7 +408,7 @@ async function obtenerStockDisponible(productoId, almacenId) {
     }
 }
 
-async function agregarProductoTablaMerma(producto, cantidad = 1) {
+async function agregarProductoTablaMerma(producto, cantidad = 1, motivoId = "") {
     const tbody = document.querySelector("#tablaMerma tbody");
     if (!tbody) return;
 
@@ -298,12 +424,18 @@ async function agregarProductoTablaMerma(producto, cantidad = 1) {
 
     const almacenId = document.getElementById("almacenMerma")?.value || "";
     const stockActual = await obtenerStockDisponible(producto.id, almacenId);
+    const defaultMotivoId = motivoId || document.getElementById("motivoMerma")?.value || "";
 
     const fila = document.createElement("tr");
     fila.innerHTML = `
         <td data-id="${producto.id}" data-precio="${Number(producto.precioActual || 0)}">${escapeHtml(producto.nombre)}</td>
         <td>${escapeHtml(producto.categoria?.nombre || "-")}</td>
         <td>${escapeHtml(producto.unidadMedida || "-")}</td>
+        <td>
+            <select class="form-select form-select-sm motivo-merma-item">
+                ${construirOptionsMotivosMerma(defaultMotivoId)}
+            </select>
+        </td>
         <td class="stock-actual-cell">${renderStockChip(stockActual, producto.stockMinimo)}</td>
         <td>
             <input type="number" class="form-control cantidad-merma-item" min="0.01" step="0.01" value="${cantidad}">
@@ -320,6 +452,14 @@ async function agregarProductoTablaMerma(producto, cantidad = 1) {
     tbody.appendChild(fila);
 
     const cantidadInput = fila.querySelector(".cantidad-merma-item");
+    const motivoSelect = fila.querySelector(".motivo-merma-item");
+
+    if (motivoSelect) {
+        motivoSelect.addEventListener("change", () => {
+            guardarBorradorMermaLocal();
+        });
+    }
+
     cantidadInput.addEventListener("input", () => {
         validarCantidadFilaMerma(fila);
         recalcularFilaMerma(fila);
@@ -400,29 +540,26 @@ function obtenerItemsMermaTabla() {
         const cantidadInput = fila.querySelector(".cantidad-merma-item");
         const stockTexto = fila.querySelector(".stock-actual-cell")?.textContent?.replace(",", ".").match(/[\d.]+/)?.[0];
 
+        const motivoSelect = fila.querySelector(".motivo-merma-item");
+
         return {
             productoId: productoTd?.dataset.id,
             productoNombre: productoTd?.textContent?.trim() || "",
             precioActual: Number(productoTd?.dataset.precio || 0),
             cantidad: cantidadInput?.value,
-            stockActual: Number(stockTexto || 0)
+            stockActual: Number(stockTexto || 0),
+            motivoId: motivoSelect?.value || ""
         };
     });
 }
 
 function validarMerma() {
     const almacenId = document.getElementById("almacenMerma")?.value;
-    const motivoId = document.getElementById("motivoMerma")?.value;
     const fecha = document.getElementById("fechaMerma")?.value;
     const items = obtenerItemsMermaTabla();
 
     if (!almacenId) {
         mostrarInfoMerma("Selecciona un almacén.");
-        return false;
-    }
-
-    if (!motivoId) {
-        mostrarInfoMerma("Selecciona un motivo de merma.");
         return false;
     }
 
@@ -438,6 +575,11 @@ function validarMerma() {
 
     for (const item of items) {
         const cantidad = Number(item.cantidad);
+        if (!item.motivoId) {
+            mostrarInfoMerma(`Selecciona un motivo para "${item.productoNombre}".`);
+            return false;
+        }
+
         if (!Number.isFinite(cantidad) || cantidad <= 0) {
             mostrarInfoMerma(`La cantidad de "${item.productoNombre}" debe ser mayor a cero.`);
             return false;
@@ -565,10 +707,9 @@ async function crearCabeceraMerma() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             almacen: { id: Number(document.getElementById("almacenMerma").value) },
-            motivo: { id: Number(document.getElementById("motivoMerma").value) },
+            motivo: document.getElementById("motivoMerma")?.value ? { id: Number(document.getElementById("motivoMerma").value) } : null,
             observacion: document.getElementById("observacionMerma").value?.trim() || "",
             fecha: document.getElementById("fechaMerma").value,
-            
         })
     });
 
@@ -587,10 +728,9 @@ async function actualizarCabeceraMerma() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             almacen: { id: Number(document.getElementById("almacenMerma").value) },
-            motivo: { id: Number(document.getElementById("motivoMerma").value) },
+            motivo: document.getElementById("motivoMerma")?.value ? { id: Number(document.getElementById("motivoMerma").value) } : null,
             observacion: document.getElementById("observacionMerma").value?.trim() || "",
             fecha: document.getElementById("fechaMerma").value,
-            
         })
     });
 
@@ -619,6 +759,7 @@ async function sobrescribirDetallesMerma() {
             body: JSON.stringify({
                 merma: { id: mermaId },
                 producto: { id: Number(item.productoId) },
+                motivo: item.motivoId ? { id: Number(item.motivoId) } : null,
                 cantidad: item.cantidad
             })
         });
@@ -687,7 +828,7 @@ async function restaurarBorradorMermaLocal() {
             const producto = productosMermaGlobal.find(p => String(p.id) === String(item.productoId));
             if (!producto) continue;
 
-            await agregarProductoTablaMerma(producto, item.cantidad);
+            await agregarProductoTablaMerma(producto, item.cantidad, item.motivoId);
         }
 
         actualizarFlujoMermaVisual();
