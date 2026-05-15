@@ -20,6 +20,7 @@ import com.loloyta.repository.OrdenCompraRepository;
 import com.loloyta.repository.StockRepository;
 import com.loloyta.service.AuthService;
 import com.loloyta.service.OrdenCompraService;
+import com.loloyta.service.StockLoteService;
 import com.loloyta.repository.ProductoRepository;
 
 @Service
@@ -42,6 +43,9 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
 
     @Autowired
     private MovimientoRepository movimientoRepository;
+    
+    @Autowired
+    private StockLoteService stockLoteService;
 
     @Override
     public List<OrdenCompra> listar() {
@@ -155,6 +159,13 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
             stock.setCantidad(stock.getCantidad().add(d.getCantidad()));
             stock.setUltimaActualizacion(LocalDateTime.now());
             stockRepository.save(stock);
+            
+            stockLoteService.crearLote(
+                    d.getProducto().getId(),
+                    orden.getAlmacenes().getId(),
+                    d.getCantidad().doubleValue(),
+                    d.getPrecioUnitario().doubleValue()
+            );
 
             Movimiento mov = new Movimiento();
             mov.setUsuario(authService.obtenerUsuarioAutenticado());
