@@ -36,25 +36,28 @@ public class StockLoteServiceImpl implements StockLoteService {
 	}
 
     @Override
-    @Transactional
-    public void crearLote(Long productoId, Long almacenId, Double cantidad, Double costoUnitario) {
-        Producto producto = productoRepository.findById(productoId)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+@Transactional
+public void crearLote(Long productoId, Long almacenId, Double cantidad, Double costoUnitario) {
+    Producto producto = productoRepository.findById(productoId).orElseThrow();
+    Almacenes almacen = almacenesRepository.findById(almacenId).orElseThrow();
 
-        Almacenes almacen = almacenesRepository.findById(almacenId)
-                .orElseThrow(() -> new RuntimeException("Almacén no encontrado"));
-
-        StockLote lote = new StockLote();
-        lote.setProducto(producto);
-        lote.setAlmacen(almacen);
-        lote.setCantidadInicial(cantidad);
-        lote.setCantidadDisponible(cantidad);
-        lote.setCostoUnitario(costoUnitario);
-        lote.setFechaIngreso(LocalDateTime.now());
-        lote.setActivo(true);
-
-        stockLoteRepository.save(lote);
-    }
+    StockLote lote = new StockLote();
+    lote.setProducto(producto);
+    lote.setAlmacen(almacen);
+    lote.setCantidadInicial(cantidad);
+    lote.setCantidadDisponible(cantidad);
+    lote.setCostoUnitario(costoUnitario);
+    
+    LocalDateTime ahora = LocalDateTime.now();
+    lote.setFechaIngreso(ahora);
+    
+    // Pruebas lote: Generar un código visual fácil: Ej. Lote-PRD5-20260515
+    String fechaFormateada = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd").format(ahora);
+    lote.setCodigoLote("LT-P" + producto.getId() + "-" + fechaFormateada);
+    
+    lote.setActivo(true);
+    stockLoteRepository.save(lote);
+}
 
     @Override
     @Transactional
@@ -103,5 +106,40 @@ public class StockLoteServiceImpl implements StockLoteService {
         if (restante > 0) {
             throw new RuntimeException("Stock insuficiente por lotes");
         }
+    }
+    
+    @Override
+    @Transactional
+    public void consumirLoteEspecifico(Long loteId, Double cantidad, String tipoMovimiento, Long referenciaId) {
+        StockLote lote = stockLoteRepository.findById(loteId)
+                .orElseThrow(() -> new RuntimeException("Lote no encontrado"));
+
+        if (lote.getCantidadDisponible() < cantidad) {
+            
+            throw new RuntimeException("Stock insuficiente en el lote especificado. Disponible: " + lote.getCantidadDisponible());
+        }
+
+        
+        lote.setCantidadDisponible(lote.getCantidadDisponible() - cantidad);
+        
+        
+        if (lote.getCantidadDisponible() == 0) {
+            lote.setActivo(false);
+        }
+        
+        stockLoteRepository.save(lote);
+
+        
+        ConsumoLote consumo = new ConsumoLote();
+        consumo.setLote(lote);
+        consumo.setProducto(lote.getProducto());
+        consumo.setAlmacen(lote.getAlmacen());
+        consumo.setTipoMovimiento(tipoMovimiento);
+        consumo.setReferenciaId(referenciaId);
+        consumo.setCantidad(cantidad);
+        consumo.setCostoUnitario(lote.getCostoUnitario());
+        consumo.setFecha(LocalDateTime.now());
+
+        consumoLoteRepository.save(consumo);
     }
 }

@@ -132,11 +132,16 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
 
         for (DetalleOrdenCompra d : detalles) {
             Producto producto = d.getProducto();
+            
+            
 
+         // Pruebas lote:
+            /*
             if (producto != null && d.getPrecioUnitario() != null) {
                 producto.setPrecioActual(d.getPrecioUnitario().doubleValue());
                 productoRepository.save(producto);
             }
+            */
 
             Stock stock = stockRepository
                     .findByAlmacenesIdAndProductoId(

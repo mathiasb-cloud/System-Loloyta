@@ -25,6 +25,8 @@ import com.loloyta.service.SalidaService;
 import com.loloyta.service.StockLoteService;
 import com.loloyta.service.StockService;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class SalidaServiceImpl implements SalidaService {
 	
@@ -227,111 +229,112 @@ public class SalidaServiceImpl implements SalidaService {
     }
 
     @Override
+    @Transactional
     public Salida confirmar(Long id) {
 
-    Salida salida = salidaRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Salida no encontrada"));
+        Salida salida = salidaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Salida no encontrada"));
 
-    if ("CONFIRMADA".equals(salida.getEstado())) {
-        return salida;
-    }
-
-    salida.setEstado("CONFIRMADA");
-
-    List<DetalleSalida> detalles = detalleRepository.findBySalidaId(id);
-
-    for (DetalleSalida d : detalles) {
-
-        BigDecimal cantidadDespacho = d.getCantidadDespacho() != null
-                ? d.getCantidadDespacho()
-                : BigDecimal.ZERO;
-
-        BigDecimal stockAntesOrigen = BigDecimal.ZERO;
-        BigDecimal stockAntesDestino = BigDecimal.ZERO;
-
-        Stock stockOrigenActual = stockService.obtenerPorProductoYAlmacen(
-                d.getProducto().getId(),
-                salida.getAlmacenes().getId()
-        );
-
-        if (stockOrigenActual != null && stockOrigenActual.getCantidad() != null) {
-            stockAntesOrigen = stockOrigenActual.getCantidad();
+        if ("CONFIRMADA".equals(salida.getEstado())) {
+            return salida;
         }
 
-        if ("ALMACEN".equalsIgnoreCase(salida.getTipoDestino()) && salida.getAlmacenDestino() != null) {
-            Stock stockDestinoActual = stockService.obtenerPorProductoYAlmacen(
+        salida.setEstado("CONFIRMADA");
+
+        List<DetalleSalida> detalles = detalleRepository.findBySalidaId(id);
+
+        for (DetalleSalida d : detalles) {
+
+            BigDecimal cantidadDespacho = d.getCantidadDespacho() != null
+                    ? d.getCantidadDespacho()
+                    : BigDecimal.ZERO;
+
+            
+            if (d.getLote() == null || d.getLote().getLoteId() == null) {
+                throw new RuntimeException("Debe especificar de qué lote se extrae el producto: " + d.getProducto().getNombre());
+            }
+
+            Stock stockOrigenActual = stockService.obtenerPorProductoYAlmacen(
                     d.getProducto().getId(),
-                    salida.getAlmacenDestino().getId()
+                    salida.getAlmacenes().getId()
+            );
+            BigDecimal stockAntesOrigen = (stockOrigenActual != null && stockOrigenActual.getCantidad() != null) 
+                    ? stockOrigenActual.getCantidad() : BigDecimal.ZERO;
+
+            BigDecimal stockAntesDestino = BigDecimal.ZERO;
+            if ("ALMACEN".equalsIgnoreCase(salida.getTipoDestino()) && salida.getAlmacenDestino() != null) {
+                Stock stockDestinoActual = stockService.obtenerPorProductoYAlmacen(
+                        d.getProducto().getId(),
+                        salida.getAlmacenDestino().getId()
+                );
+                if (stockDestinoActual != null && stockDestinoActual.getCantidad() != null) {
+                    stockAntesDestino = stockDestinoActual.getCantidad();
+                }
+            }
+
+            stockLoteService.consumirLoteEspecifico(
+                    d.getLote().getLoteId(),
+                    cantidadDespacho.doubleValue(),
+                    "SALIDA",
+                    salida.getId()
             );
 
-            if (stockDestinoActual != null && stockDestinoActual.getCantidad() != null) {
-                stockAntesDestino = stockDestinoActual.getCantidad();
+            stockService.disminuirStock(
+                    d.getProducto().getId(),
+                    salida.getAlmacenes().getId(),
+                    cantidadDespacho
+            );
+
+            if ("ALMACEN".equalsIgnoreCase(salida.getTipoDestino()) && salida.getAlmacenDestino() != null) {
+                stockService.aumentarStock(
+                        d.getProducto().getId(),
+                        salida.getAlmacenDestino().getId(),
+                        cantidadDespacho
+                );
+                
+                stockLoteService.crearLote(
+                        d.getProducto().getId(),
+                        salida.getAlmacenDestino().getId(),
+                        cantidadDespacho.doubleValue(),
+                        d.getLote().getCostoUnitario()
+                );
+            }
+
+            Movimiento mov = new Movimiento();
+
+            if ("ALMACEN".equalsIgnoreCase(salida.getTipoDestino()) && salida.getAlmacenDestino() != null) {
+                mov.setTipo("TRASPASO");
+                mov.setAlmacenDestino(salida.getAlmacenDestino());
+            } else {
+                mov.setTipo("SALIDA");
+            }
+
+            mov.setCantidad(cantidadDespacho);
+            mov.setFecha(LocalDateTime.now());
+            mov.setAlmacen(salida.getAlmacenes());
+            mov.setUsuario(authService.obtenerUsuarioAutenticado());
+            mov.setSalida(salida);
+            mov.setProducto(d.getProducto());
+
+            movimientoRepository.save(mov);
+
+            if ("TRASPASO".equalsIgnoreCase(mov.getTipo())) {
+                BigDecimal stockDespuesOrigen = stockAntesOrigen.subtract(cantidadDespacho);
+                BigDecimal stockDespuesDestino = stockAntesDestino.add(cantidadDespacho);
+
+                DetalleMovimiento detalleMov = new DetalleMovimiento();
+                detalleMov.setMovimiento(mov);
+                detalleMov.setProducto(d.getProducto());
+                detalleMov.setCantidad(cantidadDespacho);
+                detalleMov.setStockAntesOrigen(stockAntesOrigen);
+                detalleMov.setStockDespuesOrigen(stockDespuesOrigen);
+                detalleMov.setStockAntesDestino(stockAntesDestino);
+                detalleMov.setStockDespuesDestino(stockDespuesDestino);
+
+                detalleMovimientoRepository.save(detalleMov);
             }
         }
 
-        stockService.disminuirStock(
-                d.getProducto().getId(),
-                salida.getAlmacenes().getId(),
-                cantidadDespacho
-        );
-        
-        stockLoteService.descontarFIFO(
-        	    d.getProducto().getId(),
-        	    salida.getAlmacenes().getId(),
-        	    cantidadDespacho.doubleValue(),
-        	    "SALIDA",
-        	    salida.getId()
-        	);
-
-        if ("ALMACEN".equalsIgnoreCase(salida.getTipoDestino()) && salida.getAlmacenDestino() != null) {
-            stockService.aumentarStock(
-                    d.getProducto().getId(),
-                    salida.getAlmacenDestino().getId(),
-                    cantidadDespacho
-            );
-        }
-        
-        stockService.disminuirStock(
-                d.getProducto().getId(),
-                salida.getAlmacenes().getId(),
-                cantidadDespacho
-        );
-
-        Movimiento mov = new Movimiento();
-
-        if ("ALMACEN".equalsIgnoreCase(salida.getTipoDestino()) && salida.getAlmacenDestino() != null) {
-            mov.setTipo("TRASPASO");
-            mov.setAlmacenDestino(salida.getAlmacenDestino());
-        } else {
-            mov.setTipo("SALIDA");
-        }
-
-        mov.setCantidad(cantidadDespacho);
-        mov.setFecha(LocalDateTime.now());
-        mov.setAlmacen(salida.getAlmacenes());
-        mov.setUsuario(authService.obtenerUsuarioAutenticado());
-        mov.setSalida(salida);
-        mov.setProducto(d.getProducto());
-
-        movimientoRepository.save(mov);
-
-        if ("TRASPASO".equalsIgnoreCase(mov.getTipo())) {
-            BigDecimal stockDespuesOrigen = stockAntesOrigen.subtract(cantidadDespacho);
-            BigDecimal stockDespuesDestino = stockAntesDestino.add(cantidadDespacho);
-
-            DetalleMovimiento detalleMov = new DetalleMovimiento();
-            detalleMov.setMovimiento(mov);
-            detalleMov.setProducto(d.getProducto());
-            detalleMov.setCantidad(cantidadDespacho);
-            detalleMov.setStockAntesOrigen(stockAntesOrigen);
-            detalleMov.setStockDespuesOrigen(stockDespuesOrigen);
-            detalleMov.setStockAntesDestino(stockAntesDestino);
-            detalleMov.setStockDespuesDestino(stockDespuesDestino);
-
-            detalleMovimientoRepository.save(detalleMov);
-        }
+        return salidaRepository.save(salida);
     }
-
-    return salidaRepository.save(salida);
-}
 }

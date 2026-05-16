@@ -29,6 +29,8 @@ public class StockLote {
     private Double cantidadInicial;
     private Double cantidadDisponible;
     private Double costoUnitario;
+    
+    private String codigoLote;
 
     private LocalDateTime fechaIngreso;
     private LocalDateTime fechaVencimiento;
@@ -106,6 +108,16 @@ public class StockLote {
 	public void setActivo(Boolean activo) {
 		this.activo = activo;
 	}
+
+	public String getCodigoLote() {
+		return codigoLote;
+	}
+
+	public void setCodigoLote(String stockLote) {
+		this.codigoLote = stockLote;
+	}
+	
+	
     
     
 
